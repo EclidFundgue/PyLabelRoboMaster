@@ -126,7 +126,7 @@ class StackedScrollView(Surface):
             on_select: Callable[[int, FileLine], None] = None,
             on_desert: Callable[[int, ImageFileLine], None] = None,
             on_restore: Callable[[int, DesertedFileLine], None] = None,
-            padding: int = 100):
+            padding: int = 300):
         super().__init__(w + padding, h + 2 * padding, x, y - padding)
 
         self.header_height = 30

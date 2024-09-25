@@ -29,7 +29,7 @@ class ScrollView(Surface):
                  folder: str,
                  on_select: Callable[[int, FileLine], None] = None,
                  on_command: Callable[[int, FileLine], None] = None,
-                 padding: int = 100):
+                 padding: int = 300):
         super().__init__(w + padding, h + 2 * padding, x, y - padding)
 
         self.folder = folder
@@ -112,7 +112,7 @@ class ImageScrollView(ScrollView):
                  folder: str,
                  on_select: Callable[[int, ImageFileLine], None] = None,
                  on_desert: Callable[[int, ImageFileLine], None] = None,
-                 padding: int = 100):
+                 padding: int = 300):
         self.on_desert = getCallable(on_desert)
 
         super().__init__(
@@ -148,7 +148,7 @@ class DesertedScrollView(ScrollView):
                  folder: str,
                  on_select: Callable[[int, DesertedFileLine], None] = None,
                  on_restore: Callable[[int, DesertedFileLine], None] = None,
-                 padding: int = 100):
+                 padding: int = 300):
         self.on_restore = getCallable(on_restore)
 
         super().__init__(
