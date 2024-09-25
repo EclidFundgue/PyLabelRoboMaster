@@ -9,7 +9,7 @@ from .components.scroll.line import (DesertedFileLine, ImageFileLine,
 from .components.toolbar import ToolBar
 from .global_vars import VarArmorLabels
 from .pygame_gui import UIMain
-from .resources_loader import ConfigLoader, ImageLoader
+from .resources_loader import ConfigLoader
 
 
 class Main(UIMain):
@@ -62,6 +62,7 @@ class Main(UIMain):
         self.screen.addKeydownEvent(locals.K_e, self.keyboard_NextImage)
         self.screen.addKeydownEvent(locals.K_f, self.keyboard_Relabel)
         self.screen.addKeydownEvent(locals.K_c, self.keyboard_Correct)
+        self.screen.addKeydownEvent(locals.K_ESCAPE, self.keyboard_UnselectAll)
         self.screen.addKeydownEvent(locals.K_0, lambda: self.keyboard_TypeChange(0))
         self.screen.addKeydownEvent(locals.K_1, lambda: self.keyboard_TypeChange(1))
         self.screen.addKeydownEvent(locals.K_2, lambda: self.keyboard_TypeChange(2))
@@ -116,6 +117,9 @@ class Main(UIMain):
 
     def keyboard_Correct(self) -> None:
         self.label_controller.correct()
+
+    def keyboard_UnselectAll(self) -> None:
+        self.label_controller.unselectAll()
 
     def keyboard_SwitchAuto(self) -> None:
         if self.var_armor_labels.auto_labeling:

@@ -105,6 +105,7 @@ class Labels(CanvasComponent):
 
     2. ---------- select ----------
     * selectAll() -> None
+    * unselectAll() -> None
 
     3. ---------- save & load ----------
     * undo() -> None
@@ -327,6 +328,9 @@ class Labels(CanvasComponent):
         self._selectedRemoveAll()
         for label in self.labels:
             self._selectedAppend(label)
+
+    def unselectAll(self) -> None:
+        self._selectedRemoveAll()
 
     # -------------------- save & load -------------------- #
     def _saveToMemento(self) -> None:

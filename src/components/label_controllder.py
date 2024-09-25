@@ -24,6 +24,7 @@ class LabelController:
     * deleteSelected() -> None
     * setSelectedType(type: int) -> None
     * selectAll() -> None
+    * unselectAll() -> None
     * undo() -> None
     * redo() -> None
     * save() -> None
@@ -122,6 +123,10 @@ class LabelController:
     def selectAll(self):
         if self.labels is not None:
             self.labels.selectAll()
+
+    def unselectAll(self):
+        if self.labels is not None:
+            self.labels.unselectAll()
 
     def undo(self):
         if self.labels is not None:
