@@ -9,12 +9,16 @@ from .components.scroll.line import (DesertedFileLine, ImageFileLine,
 from .components.toolbar import ToolBar
 from .global_vars import VarArmorLabels
 from .pygame_gui import UIMain
-from .resources_loader import ConfigLoader
+from .resources_loader import ConfigLoader, ImageLoader
 
 
 class Main(UIMain):
     def __init__(self):
-        super().__init__([1280, 840])
+        super().__init__(
+            size=[1280, 840],
+            caption='PyLabelRoboMaster',
+            icon='resources/icon.png'
+        )
 
         # -------------------- create variables --------------------
         cfg_loader = ConfigLoader()
