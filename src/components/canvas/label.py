@@ -449,6 +449,17 @@ class Labels(CanvasComponent):
             self.dragging_point = None
             self._saveToMemento()
 
+    def onMidDrag(self, vx: int, vy: int) -> None:
+        if len(self.selected_labels) == 0:
+            return
+
+        for label in self.selected_labels:
+            for p in label.keypoints:
+                p.move(vx, vy)
+
+    def onMidRelease(self) -> None:
+        self._saveToMemento()
+
     def onHover(self, x: int, y: int) -> None:
         if self.adding_point is not None:
             self.adding_point.setCenterByCanvasPos(x, y)
