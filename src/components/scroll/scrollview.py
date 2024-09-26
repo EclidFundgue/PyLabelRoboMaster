@@ -18,6 +18,7 @@ class ScrollView(Surface):
     Methods:
     * addLine(line: FileLine) -> None
     * deleteLine(line: FileLine) -> None
+    * select(line: str) -> None
     * selectPrev() -> None
     * selectNext() -> None
     * getSelectedLine() -> FileLine | None
@@ -78,6 +79,9 @@ class ScrollView(Surface):
 
     def deleteLine(self, line: FileLine) -> None:
         self.lines.delete(line)
+
+    def select(self, line: str) -> None:
+        self.lines.select(line)
 
     def selectPrev(self) -> None:
         self.lines.selectPrev()

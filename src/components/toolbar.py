@@ -24,6 +24,7 @@ class ToolBar(Surface):
             on_redo: Callable[[], None] = None,
             on_find: Callable[[], None] = None,
             on_correct: Callable[[], None] = None,
+            on_save: Callable[[], None] = None,
             on_switch_preproc: Callable[[bool], None] = None,
             on_switch_auto: Callable[[bool], None] = None,
             on_type_change: Callable[[int], None] = None,
@@ -41,6 +42,7 @@ class ToolBar(Surface):
         rect_redo = (32, 32, 90, 20) # (0, 1)
         rect_find = (32, 32, 30, 80) # (1, 0)
         rect_correct = (32, 32, 90, 80) # (1, 1)
+        rect_save = (32, 32, 150, 80) # (1, 2)
         rect_preproc = (32, 32, 30, 140) # (2, 0)
         rect_auto = (96, 32, 90, 140) # (2, 1)
 
@@ -48,42 +50,56 @@ class ToolBar(Surface):
         self.btn_add = Button(*rect_add,
             img_loader['button']['add'],
             img_loader['button']['add_pressed'],
-            on_press=getCallable(on_add)
+            on_press=getCallable(on_add),
+            cursor_change=True
         )
         self.addChild(self.btn_add)
 
         self.btn_delete = Button(*rect_delete,
             img_loader['button']['delete'],
             img_loader['button']['delete_pressed'],
-            on_press=getCallable(on_delete)
+            on_press=getCallable(on_delete),
+            cursor_change=True
         )
         self.addChild(self.btn_delete)
 
         self.btn_undo = Button(*rect_undo,
             img_loader['button']['undo'],
             img_loader['button']['undo_pressed'],
-            on_press=getCallable(on_undo)
+            on_press=getCallable(on_undo),
+            cursor_change=True
         )
         self.addChild(self.btn_undo)
 
         self.btn_redo = Button(*rect_redo,
             img_loader['button']['redo'],
             img_loader['button']['redo_pressed'],
-            on_press=getCallable(on_redo)
+            on_press=getCallable(on_redo),
+            cursor_change=True
         )
         self.addChild(self.btn_redo)
 
         self.btn_find = Button(*rect_find,
             img_loader['button']['search'],
             img_loader['button']['search_pressed'],
-            on_press=getCallable(on_find)
+            on_press=getCallable(on_find),
+            cursor_change=True
         )
         self.addChild(self.btn_find)
+
+        self.btn_save = Button(*rect_save,
+            img_loader['button']['save'],
+            img_loader['button']['save_pressed'],
+            on_press=getCallable(on_save),
+            cursor_change=True
+        )
+        self.addChild(self.btn_save)
 
         self.btn_correct = Button(*rect_correct,
             img_loader['button']['correct'],
             img_loader['button']['correct_pressed'],
-            on_press=getCallable(on_correct)
+            on_press=getCallable(on_correct),
+            cursor_change=True
         )
         self.addChild(self.btn_correct)
 
@@ -136,6 +152,7 @@ class ToolBar(Surface):
         self.btn_redo = None
         self.btn_find = None
         self.btn_correct = None
+        self.btn_save = None
         self.swch_preproc = None
         self.swch_auto = None
 

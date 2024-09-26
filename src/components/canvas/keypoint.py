@@ -1,5 +1,6 @@
 from typing import Callable, List, Tuple
 
+import pygame
 from pygame import Surface as pg_Surface
 
 from ...process.label_io import LabelInputOutput
@@ -71,6 +72,12 @@ class Keypoint(CanvasComponent, Selectable):
     def kill(self) -> None:
         self.on_click = None
         super().kill()
+
+    def onHover(self, x: int, y: int) -> None:
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def offHover(self) -> None:
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def draw(self, surface: pg_Surface) -> None:
         if self.active or self.selected:

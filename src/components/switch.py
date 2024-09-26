@@ -1,5 +1,6 @@
 from typing import Any, Callable, Union
 
+import pygame
 from pygame import Surface as pg_Surface
 
 from ..global_vars import THEME_VAR_CHANGE
@@ -16,8 +17,7 @@ class Switch(BaseComponent):
         image_on,
         image_off,
         on_turn,
-        on_turn_on,
-        on_turn_off
+        cursor_change
     )
 
     Methods:
@@ -30,13 +30,16 @@ class Switch(BaseComponent):
             x: int, y: int,
             image_on: Union[str, pg_Surface],
             image_off: Union[str, pg_Surface],
-            on_turn: Callable[[bool], None] = None):
+            on_turn: Callable[[bool], None] = None,
+            cursor_change: bool = True):
         super().__init__(w, h, x, y)
 
         self.image_on = self.loadImage(image_on, w, h)
         self.image_off = self.loadImage(image_off, w, h)
 
         self.on_turn = getCallable(on_turn)
+        self.cursor_change = cursor_change
+
         self.on = False
 
     def turn(self) -> None:
@@ -51,6 +54,14 @@ class Switch(BaseComponent):
     def kill(self) -> None:
         self.on_turn = None
         super().kill()
+
+    def onHover(self, x: int, y: int) -> None:
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def offHover(self) -> None:
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def onLeftClick(self, x: int, y: int) -> None:
         self.on = not self.on

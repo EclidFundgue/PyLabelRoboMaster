@@ -1,7 +1,5 @@
 # Author: EclidFundgue <1011379214@qq.com>.
-# Last edit time: 16th, September, 2024
 
-__version__ = '1.2.2'
 __all__ = [
     'BaseComponent', 'Button',
     'Surface', 'Selectable', 'UIMain',

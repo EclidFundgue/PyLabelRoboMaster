@@ -162,6 +162,7 @@ class Labels(CanvasComponent):
             if self.dragging_point is None:
                 self.dragging_point = keypoint
                 self.dragging_point.select()
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         return on_click
 
     def _getLabelOnClickFunc(self, label: Label) -> Callable:
@@ -392,11 +393,17 @@ class Labels(CanvasComponent):
         saveLabel(self.label_path, labels)
 
     # -------------------- base -------------------- #
-    def kill(self) -> None:
+    def kill(self, only_self: bool = True) -> None:
+        '''
+        Set `only_self` to False when reloading the component, True when
+        program is exiting.
+        '''
         self.saveToFile()
 
-        for label in self.labels:
-            label.kill()
+        if not only_self:
+            for label in self.labels:
+                label.kill()
+
         self.removeEvents(target=str(id(self)))
         self.labels = None
         self.selected_labels = None
@@ -443,6 +450,21 @@ class Labels(CanvasComponent):
             self.dragging_point = None
             self._saveToMemento()
 
+    def onMidDrag(self, vx: int, vy: int) -> None:
+        if vx == 0 and vy == 0:
+            return
+
+        if len(self.selected_labels) != 0:
+            for label in self.selected_labels:
+                for p in label.keypoints:
+                    p.move(vx, vy)
+
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def onMidRelease(self) -> None:
+        self._saveToMemento()
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
     def onHover(self, x: int, y: int) -> None:
         if self.adding_point is not None:
             self.adding_point.setCenterByCanvasPos(x, y)
@@ -452,3 +474,5 @@ class Labels(CanvasComponent):
             self.dragging_point.unselect()
             self.dragging_point = None
             self._saveToMemento()
+
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

@@ -71,7 +71,7 @@ class LabelController:
 
     def loadLabels(self, path: str = None):
         if self.labels is not None:
-            self.labels.kill()
+            self.labels.kill(only_self=False)
             self.labels = None
 
         if path is None or self.image is None:
