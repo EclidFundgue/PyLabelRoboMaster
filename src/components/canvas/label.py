@@ -392,11 +392,17 @@ class Labels(CanvasComponent):
         saveLabel(self.label_path, labels)
 
     # -------------------- base -------------------- #
-    def kill(self) -> None:
+    def kill(self, only_self: bool = True) -> None:
+        '''
+        Set `only_self` to False when reloading the component, True when
+        program is exiting.
+        '''
         self.saveToFile()
 
-        for label in self.labels:
-            label.kill()
+        if not only_self:
+            for label in self.labels:
+                label.kill()
+
         self.removeEvents(target=str(id(self)))
         self.labels = None
         self.selected_labels = None
