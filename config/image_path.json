@@ -40,6 +40,8 @@
         "redo_pressed": "buttons/bush_gemer_pressed.png",
         "restore": "buttons/undo.png",
         "restore_confirmed": "buttons/undo_confirmed.png",
+        "save": "buttons/save.png",
+        "save_pressed": "buttons/save_pressed.png",
         "search": "buttons/search.png",
         "search_pressed": "buttons/search_pressed.png"
     },

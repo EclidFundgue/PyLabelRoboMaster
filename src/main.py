@@ -38,6 +38,7 @@ class Main(UIMain):
             on_redo=self.toolbar_onRedo,
             on_find=self.toolbar_onFind,
             on_correct=self.toolbar_onCorrect,
+            on_save=self.toolbar_onSave,
             on_switch_preproc=self.toolbar_onSwitchPreproc,
             on_switch_auto=self.toolbar_onSwitchAuto,
             on_type_change=self.toolbar_onTypeChange,
@@ -151,6 +152,9 @@ class Main(UIMain):
 
     def toolbar_onCorrect(self) -> None:
         self.label_controller.correct()
+
+    def toolbar_onSave(self) -> None:
+        self.label_controller.save()
 
     def toolbar_onSwitchPreproc(self, state: bool) -> None:
         self.label_controller.switchPreprocess(state)
