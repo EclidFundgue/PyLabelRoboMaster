@@ -1,5 +1,6 @@
 import os
 from typing import Union
+import json
 
 from .pygame_gui import BaseComponent
 from .pygame_gui.decorators import singleton
@@ -46,6 +47,7 @@ class VarArmorLabels(BaseComponent):
     VarArmorLabels(image_folder, labels_folder, deserted_image_folder)
 
     Methods:
+    * saveUserData() -> None
     * getCurrentImagePath() -> str | None
     * getCurrentLabelPath() -> str | None
     * setPage(page) -> None
@@ -57,11 +59,13 @@ class VarArmorLabels(BaseComponent):
     '''
 
     def __init__(self,
+            user_data_path: str,
             image_folder: str,
             label_folder: str,
             deserted_image_folder: str = None):
         super().__init__()
 
+        self.user_data_path = user_data_path
         self.image_folder = image_folder
         self.label_folder = label_folder
         self.deserted_folder = deserted_image_folder
@@ -75,6 +79,55 @@ class VarArmorLabels(BaseComponent):
         self.curr_page = 0
         self.curr_type = 0
         self.auto_labeling = False
+
+        self._loadUserData()
+
+    def _makeDefaultUserData(self, path: str) -> None:
+        folder = os.path.dirname(path)
+        # folder may not exist or be ''
+        if folder and not os.path.exists(folder):
+            makeFolder(folder)
+
+        with open(path, 'w') as f:
+            default_data = {
+                'last_image_folder': None, # str
+                'last_label_folder': None, # str
+                'last_edit_image': None # str
+            }
+            json.dump(default_data, f)
+
+    def _loadUserData(self) -> None:
+        if not os.path.exists(self.user_data_path):
+            self._makeDefaultUserData(self.user_data_path)
+
+        with open(self.user_data_path, 'r') as f:
+            user_data = json.load(f)
+            last_image_folder = user_data['last_image_folder']
+            last_label_folder = user_data['last_label_folder']
+            last_edit_image = user_data['last_edit_image']
+
+        if last_image_folder is None or last_image_folder != self.image_folder:
+            return
+        if last_label_folder is None or last_label_folder != self.label_folder:
+            return
+        if last_edit_image is None:
+            return
+
+        last_edit_image_path = os.path.join(self.image_folder, last_edit_image)
+        if not os.path.exists(last_edit_image_path):
+            return
+
+        self.selected_image = last_edit_image
+        self.selected_label = getLabelPath(last_edit_image, self.label_folder)
+
+    def saveUserData(self) -> None:
+        with open(self.user_data_path, 'w') as f:
+            user_data = {
+                'last_image_folder': self.image_folder,
+                'last_label_folder': self.label_folder,
+                'last_edit_image': self.selected_image
+            }
+            json.dump(user_data, f)
 
     def _buildOrLoadDeserted(self, deserted_folder: str) -> None:
         if deserted_folder is None:

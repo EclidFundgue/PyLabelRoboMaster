@@ -24,6 +24,7 @@ class Main(UIMain):
         cfg_loader = ConfigLoader()
         # global variables
         self.var_armor_labels = VarArmorLabels(
+            cfg_loader['user_data'],
             cfg_loader['image_folder'],
             cfg_loader['label_folder'],
             cfg_loader['deserted_image_folder']
@@ -54,6 +55,8 @@ class Main(UIMain):
 
         # -------------------- configure components --------------------
         self.toolbar.setBackgroundColor((219, 226, 239))
+        self.toolbar.scroll_box.reloadByGlobalVar()
+        self._reloadNavigator()
         self.label_controller.getCanvas().setBackgroundColor((17, 45, 78))
         self.label_controller.reload()
 
@@ -97,10 +100,12 @@ class Main(UIMain):
     def keyboard_PrevImage(self) -> None:
         self.toolbar.scroll_box.selectPrev()
         self.label_controller.reload()
+        self.var_armor_labels.saveUserData()
 
     def keyboard_NextImage(self) -> None:
         self.toolbar.scroll_box.selectNext()
         self.label_controller.reload()
+        self.var_armor_labels.saveUserData()
 
     def keyboard_TypeChange(self, type_id: int) -> None:
         self.var_armor_labels.setType(type_id)
@@ -166,12 +171,14 @@ class Main(UIMain):
         self.var_armor_labels.select(file_line.filename)
         self._reloadNavigator()
         self.label_controller.reload()
+        self.var_armor_labels.saveUserData()
 
     def toolbar_onScrollDesert(self, idx: int, file_line: ImageFileLine) -> None:
         self.var_armor_labels.delete(file_line.filename)
         self.toolbar.scroll_box.addLine(1, DesertedFileLine(
             file_line.w, file_line.h, file_line.filename
         ))
+        self.var_armor_labels.saveUserData()
 
     def toolbar_onScrollRestore(self, idx: int, file_line: DesertedFileLine) -> None:
         self.var_armor_labels.restore(file_line.filename)
@@ -183,11 +190,13 @@ class Main(UIMain):
         self.toolbar.scroll_box.selectPrev()
         self._reloadNavigator()
         self.label_controller.reload()
+        self.var_armor_labels.saveUserData()
 
     def toolbar_onNavigatorNext(self) -> None:
         self.toolbar.scroll_box.selectNext()
         self._reloadNavigator()
         self.label_controller.reload()
+        self.var_armor_labels.saveUserData()
 
     def canvas_onSingleSelect(self, label: Label) -> None:
         self.toolbar.type_box.setType(label.type_id)

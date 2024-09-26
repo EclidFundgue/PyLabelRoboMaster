@@ -179,6 +179,12 @@ class LinesBox(Surface):
         self.selected_idx = idx
         self.selected_line: FileLine = l
 
+    def _selectByFilename(self, filename: str) -> None:
+        for l in self.lines:
+            if l.filename == filename:
+                self._selectByLine(l)
+                return
+
     def _selectByLine(self, line: FileLine) -> None:
         if line == self.selected_line:
             return
@@ -186,7 +192,14 @@ class LinesBox(Surface):
         idx = self.lines.index(line)
         self._selectByIndex(idx)
 
-    def select(self, line: Union[int, FileLine]) -> None:
+    def _constrainRelativeByIndex(self, idx: int) -> float:
+        min_r, max_r = self.getMinMaxRelative(idx)
+        if self.dst_relative < min_r:
+            self.setRelativeWithSmooth(min_r)
+        elif self.dst_relative > max_r:
+            self.setRelativeWithSmooth(max_r)
+
+    def select(self, line: Union[int, str, FileLine]) -> None:
         '''
         Select line with given index. If there is already a selected line,
         unselect it first.
@@ -194,17 +207,14 @@ class LinesBox(Surface):
 
         if isinstance(line, int):
             self._selectByIndex(line)
+        elif isinstance(line, str):
+            self._selectByFilename(line)
         elif isinstance(line, FileLine):
             self._selectByLine(line)
         else:
             f_warning(f"Invalid line type: {type(line)}", self)
 
-    def _constrainRelativeByIndex(self, idx: int) -> float:
-        min_r, max_r = self.getMinMaxRelative(idx)
-        if self.dst_relative < min_r:
-            self.setRelativeWithSmooth(min_r)
-        elif self.dst_relative > max_r:
-            self.setRelativeWithSmooth(max_r)
+        self._constrainRelativeByIndex(self.selected_idx)
 
     def selectPrev(self) -> None:
         if self.selected_idx == -1:

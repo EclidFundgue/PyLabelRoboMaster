@@ -117,6 +117,7 @@ class StackedScrollView(Surface):
     * selectPrev() -> None
     * selectNext() -> None
     * getCurrentPageFileNumber() -> int
+    * reloadByGlobalVar() -> None
     '''
     def __init__(self, w: int, h: int, x: int, y: int,
             line_w: int, line_h: int,
@@ -187,6 +188,11 @@ class StackedScrollView(Surface):
 
     def getCurrentPageFileNumber(self) -> int:
         return self.pages[self.header.current_page].getFileNumber()
+
+    def reloadByGlobalVar(self) -> None:
+        var = VarArmorLabels()
+        if var.selected_image is not None:
+            self.pages[0].select(var.selected_image)
 
     def kill(self) -> None:
         self.header = None
