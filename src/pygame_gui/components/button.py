@@ -1,5 +1,6 @@
 from typing import Callable, Union
 
+import pygame
 from pygame import Surface as pg_Surface
 
 from ..decorators import getCallable
@@ -15,7 +16,8 @@ class Button(Surface):
         image,
         pressed_image,
         on_press,
-        continue_press
+        continue_press,
+        cursor_change
     )
     '''
     def __init__(self,
@@ -24,7 +26,8 @@ class Button(Surface):
             image: Union[str, pg_Surface],
             pressed_image: Union[str, pg_Surface] = None,
             on_press: Callable = None,
-            continue_press = -1):
+            continue_press = -1,
+            cursor_change: bool = False):
         super().__init__(w, h, x, y)
 
         self.image = self.loadImage(image, w, h)
@@ -39,6 +42,8 @@ class Button(Surface):
         self.continue_press_thresh = continue_press
         self.continue_press_time = 0
         self.pressed = False
+
+        self.cursor_change = cursor_change
 
     def kill(self) -> None:
         self.on_press = None
@@ -61,9 +66,15 @@ class Button(Surface):
         self.pressed = False
         self.continue_press_time = 0
 
+    def onHover(self, x: int, y: int) -> None:
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
     def offHover(self) -> None:
         self.pressed = False
         self.continue_press_time = 0
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def draw(self, surface: pg_Surface) -> None:
         if self.pressed:

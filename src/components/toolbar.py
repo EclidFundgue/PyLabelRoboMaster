@@ -48,42 +48,48 @@ class ToolBar(Surface):
         self.btn_add = Button(*rect_add,
             img_loader['button']['add'],
             img_loader['button']['add_pressed'],
-            on_press=getCallable(on_add)
+            on_press=getCallable(on_add),
+            cursor_change=True
         )
         self.addChild(self.btn_add)
 
         self.btn_delete = Button(*rect_delete,
             img_loader['button']['delete'],
             img_loader['button']['delete_pressed'],
-            on_press=getCallable(on_delete)
+            on_press=getCallable(on_delete),
+            cursor_change=True
         )
         self.addChild(self.btn_delete)
 
         self.btn_undo = Button(*rect_undo,
             img_loader['button']['undo'],
             img_loader['button']['undo_pressed'],
-            on_press=getCallable(on_undo)
+            on_press=getCallable(on_undo),
+            cursor_change=True
         )
         self.addChild(self.btn_undo)
 
         self.btn_redo = Button(*rect_redo,
             img_loader['button']['redo'],
             img_loader['button']['redo_pressed'],
-            on_press=getCallable(on_redo)
+            on_press=getCallable(on_redo),
+            cursor_change=True
         )
         self.addChild(self.btn_redo)
 
         self.btn_find = Button(*rect_find,
             img_loader['button']['search'],
             img_loader['button']['search_pressed'],
-            on_press=getCallable(on_find)
+            on_press=getCallable(on_find),
+            cursor_change=True
         )
         self.addChild(self.btn_find)
 
         self.btn_correct = Button(*rect_correct,
             img_loader['button']['correct'],
             img_loader['button']['correct_pressed'],
-            on_press=getCallable(on_correct)
+            on_press=getCallable(on_correct),
+            cursor_change=True
         )
         self.addChild(self.btn_correct)
 

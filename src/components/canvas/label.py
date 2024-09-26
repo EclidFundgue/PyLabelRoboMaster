@@ -162,6 +162,7 @@ class Labels(CanvasComponent):
             if self.dragging_point is None:
                 self.dragging_point = keypoint
                 self.dragging_point.select()
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         return on_click
 
     def _getLabelOnClickFunc(self, label: Label) -> Callable:
@@ -450,15 +451,19 @@ class Labels(CanvasComponent):
             self._saveToMemento()
 
     def onMidDrag(self, vx: int, vy: int) -> None:
-        if len(self.selected_labels) == 0:
+        if vx == 0 and vy == 0:
             return
 
-        for label in self.selected_labels:
-            for p in label.keypoints:
-                p.move(vx, vy)
+        if len(self.selected_labels) != 0:
+            for label in self.selected_labels:
+                for p in label.keypoints:
+                    p.move(vx, vy)
+
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
 
     def onMidRelease(self) -> None:
         self._saveToMemento()
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def onHover(self, x: int, y: int) -> None:
         if self.adding_point is not None:
@@ -469,3 +474,5 @@ class Labels(CanvasComponent):
             self.dragging_point.unselect()
             self.dragging_point = None
             self._saveToMemento()
+
+        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

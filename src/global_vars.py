@@ -1,6 +1,6 @@
+import json
 import os
 from typing import Union
-import json
 
 from .pygame_gui import BaseComponent
 from .pygame_gui.decorators import singleton

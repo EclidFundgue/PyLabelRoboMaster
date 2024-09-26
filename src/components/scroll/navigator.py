@@ -41,14 +41,16 @@ class Navigator(Surface):
             loader['button']['arrow'],
             loader['button']['arrow_pressed'],
             on_press=self._onButtonPrev,
-            continue_press=40
+            continue_press=40,
+            cursor_change=True
         )
         self.btn_next = Button(
             btn_w, btn_h, self.w - btn_w, (h - btn_h) // 2,
             pygame.transform.flip(loader['button']['arrow'], True, False),
             pygame.transform.flip(loader['button']['arrow_pressed'], True, False),
             on_press=self._onButtonNext,
-            continue_press=40
+            continue_press=40,
+            cursor_change=True
         )
 
         self.padx = 15
