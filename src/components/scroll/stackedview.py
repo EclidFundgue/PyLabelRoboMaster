@@ -1,8 +1,7 @@
 from typing import Callable, List
 
 from ...global_vars import VarArmorLabels
-from ...pygame_gui import Selectable, Surface
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import Selectable, Surface, getCallable
 from .line import DesertedFileLine, ImageFileLine, TextImage
 from .line import _GenericFileLine as FileLine
 from .scrollview import DesertedScrollView, ImageScrollView, ScrollView

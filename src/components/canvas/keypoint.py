@@ -3,9 +3,8 @@ from typing import Callable, List, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...process.label_io import LabelInputOutput
-from ...pygame_gui import Selectable
-from ...pygame_gui.decorators import getCallable
+from ...process.label_io import LabelIO
+from ...pygame_gui import Selectable, getCallable
 from ...resources_loader import ImageLoader
 from .canvas import CanvasComponent
 
@@ -86,7 +85,7 @@ class Keypoint(CanvasComponent, Selectable):
             surface.blit(self.image, (self.x, self.y))
 
 def getKeypointsFromLabelIO(
-            label_io: LabelInputOutput,
+            label_io: LabelIO,
             image_size: Tuple[int, int]) -> List[Keypoint]:
         img_w, img_h = image_size
         pt_pos = [(pt[0] * img_w, pt[1] * img_h) for pt in label_io.kpts]

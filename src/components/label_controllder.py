@@ -1,7 +1,7 @@
 from typing import Callable
 
 from ..global_vars import VarArmorLabels
-from ..pygame_gui.decorators import getCallable
+from ..pygame_gui import getCallable
 from ..utils.gamma import gammaTransformation
 from .canvas.canvas import Canvas
 from .canvas.image import Image

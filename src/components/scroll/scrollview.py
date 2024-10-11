@@ -1,7 +1,6 @@
 from typing import Callable, List, Union
 
-from ...pygame_gui import Surface
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import Surface, getCallable
 from ...utils.dataproc import getImageFiles
 from .bar import ScrollBar
 from .line import DesertedFileLine, ImageFileLine

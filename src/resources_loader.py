@@ -4,8 +4,7 @@ from typing import Any, Union
 
 from pygame import Surface as pg_Surface
 
-from .pygame_gui import BaseComponent, f_error
-from .pygame_gui.decorators import singleton
+from .pygame_gui import BaseComponent, f_error, singleton
 from .utils.constants import ROOT_PATH
 
 

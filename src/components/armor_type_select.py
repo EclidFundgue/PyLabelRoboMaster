@@ -3,10 +3,8 @@ from typing import Callable, Union
 import pygame
 from pygame.surface import Surface as pg_Surface
 
-from ..pygame_gui import Selectable, Surface
-from ..pygame_gui.decorators import getCallable
+from ..pygame_gui import Selectable, Surface, getCallable
 from ..resources_loader import ImageLoader
-from ..utils.constants import ConfigArmorTypeSelect as cfg
 
 
 class ColorButton(Selectable):

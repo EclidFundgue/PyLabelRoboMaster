@@ -4,8 +4,7 @@ from typing import Callable, List, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Selectable, f_error, f_warning
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import Selectable, f_error, f_warning, getCallable
 from ...utils.dataproc import sortedPoints
 from ...utils.geometry import in_polygon
 from .canvas import CanvasComponent

@@ -3,8 +3,7 @@ from typing import Callable, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import BaseComponent, Surface
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import BaseComponent, Surface, getCallable
 
 
 class _ScrollButton(BaseComponent):

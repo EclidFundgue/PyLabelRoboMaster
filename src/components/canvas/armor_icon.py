@@ -2,8 +2,7 @@ from typing import Callable, Tuple
 
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Selectable
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import Selectable, getCallable
 from ...resources_loader import ImageLoader
 from .canvas import CanvasComponent, Surface
 from .keypoint import Keypoint

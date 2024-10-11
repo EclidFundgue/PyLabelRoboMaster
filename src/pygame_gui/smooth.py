@@ -1,5 +1,5 @@
-import time
 import math
+import time
 from typing import Tuple
 
 from .f___loger import fuck as f_error
