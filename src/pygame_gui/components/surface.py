@@ -17,6 +17,9 @@ class Surface(BaseComponent):
     Methods:
     * clear() -> None
     * setBackgroundColor(color) -> None
+    * alignHorizontalCenter(obj) -> None
+    * alignVerticalCenter(obj) -> None
+    * alignCenter(obj) -> None
     * draw(self, surface) -> None
     '''
     @overload
@@ -55,6 +58,19 @@ class Surface(BaseComponent):
     def setBackgroundColor(self, color: tuple = KEY_COLOR) -> None:
         ''' Set KEY_COLOR to be transparent. '''
         self.backgournd_color = color
+
+    def alignHorizontalCenter(self, obj: BaseComponent) -> None:
+        ''' Align object horizontally center to self. '''
+        obj.x = (self.w - obj.w) // 2
+
+    def alignVerticalCenter(self, obj: BaseComponent) -> None:
+        ''' Align object vertically center to self. '''
+        obj.y = (self.h - obj.h) // 2
+
+    def alignCenter(self, obj: BaseComponent) -> None:
+        ''' Align object center to self. '''
+        self.alignHorizontalCenter(obj)
+        self.alignVerticalCenter(obj)
 
     def draw(self, surface: pg_Surface) -> None:
         ''' Draw children to self, then draw self to parent component. '''
