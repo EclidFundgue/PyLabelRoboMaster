@@ -1,8 +1,7 @@
 from typing import Callable
 
 from ..global_vars import VarArmorLabels
-from ..pygame_gui import Button, Surface
-from ..pygame_gui.decorators import getCallable
+from ..pygame_gui import Button, Surface, getCallable
 from ..resources_loader import ImageLoader
 from .armor_type_select import ArmorIconsSelect
 from .scroll.line import DesertedFileLine, ImageFileLine
@@ -36,15 +35,15 @@ class ToolBar(Surface):
             on_navigator_next: Callable[[], None] = None):
         super().__init__(280, 840, x, y)
 
-        rect_add = (32, 32, 150, 20) # (0, 2)
-        rect_delete = (32, 32, 210, 20) # (0, 3)
-        rect_undo = (32, 32, 30, 20) # (0, 0)
-        rect_redo = (32, 32, 90, 20) # (0, 1)
-        rect_find = (32, 32, 30, 80) # (1, 0)
-        rect_correct = (32, 32, 90, 80) # (1, 1)
-        rect_save = (32, 32, 150, 80) # (1, 2)
-        rect_preproc = (32, 32, 30, 140) # (2, 0)
-        rect_auto = (96, 32, 90, 140) # (2, 1)
+        rect_undo = (32, 32, 20, 20) # (0, 0)
+        rect_redo = (32, 32, 70, 20) # (0, 1)
+        rect_save = (32, 32, 120, 20) # (0, 2)
+        rect_add = (32, 32, 20, 70) # (1, 0)
+        rect_delete = (32, 32, 70, 70) # (1, 1)
+        rect_find = (32, 32, 20, 120) # (2, 0)
+        rect_correct = (32, 32, 70, 120) # (2, 1)
+        rect_preproc = (32, 32, 20, 170) # (3, 0)
+        rect_auto = (86, 32, 70, 170) # (3, 1)
 
         img_loader = ImageLoader()
         self.btn_add = Button(*rect_add,
@@ -118,7 +117,7 @@ class ToolBar(Surface):
         self.addChild(self.swch_auto)
 
         self.type_box = ArmorIconsSelect(
-            20, 250,
+            20, 270,
             on_select=getCallable(on_type_change)
         )
         self.addChild(self.type_box)
