@@ -4,8 +4,7 @@ import pygame
 from pygame import Surface as pg_Surface
 
 from ..global_vars import THEME_VAR_CHANGE
-from ..pygame_gui import BaseComponent
-from ..pygame_gui.decorators import getCallable
+from ..pygame_gui import BaseComponent, f_warning, getCallable
 
 
 class Switch(BaseComponent):
@@ -72,6 +71,52 @@ class Switch(BaseComponent):
             surface.blit(self.image_on, (self.x, self.y))
         else:
             surface.blit(self.image_off, (self.x, self.y))
+
+    def addObserver(self, observer) -> None:
+        '''
+        Add an observer to this theme. All observers will be noticed when Theme call
+        `notify` function. Observer can receive notice by calling `onReceive` function.
+        '''
+        self.removeDead()
+
+        if not observer.alive:
+            f_warning(f'Operation on dead component {observer}.', self)
+            return
+
+        if observer in self.observers:
+            f_warning(f'Observer {observer} has already attached to {self}.', self)
+            return
+
+        self.observers.append(observer)
+
+    def removeObserver(self, observer) -> None:
+        ''' Remove observer from this theme. '''
+        self.removeDead()
+
+        if not observer.alive:
+            f_warning(f'Operation on dead component {observer}.', self)
+            return
+
+        if observer not in self.observers:
+            f_warning(f'Observer {observer} has not attach to {self} yet.', self)
+            return
+
+        self.observers.remove(observer)
+
+    def removeAllObservers(self) -> None:
+        ''' Clear all observers. '''
+        self.observers = []
+
+    def notify(self, theme: str, message: Any = None) -> None:
+        ''' Send message to all observers. '''
+        self.removeDead()
+
+        for observer in self.observers:
+            observer.onReceive(id(self), theme, message)
+
+    def onReceive(self, sender_id: int, theme: str, message: Any) -> None:
+        ''' Receive a mesage. '''
+        pass
 
 class ThemeBasedSwitchTrigger(BaseComponent):
     '''

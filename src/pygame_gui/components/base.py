@@ -1,5 +1,5 @@
 import os
-from typing import Any, Callable, List, Tuple, Union
+from typing import Callable, List, Tuple, Union
 
 import pygame
 from pygame import Surface as pg_Surface
@@ -41,13 +41,6 @@ class BaseComponent:
     * getRect() -> Tuple[int]
     * draw(surface) -> None
 
-    4. ---------- Observer ----------
-    * addObserver(observer) -> None
-    * removeObserver(observer) -> None
-    * removeAllObservers() -> None
-    * notify(theme, message) -> None
-    * onReceive(sender_id, theme, message) -> None
-
     Internal Methods:
     * removeDead() -> None
     * update() -> None
@@ -56,7 +49,6 @@ class BaseComponent:
     def __init__(self, w: int = 0, h: int = 0,
                  x: int = 0, y: int = 0, is_root: bool = False):
         self.child_components: List[BaseComponent] = []
-        self.observers: List[BaseComponent] = []
         self._listener = Listener()
         self.active = False # True when mouse hover on the component
         self.alive = True # Component will be removed when not alive
@@ -149,10 +141,9 @@ class BaseComponent:
 
     def removeDead(self) -> None:
         '''
-        Remove dead components in child_components and observers.\n
+        Remove dead components in child_components.\n
         '''
         self.child_components = list(filter(lambda c: c.alive, self.child_components))
-        self.observers = list(filter(lambda c: c.alive, self.observers))
 
     def kill(self) -> None:
         '''
@@ -168,7 +159,6 @@ class BaseComponent:
             child.kill()
         self.child_components = []
 
-        self.removeAllObservers()
         self._listener = None
         self.active = False
         self.alive = False
@@ -350,51 +340,3 @@ class BaseComponent:
         return (self.w, self.h, self.x, self.y)
 
     def draw(self, surface: pg_Surface) -> None: ...
-
-
-    # -------------------- Observer Pattern -------------------- #
-    def addObserver(self, observer) -> None:
-        '''
-        Add an observer to this theme. All observers will be noticed when Theme call
-        `notify` function. Observer can receive notice by calling `onReceive` function.
-        '''
-        self.removeDead()
-
-        if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
-            return
-
-        if observer in self.observers:
-            f_warning(f'Observer {observer} has already attached to {self}.', self)
-            return
-
-        self.observers.append(observer)
-
-    def removeObserver(self, observer) -> None:
-        ''' Remove observer from this theme. '''
-        self.removeDead()
-
-        if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
-            return
-
-        if observer not in self.observers:
-            f_warning(f'Observer {observer} has not attach to {self} yet.', self)
-            return
-
-        self.observers.remove(observer)
-
-    def removeAllObservers(self) -> None:
-        ''' Clear all observers. '''
-        self.observers = []
-
-    def notify(self, theme: str, message: Any = None) -> None:
-        ''' Send message to all observers. '''
-        self.removeDead()
-
-        for observer in self.observers:
-            observer.onReceive(id(self), theme, message)
-
-    def onReceive(self, sender_id: int, theme: str, message: Any) -> None:
-        ''' Receive a mesage. '''
-        pass

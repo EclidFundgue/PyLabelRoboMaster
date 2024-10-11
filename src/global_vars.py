@@ -1,15 +1,61 @@
 import json
 import os
-from typing import Union
+from typing import Any, Union
 
-from .pygame_gui import BaseComponent
-from .pygame_gui.decorators import singleton
+from .pygame_gui import BaseComponent, f_warning, singleton
 from .utils.dataproc import getLabelPath, makeFolder
 
 THEME_VAR_CHANGE = 'VAR_CHANGE'
 
+class ObserveVar:
+    def addObserver(self, observer) -> None:
+        '''
+        Add an observer to this theme. All observers will be noticed when Theme call
+        `notify` function. Observer can receive notice by calling `onReceive` function.
+        '''
+        self.removeDead()
+
+        if not observer.alive:
+            f_warning(f'Operation on dead component {observer}.', self)
+            return
+
+        if observer in self.observers:
+            f_warning(f'Observer {observer} has already attached to {self}.', self)
+            return
+
+        self.observers.append(observer)
+
+    def removeObserver(self, observer) -> None:
+        ''' Remove observer from this theme. '''
+        self.removeDead()
+
+        if not observer.alive:
+            f_warning(f'Operation on dead component {observer}.', self)
+            return
+
+        if observer not in self.observers:
+            f_warning(f'Observer {observer} has not attach to {self} yet.', self)
+            return
+
+        self.observers.remove(observer)
+
+    def removeAllObservers(self) -> None:
+        ''' Clear all observers. '''
+        self.observers = []
+
+    def notify(self, theme: str, message: Any = None) -> None:
+        ''' Send message to all observers. '''
+        self.removeDead()
+
+        for observer in self.observers:
+            observer.onReceive(id(self), theme, message)
+
+    def onReceive(self, sender_id: int, theme: str, message: Any) -> None:
+        ''' Receive a mesage. '''
+        pass
+
 @singleton
-class VarArmorIconType(BaseComponent):
+class VarArmorIconType(BaseComponent, ObserveVar):
     '''
     Methods:
     * setColor(idx) -> None
@@ -39,7 +85,7 @@ class VarArmorIconType(BaseComponent):
         self.notify(self.theme, (self.color_idx, self.type_idx))
 
 @singleton
-class VarArmorLabels(BaseComponent):
+class VarArmorLabels(BaseComponent, ObserveVar):
     '''
     This class is used to manage the image pairs and the deserted images, and
     provide methods to switch between the image folders and select/delete images.
