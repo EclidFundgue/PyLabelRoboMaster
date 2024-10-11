@@ -29,6 +29,8 @@
         "add_pressed": "buttons/add_pressed.png",
         "arrow": "buttons/arrow.png",
         "arrow_pressed": "buttons/arrow_pressed.png",
+        "back": "buttons/back.png",
+        "back_pressed": "buttons/back_pressed.png",
         "correct": "buttons/correct.png",
         "correct_pressed": "buttons/correct.png",
         "delete": "buttons/delete.png",
@@ -55,6 +57,20 @@
         "image_not_found": "error/not_found.png",
         "keypoint": "label/keypoint.png",
         "keypoint_hover": "label/keypoint_hover.png"
+    },
+    "clock": {
+        "0": "clock/0.png",
+        "1": "clock/1.png",
+        "2": "clock/2.png",
+        "3": "clock/3.png",
+        "4": "clock/4.png",
+        "5": "clock/5.png",
+        "6": "clock/6.png",
+        "7": "clock/7.png",
+        "8": "clock/8.png",
+        "9": "clock/9.png",
+        "sep": "clock/sep.png",
+        "colon": "clock/colon.png"
     },
     "other": {
         "not_found": "error/not_found.png"

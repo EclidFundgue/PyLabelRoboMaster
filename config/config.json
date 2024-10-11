@@ -5,6 +5,6 @@
     "mode": "armor",
     "load_network": false,
     "model_path": "",
-    "resolution": [1280, 720],
+    "resolution": [1280, 840],
     "user_data": "user_data.json"
 }
