@@ -3,38 +3,9 @@ from typing import Callable, Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import BaseComponent, Selectable
-from ...pygame_gui.decorators import getCallable
+from ...pygame_gui import BaseComponent, Selectable, SmoothColor, getCallable
 from ...resources_loader import ImageLoader
 
-
-class _SmoothColor:
-    '''
-    Change color smoothly.
-
-    _SmoothColor(color, smooth_factor)
-
-    Methods:
-    * update() -> None
-    * setColor(color) -> None
-    * getColor() -> Tuple[int, int, int]
-    '''
-    def __init__(self, color: Tuple[int, int, int], smooth_factor: float = 0.5):
-        self.curr_color = color
-        self.dst_color = color
-        self.smooth_factor = smooth_factor
-
-    def update(self) -> None:
-        self.curr_color = tuple(
-            dst - self.smooth_factor * (dst - curr)
-            for dst, curr in zip(self.dst_color, self.curr_color)
-        )
-
-    def setColor(self, color: Tuple[int, int, int]) -> None:
-        self.dst_color = color
-
-    def getColor(self) -> Tuple[int, int, int]:
-        return self.curr_color
 
 class TextImage(BaseComponent):
     '''
@@ -143,11 +114,8 @@ class _GenericFileLine(Selectable):
         self.bg_color = (228, 249, 245)
         self.bg_color_hover = (138, 238, 234)
         self.bg_color_selected = (101, 160, 156)
-        self.color = _SmoothColor(
-            self.bg_color,
-            smooth_factor = 0.5 if smooth_color_change else 0
-        )
-        self.current_background_color = self.bg_color
+        smooth_time_period = 0.03 if smooth_color_change else 0.0
+        self.bg_smooth_color = SmoothColor(smooth_time_period, self.bg_color)
 
         # text image
         self.text_img = TextImage(filename)
@@ -193,18 +161,16 @@ class _GenericFileLine(Selectable):
         super().update(events)
 
         if self.selected:
-            self.color.setColor(self.bg_color_selected)
+            self.bg_smooth_color.setColor(self.bg_color_selected)
         elif self.active:
-            self.color.setColor(self.bg_color_hover)
+            self.bg_smooth_color.setColor(self.bg_color_hover)
         else:
-            self.color.setColor(self.bg_color)
-        self.color.update()
-        self.current_background_color = self.color.getColor()
+            self.bg_smooth_color.setColor(self.bg_color)
 
     def draw(self, surface: pg_Surface) -> None:
         pygame.draw.rect(
             surface,
-            self.current_background_color,
+            self.bg_smooth_color.getCurrentColor(),
             pygame.Rect(self.x, self.y, self.w, self.h)
         )
 
