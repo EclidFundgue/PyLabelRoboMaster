@@ -8,7 +8,7 @@ from .scroll.line import DesertedFileLine, ImageFileLine
 from .scroll.line import _GenericFileLine as FileLine
 from .scroll.navigator import Navigator
 from .scroll.stackedview import StackedScrollView
-from .switch import Switch, ThemeBasedSwitchTrigger
+from .switch import Switch
 
 
 class ToolBar(Surface):
