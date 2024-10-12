@@ -5,9 +5,8 @@ from pygame import Surface as pg_Surface
 from pygame import locals
 
 from ...process.correct import correctLabels, relabel
-from ...process.label_io import LabelInputOutput, loadLabel, saveLabel
-from ...pygame_gui import f_warning
-from ...pygame_gui.decorators import getCallable
+from ...process.label_io import ArmorLabelIO, loadLabel, saveLabel
+from ...pygame_gui import f_warning, getCallable
 from ...utils.dataproc import sortedPoints, surface2mat
 from .armor_icon import TypeIcon
 from .canvas import Canvas, CanvasComponent
@@ -49,10 +48,10 @@ class Label:
         if self.icon is not None:
             canvas.addChild(self.icon)
 
-    def getLabelIO(self, image_size: Tuple[int, int]) -> LabelInputOutput:
+    def getLabelIO(self, image_size: Tuple[int, int]) -> ArmorLabelIO:
         kpts = [(p._x / image_size[0], p._y / image_size[1])
                 for p in self.keypoints]
-        return LabelInputOutput(
+        return ArmorLabelIO(
             self.type_id,
             sortedPoints(kpts),
         )
@@ -77,7 +76,7 @@ class Label:
 class LabelsMemeto:
     ''' Saves infomation of LabelsManager. '''
     def __init__(self):
-        self.labels: List[LabelInputOutput] = []
+        self.labels: List[ArmorLabelIO] = []
         self.selected_incidies: List[int] = []
         self.curr_type_id = 0
 
@@ -180,7 +179,7 @@ class Labels(CanvasComponent):
                     self._selectedRemove(label)
         return on_click
 
-    def _addLabelByIO(self, label_io: LabelInputOutput) -> None:
+    def _addLabelByIO(self, label_io: ArmorLabelIO) -> None:
         # create label
         keypoints = getKeypointsFromLabelIO(label_io, self.image_rect[:2])
         contour = Contour(self.keypoint_size, keypoints)
@@ -396,7 +395,8 @@ class Labels(CanvasComponent):
     def kill(self, only_self: bool = True) -> None:
         '''
         Set `only_self` to False when reloading the component, True when
-        program is exiting.
+        program is exiting. Because children components is managed by
+        `Canvas`, they will be killed by `Canvas` automatically.
         '''
         self.saveToFile()
 

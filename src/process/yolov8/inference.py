@@ -4,7 +4,7 @@ from typing import List
 import cv2
 from ultralytics import YOLO
 
-from ..label_io import LabelInputOutput
+from ..label_io import ArmorLabelIO
 from .translator import predict_with_split_windows
 
 
@@ -12,7 +12,7 @@ class Yolov8Net:
     def __init__(self, path: str):
         self.model = YOLO(path, task='pose')
 
-    def __call__(self, img: cv2.Mat) -> List[LabelInputOutput]:
+    def __call__(self, img: cv2.Mat) -> List[ArmorLabelIO]:
         h, w, ch = img.shape
         ls = predict_with_split_windows(self.model, img, 544)
         res = []
@@ -22,6 +22,6 @@ class Yolov8Net:
             ys = [y / h for y in lb[6::2]]
             pts = list(zip(xs, ys))
             res.append(
-                LabelInputOutput(idx, pts)
+                ArmorLabelIO(idx, pts)
             )
         return res
