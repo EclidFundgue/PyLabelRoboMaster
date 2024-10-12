@@ -139,7 +139,7 @@ class LabelController:
     def save(self):
         if self.labels is not None:
             self.labels.saveToFile()
-    
+
     def switchPreprocess(self, state: bool) -> None:
         if self.image is not None:
             if state:
