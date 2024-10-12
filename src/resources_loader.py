@@ -51,9 +51,14 @@ class ConfigLoader:
     '''
 
     def __init__(self):
-        image_path = os.path.join(ROOT_PATH, 'config/config.json')
-        with open(image_path, 'r', encoding='utf-8') as f:
+        self.image_path = os.path.join(ROOT_PATH, 'config/config.json')
+        with open(self.image_path, 'r', encoding='utf-8') as f:
             self.config_dict: dict = json.load(f)
 
     def __getitem__(self, key: str) -> Any:
         return self.config_dict[key]
+    
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.config_dict[key] = value
+        with open(self.image_path, 'w', encoding='utf-8') as f:
+            json.dump(self.config_dict, f, indent=4)
