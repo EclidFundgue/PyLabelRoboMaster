@@ -1,6 +1,7 @@
+from .components.stacked_page import StackedPageView
 from .global_vars import VarArmorLabels
 from .pages.armor import ArmorPage
-from .pages.menus import MainMenu
+from .pages.menus import LabelingMenu, MainMenu, SettingMenu
 from .pygame_gui import UIMain
 from .resources_loader import ConfigLoader
 
@@ -22,33 +23,24 @@ class Main(UIMain):
             cfg_loader['deserted_image_folder']
         )
 
-        self.pages = [
-            MainMenu(
-                *cfg_loader['resolution'], 0, 0,
-                on_change_labeling=lambda: self.setPageByIndex(1)
-            ),
-            ArmorPage(
-                *cfg_loader['resolution'], 0, 0,
-                on_back=lambda: self.setPageByIndex(0)
-            )
-        ]
+        rect = (cfg_loader['resolution'][0], cfg_loader['resolution'][1], 0, 0)
+        page_incidies = {
+            'main_menu': 0,
+            'labeling_menu': 1,
+            'setting_menu': 2,
+            'armor_page': 3
+        }
+        self.stacked_page_view = StackedPageView(*rect)
+        self.stacked_page_view.addPage(MainMenu(*rect, page_incidies))
+        self.stacked_page_view.addPage(LabelingMenu(*rect, page_incidies))
+        self.stacked_page_view.addPage(SettingMenu(*rect, page_incidies))
+        self.stacked_page_view.addPage(ArmorPage(*rect, page_incidies))
+        self.stacked_page_view.setPage(0)
 
-        self.current_page_index = 0
-
-        self.screen.addChild(self.pages[self.current_page_index])
-
-    def setPageByIndex(self, idx: int) -> None:
-        self.screen.removeChild(self.pages[self.current_page_index])
-        self.current_page_index = idx
-        self.screen.addChild(self.pages[self.current_page_index])
+        self.screen.addChild(self.stacked_page_view)
 
     def onExit(self) -> None:
-        self.screen.removeChild(self.pages[self.current_page_index])
-
-        for page in self.pages:
-            page.kill()
-        self.pages = None
-
+        self.stacked_page_view = None
         super().onExit()
 
 def main():

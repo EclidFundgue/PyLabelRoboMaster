@@ -1,5 +1,4 @@
 import os
-from typing import Callable
 
 from pygame import locals
 
@@ -7,20 +6,18 @@ from ..components.canvas.label import Label
 from ..components.label_controllder import LabelController
 from ..components.scroll.line import (DesertedFileLine, ImageFileLine,
                                       _GenericFileLine)
+from ..components.stacked_page import StackedPage
 from ..components.toolbar import ToolBar
 from ..global_vars import VarArmorLabels
-from ..pygame_gui import Button, Surface, getCallable
+from ..pygame_gui import Button
 from ..resources_loader import ConfigLoader, ImageLoader
 
 
-class ArmorPage(Surface):
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            on_back: Callable[[], None] = None,
-        ):
+class ArmorPage(StackedPage):
+    def __init__(self, w: int, h: int, x: int, y: int, page_incides: dict):
         super().__init__(w, h, x, y)
 
-        self.on_back = getCallable(on_back)
+        self.page_incides = page_incides
 
         cfg_loader = ConfigLoader()
         img_loader = ImageLoader()
@@ -111,7 +108,7 @@ class ArmorPage(Surface):
         )
 
     def onBack(self) -> None:
-        self.on_back()
+        self.setPage(self.page_incides['main_menu'])
 
     def keyboard_PrevImage(self) -> None:
         self.toolbar.scroll_box.selectPrev()
