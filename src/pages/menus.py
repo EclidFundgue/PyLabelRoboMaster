@@ -7,6 +7,11 @@ from ..pygame_gui import TextButton
 from ..resources_loader import ConfigLoader
 
 
+_TEXT_BUTTON_COLOR = (249, 247, 247)
+_TEXT_BUTTON_HOVER_COLOR = (63, 114, 175)
+_TEXT_BUTTON_PRESSED_COLOR = (219, 226, 239)
+_TEXT_SWITCH_COLOR = _TEXT_BUTTON_COLOR
+
 class MainMenu(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incidies: dict):
         super().__init__(w, h, x, y)
@@ -20,9 +25,9 @@ class MainMenu(StackedPage):
             300, 50, 50, 50,
             text='Label',
             font=text_font,
-            background_color=(219, 226, 239),
-            hover_color=(63, 114, 175),
-            pressed_color=(249, 247, 247),
+            background_color=_TEXT_BUTTON_COLOR,
+            hover_color=_TEXT_BUTTON_HOVER_COLOR,
+            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeLabeling,
             cursor_change=True
         )
@@ -33,9 +38,9 @@ class MainMenu(StackedPage):
             300, 50, 50, 120,
             text='Setting',
             font=text_font,
-            background_color=(219, 226, 239),
-            hover_color=(63, 114, 175),
-            pressed_color=(249, 247, 247),
+            background_color=_TEXT_BUTTON_COLOR,
+            hover_color=_TEXT_BUTTON_HOVER_COLOR,
+            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeSetting,
             cursor_change=True
         )
@@ -46,7 +51,7 @@ class MainMenu(StackedPage):
         self.addChild(clock)
 
         # background
-        self.setBackgroundColor((17, 45, 78))
+        self.setBackgroundColor((219, 226, 239))
 
     def _onPageChangeLabeling(self) -> None:
         self.setPage(self.page_incidies['labeling_menu'])
@@ -67,9 +72,9 @@ class LabelingMenu(StackedPage):
             300, 50, 50, 50,
             text='Back',
             font=text_font,
-            background_color=(219, 226, 239),
-            hover_color=(63, 114, 175),
-            pressed_color=(249, 247, 247),
+            background_color=_TEXT_BUTTON_COLOR,
+            hover_color=_TEXT_BUTTON_HOVER_COLOR,
+            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeBack,
             cursor_change=True
         )
@@ -80,16 +85,16 @@ class LabelingMenu(StackedPage):
             300, 50, 50, 120,
             text='Armor',
             font=text_font,
-            background_color=(219, 226, 239),
-            hover_color=(63, 114, 175),
-            pressed_color=(249, 247, 247),
+            background_color=_TEXT_BUTTON_COLOR,
+            hover_color=_TEXT_BUTTON_HOVER_COLOR,
+            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeArmor,
             cursor_change=True
         )
         self.addChild(btn_armor)
 
         # background
-        self.setBackgroundColor((17, 45, 78))
+        self.setBackgroundColor((219, 226, 239))
 
     def _onPageChangeBack(self) -> None:
         self.setPage(self.page_incidies['main_menu'])
@@ -110,9 +115,9 @@ class SettingMenu(StackedPage):
             300, 50, 50, 50,
             text='Back',
             font=text_font,
-            background_color=(219, 226, 239),
-            hover_color=(63, 114, 175),
-            pressed_color=(249, 247, 247),
+            background_color=_TEXT_BUTTON_COLOR,
+            hover_color=_TEXT_BUTTON_HOVER_COLOR,
+            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeBack,
             cursor_change=True
         )
@@ -123,14 +128,14 @@ class SettingMenu(StackedPage):
             300, 50, 500, 50,
             num_states=2,
             texts=['Load Network: Off', 'Load Network: On'],
-            background_color=(219, 226, 239),
+            background_color=_TEXT_SWITCH_COLOR,
             on_turn=self._onLoadNetworkSwitch,
             cursor_change=True
         )
         self.addChild(self.load_network_switch)
 
         # background
-        self.setBackgroundColor((17, 45, 78))
+        self.setBackgroundColor((219, 226, 239))
 
     def _onLoadNetworkSwitch(self, state: int) -> None:
         loader = ConfigLoader()
