@@ -3,11 +3,11 @@ from typing import List
 
 from pygame import Surface as pg_Surface
 
-from ..pygame_gui import BaseComponent
+from .. import pygame_gui as ui
 from ..resources_loader import ImageLoader
 
 
-class Clock(BaseComponent):
+class Clock(ui.components.BaseComponent):
     def __init__(self, x: int, y: int):
         self.number_width = 26
         self.number_height = 46

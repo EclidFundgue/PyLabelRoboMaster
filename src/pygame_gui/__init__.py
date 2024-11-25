@@ -3,20 +3,11 @@
 __all__ = [
     'components',
     'constants',
+    'draw',
     'logger',
 
     # UI
     'UIMain',
-
-    # Components
-    'BaseComponent',
-    'Button',
-    'Selectable',
-    'SmoothColor',
-    'SmoothFloat',
-    'SmoothNormFloat',
-    'Surface',
-    'TextButton',
 
     # Functions
     'getCallable',
@@ -24,14 +15,13 @@ __all__ = [
 
     # Variables
     'LightColorTheme',
+    'SmoothColor',
+    'SmoothFloat',
+    'SmoothNormFloat'
 ]
 
-from . import components, constants, logger
+from . import components, constants, draw, logger
 from .color_system import LightColorTheme
-from .components.base import BaseComponent
-from .components.button import Button, TextButton
-from .components.selectable import Selectable
-from .components.surface import Surface
 from .decorators import getCallable, singleton
 from .smooth import SmoothColor, SmoothFloat, SmoothNormFloat
 from .uimain import UIMain

@@ -2,7 +2,7 @@ from pygame import locals
 
 from ..components import switch
 from ..global_vars import VarArmorAutoLabeling
-from ..pygame_gui import Surface, UIMain
+from ..pygame_gui import RectContainer, UIMain
 from ..resources_loader import ImageLoader
 
 
@@ -19,7 +19,7 @@ class TestSwitch(UIMain):
             on_turn=var1.switch
         )
         trig1 = switch.ThemeBasedSwitchTrigger(var1, swch1)
-        surf = Surface(640, 640, 0, 0)
+        surf = RectContainer(640, 640, 0, 0)
 
         surf.setBackgroundColor((205, 205, 205))
 

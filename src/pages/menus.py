@@ -1,16 +1,12 @@
 import pygame
 
+from .. import pygame_gui as ui
 from ..components.clock import Clock
 from ..components.stacked_page import StackedPage
 from ..components.switch import NTextSwitch
-from ..pygame_gui import TextButton
 from ..resources_loader import ConfigLoader
 
-
-_TEXT_BUTTON_COLOR = (249, 247, 247)
-_TEXT_BUTTON_HOVER_COLOR = (63, 114, 175)
-_TEXT_BUTTON_PRESSED_COLOR = (219, 226, 239)
-_TEXT_SWITCH_COLOR = _TEXT_BUTTON_COLOR
+_TEXT_SWITCH_COLOR = (249, 247, 247)
 
 class MainMenu(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incidies: dict):
@@ -18,32 +14,26 @@ class MainMenu(StackedPage):
 
         self.page_incidies = page_incidies
 
-        text_font = pygame.font.SysFont('simsun', 30)
+        text_font = pygame.font.SysFont('simsun', 32)
 
         # labeling button
-        btn_labeling = TextButton(
+        btn_labeling = ui.components.TextButton(
             300, 50, 50, 50,
             text='Label',
-            font=text_font,
-            background_color=_TEXT_BUTTON_COLOR,
-            hover_color=_TEXT_BUTTON_HOVER_COLOR,
-            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeLabeling,
             cursor_change=True
         )
+        btn_labeling.setFont(text_font)
         self.addChild(btn_labeling)
 
         # setting button
-        btn_setting = TextButton(
+        btn_setting = ui.components.TextButton(
             300, 50, 50, 120,
             text='Setting',
-            font=text_font,
-            background_color=_TEXT_BUTTON_COLOR,
-            hover_color=_TEXT_BUTTON_HOVER_COLOR,
-            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeSetting,
             cursor_change=True
         )
+        btn_setting.setFont(text_font)
         self.addChild(btn_setting)
 
         # clock
@@ -51,13 +41,19 @@ class MainMenu(StackedPage):
         self.addChild(clock)
 
         # background
-        self.setBackgroundColor((219, 226, 239))
+        color_theme = ui.LightColorTheme()
+        self.setBackgroundColor(color_theme.Surface)
 
     def _onPageChangeLabeling(self) -> None:
         self.setPage(self.page_incidies['labeling_menu'])
 
     def _onPageChangeSetting(self) -> None:
         self.setPage(self.page_incidies['setting_menu'])
+
+    def onHide(self):
+        for ch in self.child_components:
+            if isinstance(ch, ui.components.TextButton):
+                ch.pressed = False
 
 class LabelingMenu(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incidies: dict):
@@ -68,39 +64,39 @@ class LabelingMenu(StackedPage):
         text_font = pygame.font.SysFont('simsun', 30)
 
         # back button
-        btn_back = TextButton(
+        btn_back = ui.components.TextButton(
             300, 50, 50, 50,
             text='Back',
-            font=text_font,
-            background_color=_TEXT_BUTTON_COLOR,
-            hover_color=_TEXT_BUTTON_HOVER_COLOR,
-            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeBack,
             cursor_change=True
         )
+        btn_back.setFont(text_font)
         self.addChild(btn_back)
 
         # armor button
-        btn_armor = TextButton(
+        btn_armor = ui.components.TextButton(
             300, 50, 50, 120,
             text='Armor',
-            font=text_font,
-            background_color=_TEXT_BUTTON_COLOR,
-            hover_color=_TEXT_BUTTON_HOVER_COLOR,
-            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeArmor,
             cursor_change=True
         )
+        btn_armor.setFont(text_font)
         self.addChild(btn_armor)
 
         # background
-        self.setBackgroundColor((219, 226, 239))
+        color_theme = ui.LightColorTheme()
+        self.setBackgroundColor(color_theme.Surface)
 
     def _onPageChangeBack(self) -> None:
         self.setPage(self.page_incidies['main_menu'])
 
     def _onPageChangeArmor(self) -> None:
         self.setPage(self.page_incidies['armor_page'])
+
+    def onHide(self):
+        for ch in self.child_components:
+            if isinstance(ch, ui.components.TextButton):
+                ch.pressed = False
 
 class SettingMenu(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incidies: dict):
@@ -111,16 +107,13 @@ class SettingMenu(StackedPage):
         text_font = pygame.font.SysFont('simsun', 30)
 
         # back button
-        btn_back = TextButton(
+        btn_back = ui.components.TextButton(
             300, 50, 50, 50,
             text='Back',
-            font=text_font,
-            background_color=_TEXT_BUTTON_COLOR,
-            hover_color=_TEXT_BUTTON_HOVER_COLOR,
-            pressed_color=_TEXT_BUTTON_PRESSED_COLOR,
             on_press=self._onPageChangeBack,
             cursor_change=True
         )
+        btn_back.setFont(text_font)
         self.addChild(btn_back)
 
         # load network switch
@@ -135,7 +128,8 @@ class SettingMenu(StackedPage):
         self.addChild(self.load_network_switch)
 
         # background
-        self.setBackgroundColor((219, 226, 239))
+        color_theme = ui.LightColorTheme()
+        self.setBackgroundColor(color_theme.Surface)
 
     def _onLoadNetworkSwitch(self, state: int) -> None:
         loader = ConfigLoader()
@@ -146,3 +140,8 @@ class SettingMenu(StackedPage):
 
     def _onPageChangeBack(self) -> None:
         self.setPage(self.page_incidies['main_menu'])
+
+    def onHide(self):
+        for ch in self.child_components:
+            if isinstance(ch, ui.components.TextButton):
+                ch.pressed = False

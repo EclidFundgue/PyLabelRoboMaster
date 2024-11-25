@@ -1,13 +1,12 @@
 from typing import Callable, Union
 
-import pygame
-from pygame.surface import Surface as pg_Surface
+from pygame.surface import Surface
 
-from ..pygame_gui import Selectable, Surface, getCallable
+from .. import pygame_gui as ui
 from ..resources_loader import ImageLoader
 
 
-class ColorButton(Selectable):
+class ColorButton(ui.components.Selectable):
     '''
     Button to select armor color.
 
@@ -15,21 +14,21 @@ class ColorButton(Selectable):
     '''
     def __init__(self,
             w: int, h: int, x: int, y: int,
-            img: Union[str, pg_Surface],
-            img_hover: Union[str, pg_Surface],
-            img_select: Union[str, pg_Surface],
+            img: Union[str, Surface],
+            img_hover: Union[str, Surface],
+            img_select: Union[str, Surface],
             on_click: Callable[[], None] = None):
         super().__init__(w, h, x, y)
 
         self.image = self.loadImage(img, w, h)
         self.image_hover = self.loadImage(img_hover, w, h)
         self.image_select = self.loadImage(img_select, w, h)
-        self.on_click = getCallable(on_click)
+        self.on_click = ui.getCallable(on_click)
 
     def onLeftClick(self, x: int, y: int):
         self.on_click()
 
-    def draw(self, surface: pg_Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         if self.selected:
             surface.blit(self.image_select, (self.x, self.y))
         elif self.active:
@@ -37,7 +36,7 @@ class ColorButton(Selectable):
         else:
             surface.blit(self.image, (self.x, self.y))
 
-class ArmorTypeButton(Selectable):
+class ArmorTypeButton(ui.components.Selectable):
     '''
     Button to select armor type.
 
@@ -48,10 +47,10 @@ class ArmorTypeButton(Selectable):
     '''
     def __init__(self,
             w: int, h: int, x: int, y: int,
-            img: Union[str, pg_Surface],
-            img_frame: Union[str, pg_Surface],
-            img_blue: Union[str, pg_Surface],
-            img_red: Union[str, pg_Surface],
+            img: Union[str, Surface],
+            img_frame: Union[str, Surface],
+            img_blue: Union[str, Surface],
+            img_red: Union[str, Surface],
             on_click: Callable[[], None] = None):
         super().__init__(w, h, x, y)
 
@@ -61,7 +60,7 @@ class ArmorTypeButton(Selectable):
             self.loadImage(img_blue, w, h),
             self.loadImage(img_red, w, h)
         ]
-        self.on_click = getCallable(on_click)
+        self.on_click = ui.getCallable(on_click)
 
         self.color_idx = -1
         self.selected = False
@@ -73,7 +72,7 @@ class ArmorTypeButton(Selectable):
         # 0: blue, 1: red
         self.color_idx = color_idx
 
-    def draw(self, surface: pygame.Surface):
+    def draw(self, surface: Surface):
         if self.color_idx != -1:
             surface.blit(self.color_backgrounds[self.color_idx], (self.x, self.y))
 
@@ -82,7 +81,7 @@ class ArmorTypeButton(Selectable):
         if self.selected:
             surface.blit(self.img_frame, (self.x, self.y))
 
-class ColorSelectBox(Surface):
+class ColorSelectBox(ui.components.RectContainer):
     '''
     Click to select armor color.
 
@@ -98,7 +97,7 @@ class ColorSelectBox(Surface):
             on_select: Callable[[int], None] = None):
         super().__init__(w, h, x, y)
 
-        self.on_select = getCallable(on_select)
+        self.on_select = ui.getCallable(on_select)
 
         loader = ImageLoader()
         def on_click_blue():
@@ -139,7 +138,7 @@ class ColorSelectBox(Surface):
         self.on_select = None
         super().kill()
 
-class ArmorTypeSelectBox(Surface):
+class ArmorTypeSelectBox(ui.components.RectContainer):
     '''
     Click to select armor type.
 
@@ -156,7 +155,7 @@ class ArmorTypeSelectBox(Surface):
             on_select: Callable[[int], None] = None):
         super().__init__(w, h, x, y)
 
-        self.on_select = getCallable(on_select)
+        self.on_select = ui.getCallable(on_select)
 
         loader = ImageLoader()['icon']
         loader_type = loader['type']
@@ -204,7 +203,7 @@ class ArmorTypeSelectBox(Surface):
         self.on_select = None
         super().kill()
 
-class ArmorIconsSelect(Surface):
+class ArmorIconsSelect(ui.components.RectContainer):
     '''
     Manage armor types on labels.
 
@@ -233,7 +232,7 @@ class ArmorIconsSelect(Surface):
         h = color_size + 16 + type_size * 2 + type_pad + 2 * pad
         super().__init__(w, h, x, y)
 
-        self.on_select = getCallable(on_select)
+        self.on_select = ui.getCallable(on_select)
 
         def on_color_select(idx: int):
             self.setColorType(idx)
@@ -262,13 +261,14 @@ class ArmorIconsSelect(Surface):
             icon_pady=type_pad,
             on_select=on_type_select
         )
-        color_box_bg = Surface(w, color_size + 16, 0, 0)
-        type_box_bg = Surface(w, type_h + 2 * pad, 0, type_y - pad)
+        color_box_bg = ui.components.RectContainer(w, color_size + 16, 0, 0)
+        type_box_bg = ui.components.RectContainer(w, type_h + 2 * pad, 0, type_y - pad)
 
         color_box_bg.layer = -1
         type_box_bg.layer = -1
-        color_box_bg.setBackgroundColor((17, 153, 158))
-        type_box_bg.setBackgroundColor((228, 249, 245))
+        color_theme = ui.LightColorTheme()
+        color_box_bg.setBackgroundColor(color_theme.OnPrimaryContainer)
+        type_box_bg.setBackgroundColor(color_theme.PrimaryContainer)
 
         self.addChild(self.color_box)
         self.addChild(self.type_box)

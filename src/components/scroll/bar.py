@@ -3,10 +3,10 @@ from typing import Callable, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import BaseComponent, Surface, getCallable
+from ... import pygame_gui as ui
 
 
-class _ScrollButton(BaseComponent):
+class _ScrollButton(ui.components.BaseComponent):
     '''
     Inner class of ScrollBar. Generate default scroll button image
     by input size.
@@ -17,11 +17,12 @@ class _ScrollButton(BaseComponent):
         h = w * 3
         super().__init__(w, h, x, y)
 
+        color_theme = ui.LightColorTheme()
         self.image = _ScrollButton._generateDefaultImage(
-            w, h, (17, 153, 158), (48, 227, 202)
+            w, h, color_theme.Secondary, color_theme.OnSecondary
         )
         self.active_image = _ScrollButton._generateDefaultImage(
-            w, h, (48, 227, 202), (228, 249, 245)
+            w, h, color_theme.OnSecondaryContainer, color_theme.SecondaryContainer
         )
 
         self.pressed = False
@@ -43,7 +44,7 @@ class _ScrollButton(BaseComponent):
         else:
             surface.blit(self.image, (self.x, self.y))
 
-class ScrollBar(Surface):
+class ScrollBar(ui.components.RectContainer):
     '''
     Verticle scroll bar, usually in right side of scroll box.
 
@@ -66,7 +67,7 @@ class ScrollBar(Surface):
                  padding: int = 20):
         self.padding = padding
 
-        self.on_drag: Callable[[float], None] = getCallable(on_drag)
+        self.on_drag: Callable[[float], None] = ui.getCallable(on_drag)
 
         super().__init__(
             w + 2 * self.padding,
@@ -75,7 +76,7 @@ class ScrollBar(Surface):
             y - self.padding
         )
 
-        self.rail = Surface(w, h, self.padding, self.padding)
+        self.rail = ui.components.RectContainer(w, h, self.padding, self.padding)
         self.button = _ScrollButton(w, self.padding, self.padding)
 
         self.rail.setBackgroundColor((228, 249, 245))
@@ -94,7 +95,7 @@ class ScrollBar(Surface):
             self.button.y = y
             self.on_drag(self.getRelative())
 
-    def setRail(self, rail: BaseComponent) -> None:
+    def setRail(self, rail: ui.components.BaseComponent) -> None:
         ''' Customize rail style. '''
         self.rail.kill()
         self.removeDead()
@@ -104,7 +105,7 @@ class ScrollBar(Surface):
         self.rail = rail
         self.addChild(self.rail)
 
-    def setButton(self, btn: BaseComponent) -> None:
+    def setButton(self, btn: ui.components.BaseComponent) -> None:
         ''' Customize button style. '''
         self.button.kill()
         self.removeDead()

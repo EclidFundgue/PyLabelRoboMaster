@@ -1,4 +1,4 @@
-from ..pygame_gui import Button, Surface, UIMain
+from ..pygame_gui import Button, RectContainer, UIMain
 from ..resources_loader import ImageLoader
 
 
@@ -11,7 +11,7 @@ class TestButton(UIMain):
         def on_press():
             print('pressed')
 
-        surf = Surface(300, 300, 10, 10)
+        surf = RectContainer(300, 300, 10, 10)
         btn1 = Button(
             32, 32, 20, 20,
             img_loader['button']['add'],

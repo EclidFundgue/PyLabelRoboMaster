@@ -4,8 +4,7 @@ from typing import Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from . import logger
-from .components.surface import BaseComponent, RootSurface
+from . import components, logger
 
 
 def win32MovePygameWindow(position: Tuple[int, int]) -> None:
@@ -33,10 +32,13 @@ class UIMain:
     * run() -> None
     * onExit() -> None
     '''
-    def __init__(self, size: Tuple[int, int], fps: int = 60,
-                 position: Tuple[int, int] = None,
-                 caption: str = 'default',
-                 icon: Union[str, pg_Surface] = None):
+    def __init__(self,
+        size: Tuple[int, int],
+        fps: int = 60,
+        position: Tuple[int, int] = None,
+        caption: str = 'default',
+        icon: Union[str, pg_Surface] = None
+    ):
         self.fps = fps
 
         pygame.init()
@@ -48,7 +50,7 @@ class UIMain:
             position = ((resolution[0] - size[0]) // 2, (resolution[1] - size[1]) // 2)
 
         screen = pygame.display.set_mode(size)
-        self.screen = RootSurface(screen)
+        self.screen = components.Root(screen)
         self.clock = pygame.time.Clock()
 
         # caption
@@ -58,7 +60,7 @@ class UIMain:
         if icon is None:
             icon = generateDefaultIcon()
         elif isinstance(icon, str):
-            icon = BaseComponent.loadImage(self, icon)
+            icon = components.BaseComponent.loadImage(self, icon)
 
         if isinstance(icon, pg_Surface):
             pygame.display.set_icon(icon)
@@ -86,15 +88,10 @@ class UIMain:
             pygame.display.flip()
             self.clock.tick(self.fps)
 
-class _UIMainDemo(UIMain):
-    '''
-    An example to use UIMain in your project. Use
+'''
+This is an example to use UIMain in your project.
 
-    >>> main = _UIMainDemo()
-    >>> main.run()
-
-    to run.
-    '''
+class Demo(UIMain):
     def __init__(self):
         super().__init__((640, 640))
         
@@ -114,3 +111,11 @@ class _UIMainDemo(UIMain):
         self.screen.addChild(navigater)
         self.screen.addChild(canvas)
         self.screen.addChild(control)
+
+Use
+
+>>> demo = Demo()
+>>> demo.run()
+
+to run.
+'''

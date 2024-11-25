@@ -2,7 +2,8 @@ import json
 import os
 from typing import Any, Union
 
-from .pygame_gui import BaseComponent, logger, singleton
+from . import pygame_gui as ui
+from .pygame_gui import logger
 from .utils.dataproc import getLabelPath, makeFolder
 
 THEME_VAR_CHANGE = 'VAR_CHANGE'
@@ -54,8 +55,8 @@ class ObserveVar:
         ''' Receive a mesage. '''
         pass
 
-@singleton
-class VarArmorIconType(BaseComponent, ObserveVar):
+@ui.singleton
+class VarArmorIconType(ui.components.BaseComponent, ObserveVar):
     '''
     Methods:
     * setColor(idx) -> None
@@ -84,8 +85,8 @@ class VarArmorIconType(BaseComponent, ObserveVar):
         self.type_idx = idx % 8
         self.notify(self.theme, (self.color_idx, self.type_idx))
 
-@singleton
-class VarArmorLabels(BaseComponent, ObserveVar):
+@ui.singleton
+class VarArmorLabels(ui.components.BaseComponent, ObserveVar):
     '''
     This class is used to manage the image pairs and the deserted images, and
     provide methods to switch between the image folders and select/delete images.

@@ -31,9 +31,13 @@ def __getFuncInfoStr(obj: object, f_name: str) -> str:
         ','.join(argspec.args)
     )
 
-def __logGeneric(info: str, level: str, color: int,
-                 err_type: Exception = None,
-                 self: object = None) -> None:
+def __logGeneric(
+    info: str,
+    level: str,
+    color: int,
+    err_type: Exception = None,
+    self: object = None
+) -> None:
     f_name = sys._getframe(2).f_code.co_name
 
     level = __strColor(level, color)

@@ -2,6 +2,7 @@ import os
 
 from pygame import locals
 
+from .. import pygame_gui as ui
 from ..components.canvas.label import Label
 from ..components.label_controllder import LabelController
 from ..components.scroll.line import (DesertedFileLine, ImageFileLine,
@@ -9,7 +10,6 @@ from ..components.scroll.line import (DesertedFileLine, ImageFileLine,
 from ..components.stacked_page import StackedPage
 from ..components.toolbar import ToolBar
 from ..global_vars import VarArmorLabels
-from ..pygame_gui import Button
 from ..resources_loader import ConfigLoader, ImageLoader
 
 
@@ -53,7 +53,7 @@ class ArmorPage(StackedPage):
             on_single_select=self.canvas_onSingleSelect
         )
 
-        self.back_button = Button(
+        self.back_button = ui.components.Button(
             32, 32, 1230, 20,
             image=img_loader['button']['back'],
             pressed_image=img_loader['button']['back_pressed'],
@@ -62,12 +62,14 @@ class ArmorPage(StackedPage):
         )
 
         # -------------------- configure components --------------------
-        self.toolbar.setBackgroundColor((219, 226, 239))
+        color_theme = ui.LightColorTheme()
+        self.toolbar.setBackgroundColor(color_theme.SurfaceVariant)
         self.toolbar.scroll_box.reloadByGlobalVar()
         self._reloadNavigator()
-        self.label_controller.getCanvas().setBackgroundColor((17, 45, 78))
+        self.label_controller.getCanvas().setBackgroundColor(color_theme.Surface)
         self.label_controller.reload()
         self.back_button.layer = 10
+        self.setBackgroundColor(color_theme.SurfaceVariant)
 
         # -------------------- add event listeners --------------------
         self.addKeydownEvent(locals.K_q, self.keyboard_PrevImage)

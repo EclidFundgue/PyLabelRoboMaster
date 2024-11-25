@@ -3,13 +3,13 @@ from typing import Callable, List, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
+from ... import pygame_gui as ui
 from ...process.label_io import LabelIO
-from ...pygame_gui import Selectable, getCallable
 from ...resources_loader import ImageLoader
 from .canvas import CanvasComponent
 
 
-class Keypoint(CanvasComponent, Selectable):
+class Keypoint(CanvasComponent, ui.components.Selectable):
     '''
     Display keypoint on screen.
 
@@ -24,7 +24,7 @@ class Keypoint(CanvasComponent, Selectable):
             x: int, y: int,
             on_click: Callable[[], None] = None,
             w: int = 24, h: int = 24):
-        self.on_click = getCallable(on_click)
+        self.on_click = ui.getCallable(on_click)
 
         loader = ImageLoader()
         self.image = self.loadImage(loader['label']['keypoint'], w, h)

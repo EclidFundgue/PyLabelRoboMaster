@@ -3,11 +3,12 @@ from typing import Any, Callable, List, Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
+from .. import pygame_gui as ui
 from ..global_vars import THEME_VAR_CHANGE
-from ..pygame_gui import BaseComponent, getCallable, logger
+from ..pygame_gui import logger
 
 
-class NSwitch(BaseComponent):
+class NSwitch(ui.components.BaseComponent):
     '''
     A Switch has a specific number of states.
 
@@ -40,7 +41,7 @@ class NSwitch(BaseComponent):
 
         self.num_states = num_states
         self.images = [self.loadImage(image, w, h) for image in images]
-        self.on_turn = getCallable(on_turn)
+        self.on_turn = ui.getCallable(on_turn)
         self.cursor_change = cursor_change
 
         self.state = 0
@@ -73,7 +74,7 @@ class NSwitch(BaseComponent):
     def draw(self, surface: pg_Surface) -> None:
         surface.blit(self.images[self.state], (self.x, self.y))
 
-class Switch(BaseComponent):
+class Switch(ui.components.BaseComponent):
     '''
     A Switch has two states: on and off.
 
@@ -102,7 +103,7 @@ class Switch(BaseComponent):
         self.image_on = self.loadImage(image_on, w, h)
         self.image_off = self.loadImage(image_off, w, h)
 
-        self.on_turn = getCallable(on_turn)
+        self.on_turn = ui.getCallable(on_turn)
         self.cursor_change = cursor_change
 
         self.on = False
@@ -211,7 +212,7 @@ class NTextSwitch(NSwitch):
         ret_surface.blit(text_surface, (x, y))
         return ret_surface
 
-class ThemeBasedSwitchTrigger(BaseComponent):
+class ThemeBasedSwitchTrigger(ui.components.BaseComponent):
     '''
     Bind switch and variables. Change switch when variable changed.
 
@@ -220,7 +221,7 @@ class ThemeBasedSwitchTrigger(BaseComponent):
     def __init__(self, var, switch: Switch):
         super().__init__()
 
-        self.var: BaseComponent = var
+        self.var: ui.components.BaseComponent = var
         self.switch = switch
 
         self.var.addObserver(self)

@@ -1,7 +1,7 @@
 from typing import Callable
 
+from .. import pygame_gui as ui
 from ..global_vars import VarArmorLabels
-from ..pygame_gui import Button, Surface, getCallable
 from ..resources_loader import ImageLoader
 from .armor_type_select import ArmorIconsSelect
 from .scroll.line import DesertedFileLine, ImageFileLine
@@ -11,7 +11,7 @@ from .scroll.stackedview import StackedScrollView
 from .switch import Switch
 
 
-class ToolBar(Surface):
+class ToolBar(ui.components.RectContainer):
     '''
     A toolbar for the labeling interface.
     '''
@@ -46,58 +46,58 @@ class ToolBar(Surface):
         rect_auto = (86, 32, 70, 170) # (3, 1)
 
         img_loader = ImageLoader()
-        self.btn_add = Button(*rect_add,
+        self.btn_add = ui.components.Button(*rect_add,
             img_loader['button']['add'],
             img_loader['button']['add_pressed'],
-            on_press=getCallable(on_add),
+            on_press=ui.getCallable(on_add),
             cursor_change=True
         )
         self.addChild(self.btn_add)
 
-        self.btn_delete = Button(*rect_delete,
+        self.btn_delete = ui.components.Button(*rect_delete,
             img_loader['button']['delete'],
             img_loader['button']['delete_pressed'],
-            on_press=getCallable(on_delete),
+            on_press=ui.getCallable(on_delete),
             cursor_change=True
         )
         self.addChild(self.btn_delete)
 
-        self.btn_undo = Button(*rect_undo,
+        self.btn_undo = ui.components.Button(*rect_undo,
             img_loader['button']['undo'],
             img_loader['button']['undo_pressed'],
-            on_press=getCallable(on_undo),
+            on_press=ui.getCallable(on_undo),
             cursor_change=True
         )
         self.addChild(self.btn_undo)
 
-        self.btn_redo = Button(*rect_redo,
+        self.btn_redo = ui.components.Button(*rect_redo,
             img_loader['button']['redo'],
             img_loader['button']['redo_pressed'],
-            on_press=getCallable(on_redo),
+            on_press=ui.getCallable(on_redo),
             cursor_change=True
         )
         self.addChild(self.btn_redo)
 
-        self.btn_find = Button(*rect_find,
+        self.btn_find = ui.components.Button(*rect_find,
             img_loader['button']['search'],
             img_loader['button']['search_pressed'],
-            on_press=getCallable(on_find),
+            on_press=ui.getCallable(on_find),
             cursor_change=True
         )
         self.addChild(self.btn_find)
 
-        self.btn_save = Button(*rect_save,
+        self.btn_save = ui.components.Button(*rect_save,
             img_loader['button']['save'],
             img_loader['button']['save_pressed'],
-            on_press=getCallable(on_save),
+            on_press=ui.getCallable(on_save),
             cursor_change=True
         )
         self.addChild(self.btn_save)
 
-        self.btn_correct = Button(*rect_correct,
+        self.btn_correct = ui.components.Button(*rect_correct,
             img_loader['button']['correct'],
             img_loader['button']['correct_pressed'],
-            on_press=getCallable(on_correct),
+            on_press=ui.getCallable(on_correct),
             cursor_change=True
         )
         self.addChild(self.btn_correct)
@@ -105,20 +105,20 @@ class ToolBar(Surface):
         self.swch_preproc = Switch(*rect_preproc,
             img_loader['switch']['eye_open'],
             img_loader['switch']['eye_close'],
-            on_turn=getCallable(on_switch_preproc)
+            on_turn=ui.getCallable(on_switch_preproc)
         )
         self.addChild(self.swch_preproc)
 
         self.swch_auto = Switch(*rect_auto,
             img_loader['switch']['auto_on'],
             img_loader['switch']['auto_off'],
-            on_turn=getCallable(on_switch_auto)
+            on_turn=ui.getCallable(on_switch_auto)
         )
         self.addChild(self.swch_auto)
 
         self.type_box = ArmorIconsSelect(
             20, 270,
-            on_select=getCallable(on_type_change)
+            on_select=ui.getCallable(on_type_change)
         )
         self.addChild(self.type_box)
 
@@ -128,10 +128,10 @@ class ToolBar(Surface):
             200, 30,
             var_path.image_folder,
             var_path.deserted_folder,
-            on_page_changed=getCallable(on_scroll_page_change),
-            on_select=getCallable(on_scroll_select),
-            on_desert=getCallable(on_scroll_desert),
-            on_restore=getCallable(on_scroll_restore)
+            on_page_changed=ui.getCallable(on_scroll_page_change),
+            on_select=ui.getCallable(on_scroll_select),
+            on_desert=ui.getCallable(on_scroll_desert),
+            on_restore=ui.getCallable(on_scroll_restore)
         )
         self.addChild(self.scroll_box)
 
@@ -139,8 +139,8 @@ class ToolBar(Surface):
             240, 30, 25, 450,
             num=self.scroll_box.getCurrentPageFileNumber(),
             font_color=(0, 0, 0),
-            on_prev=getCallable(on_navigator_prev),
-            on_next=getCallable(on_navigator_next)
+            on_prev=ui.getCallable(on_navigator_prev),
+            on_next=ui.getCallable(on_navigator_next)
         )
         self.addChild(self.navigator)
 

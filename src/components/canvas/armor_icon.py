@@ -2,13 +2,13 @@ from typing import Callable, Tuple
 
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Selectable, getCallable
+from ... import pygame_gui as ui
 from ...resources_loader import ImageLoader
-from .canvas import CanvasComponent, Surface
+from .canvas import CanvasComponent
 from .keypoint import Keypoint
 
 
-class TypeIcon(CanvasComponent, Surface, Selectable):
+class TypeIcon(CanvasComponent, ui.components.RectContainer, ui.components.Selectable):
     '''
     Display armor type beside label.
 
@@ -31,12 +31,12 @@ class TypeIcon(CanvasComponent, Surface, Selectable):
         self.pady = 10
         x = bind_point.x + self.padx
         y = bind_point.y + self.pady
-        Surface.__init__(self, w, h, x, y)
+        ui.components.RectContainer.__init__(self, w, h, x, y)
         CanvasComponent.__init__(self, w, h, x, y)
         self.selected = False
 
         self.bind_point = bind_point
-        self.on_click = getCallable(on_click)
+        self.on_click = ui.getCallable(on_click)
 
         loader = ImageLoader()['icon']['type']
         self.type_icons = [

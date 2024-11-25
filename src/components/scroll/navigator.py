@@ -3,11 +3,11 @@ from typing import Callable, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Button, Surface, getCallable
+from ... import pygame_gui as ui
 from ...resources_loader import ImageLoader
 
 
-class Navigator(Surface):
+class Navigator(ui.components.RectContainer):
     '''
     Show current selected image filename and index infomation.
 
@@ -26,8 +26,8 @@ class Navigator(Surface):
 
         self.font_color = font_color
         self.font = pygame.font.SysFont('simsun', 13)
-        self.on_prev = getCallable(on_prev)
-        self.on_next = getCallable(on_next)
+        self.on_prev = ui.getCallable(on_prev)
+        self.on_next = ui.getCallable(on_next)
 
         self.filename_img = self.font.render('', False, self.font_color)
         self.index_img = self.font.render(f'0/{num}', False, self.font_color)
@@ -35,7 +35,7 @@ class Navigator(Surface):
         loader = ImageLoader()
         btn_w = 16
         btn_h = 16
-        self.btn_prev = Button(
+        self.btn_prev = ui.components.Button(
             btn_w, btn_h, 0, (h - btn_h) // 2,
             loader['button']['arrow'],
             loader['button']['arrow_pressed'],
@@ -43,7 +43,7 @@ class Navigator(Surface):
             continue_press=40,
             cursor_change=True
         )
-        self.btn_next = Button(
+        self.btn_next = ui.components.Button(
             btn_w, btn_h, self.w - btn_w, (h - btn_h) // 2,
             pygame.transform.flip(loader['button']['arrow'], True, False),
             pygame.transform.flip(loader['button']['arrow_pressed'], True, False),

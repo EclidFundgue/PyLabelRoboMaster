@@ -1,9 +1,10 @@
 from typing import List, Union
 
-from ..pygame_gui import Surface, logger
+from .. import pygame_gui as ui
+from ..pygame_gui import logger
 
 
-class StackedPage(Surface):
+class StackedPage(ui.components.RectContainer):
     '''
     A stacked page is a surface that can be added to a StackedPageView.
 
@@ -30,7 +31,7 @@ class StackedPage(Surface):
     def onHide(self) -> None: ...
 
 
-class StackedPageView(Surface):
+class StackedPageView(ui.components.RectContainer):
     '''
     Show a current page of the stacked pages.
 

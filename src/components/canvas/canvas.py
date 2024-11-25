@@ -1,10 +1,11 @@
 import math
 from typing import List, Tuple
 
-from ...pygame_gui import BaseComponent, Surface, logger
+from ... import pygame_gui as ui
+from ...pygame_gui import logger
 
 
-class CanvasComponent(BaseComponent):
+class CanvasComponent(ui.components.BaseComponent):
     '''
     Special component responsibe for drawing in canvas.
     You can override `getDisplayPos`, `getDisplaySize`,
@@ -75,7 +76,7 @@ class CanvasComponent(BaseComponent):
         self.view_x = view_x
         self.view_y = view_y
 
-class Canvas(Surface):
+class Canvas(ui.components.RectContainer):
     '''
     Canvas(
         w, h, x, y,

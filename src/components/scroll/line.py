@@ -3,11 +3,11 @@ from typing import Callable, Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import BaseComponent, Selectable, SmoothColor, getCallable
+from ... import pygame_gui as ui
 from ...resources_loader import ImageLoader
 
 
-class TextImage(BaseComponent):
+class TextImage(ui.components.BaseComponent):
     '''
     Provide image of text.
 
@@ -35,7 +35,7 @@ class TextImage(BaseComponent):
     def draw(self, surface: pg_Surface) -> None:
         surface.blit(self.text_img, (self.x, self.y))
 
-class _DoubleClickButton(BaseComponent):
+class _DoubleClickButton(ui.components.BaseComponent):
     '''
     Button that needs double click.
 
@@ -52,7 +52,7 @@ class _DoubleClickButton(BaseComponent):
         self.img: pg_Surface = self.loadImage(img, w, h)
         self.img2: pg_Surface = self.loadImage(img2, w, h)
 
-        self.command: Callable[[], None] = getCallable(command)
+        self.command: Callable[[], None] = ui.getCallable(command)
         self.confirmed = False
 
     def kill(self) -> None:
@@ -74,7 +74,7 @@ class _DoubleClickButton(BaseComponent):
         else:
             surface.blit(self.img, (self.x, self.y))
 
-class _GenericFileLine(Selectable):
+class _GenericFileLine(ui.components.Selectable):
     '''
     FileLine shows file name. It calls `on_select` when selected.
     Position will be managed by its parent component.
@@ -106,20 +106,23 @@ class _GenericFileLine(Selectable):
         super().__init__(w, h, 0, 0)
 
         self.filename = filename
-        self.on_select: Callable[[], None] = getCallable(on_select)
-        self.command: Callable[[], None] = getCallable(command)
+        self.on_select: Callable[[], None] = ui.getCallable(on_select)
+        self.command: Callable[[], None] = ui.getCallable(command)
         self.text_padx = text_padx
 
         # background color
-        self.bg_color = (228, 249, 245)
-        self.bg_color_hover = (138, 238, 234)
-        self.bg_color_selected = (101, 160, 156)
+        color_theme = ui.LightColorTheme()
+        self.bg_color = color_theme.SecondaryContainer
+        self.bg_color_hover = (self.bg_color[0] - 15, self.bg_color[1] - 29, self.bg_color[2] - 6)
+        self.bg_color_selected = color_theme.OnSecondaryContainer
         smooth_time_period = 0.03 if smooth_color_change else 0.0
-        self.bg_smooth_color = SmoothColor(smooth_time_period, self.bg_color)
+        self.bg_smooth_color = ui.SmoothColor(smooth_time_period, self.bg_color)
 
         # text image
-        self.text_img = TextImage(filename)
+        self.text_img = TextImage(filename, color_theme.OnSecondaryContainer)
+        self.pressed_text_img = TextImage(filename, color_theme.SecondaryContainer)
         self._alignTextImage(self.text_img)
+        self._alignTextImage(self.pressed_text_img)
 
         # command button
         btn_w = 16
@@ -137,7 +140,7 @@ class _GenericFileLine(Selectable):
     def _onCommandButtonClick(self) -> None:
         self.command()
 
-    def _alignTextImage(self, img: BaseComponent) -> None:
+    def _alignTextImage(self, img: ui.components.BaseComponent) -> None:
         ''' Align x to text_padx and y to center '''
         img.x = self.text_padx
         img.y = (self.h - img.h) // 2
@@ -148,6 +151,16 @@ class _GenericFileLine(Selectable):
         self.on_select = None
         self.command = None
         return super().kill()
+
+    def select(self):
+        self.removeChild(self.text_img)
+        self.addChild(self.pressed_text_img)
+        super().select()
+
+    def unselect(self):
+        self.removeChild(self.pressed_text_img)
+        self.addChild(self.text_img)
+        super().unselect()
 
     def onLeftClick(self, x: int, y: int) -> None:
         # This component may be killed when on_delect is called.

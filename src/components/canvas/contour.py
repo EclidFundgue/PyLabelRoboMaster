@@ -4,14 +4,15 @@ from typing import Callable, List, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Selectable, getCallable, logger
+from ... import pygame_gui as ui
+from ...pygame_gui import logger
 from ...utils.dataproc import sortedPoints
 from ...utils.geometry import in_polygon
 from .canvas import CanvasComponent
 from .keypoint import Keypoint
 
 
-class Contour(CanvasComponent, Selectable):
+class Contour(CanvasComponent, ui.components.Selectable):
     '''
     Manage keypoints contour. Initialized by size (max keypoint number) and
     points (optional). Contour will only be close if `len(points) == size`.
@@ -41,7 +42,7 @@ class Contour(CanvasComponent, Selectable):
 
         self.size: int = size
         self.points: List[Keypoint] = points
-        self.on_click: Callable[[], None] = getCallable(on_click)
+        self.on_click: Callable[[], None] = ui.getCallable(on_click)
         self.line_width: int = line_width
         self.line_color: Tuple[int] = line_color
         self.line_color_hover: Tuple[int] = line_color_hover

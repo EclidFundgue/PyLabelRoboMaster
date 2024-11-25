@@ -1,10 +1,11 @@
 from typing import Callable, List, Tuple, Union
 
-from ...pygame_gui import SmoothFloat, Surface, getCallable, logger
+from ... import pygame_gui as ui
+from ...pygame_gui import logger
 from .line import _GenericFileLine as FileLine
 
 
-class LinesBox(Surface):
+class LinesBox(ui.components.RectContainer):
     '''
     Contains list of FileLine, display them by relative position.
     Automacically control position of each line, and handle mouse
@@ -41,8 +42,8 @@ class LinesBox(Surface):
         self.total_height, self.heights = self._getLinesHieghts(self.lines)
         self.child_top_idx = 0 # line_idx = child_idx + child_top_idx
 
-        self.on_relative_changed: Callable[[float], None] = getCallable(on_relative_changed)
-        self.on_selected_changed: Callable[[int, FileLine], None] = getCallable(on_selected_changed)
+        self.on_relative_changed: Callable[[float], None] = ui.getCallable(on_relative_changed)
+        self.on_selected_changed: Callable[[int, FileLine], None] = ui.getCallable(on_selected_changed)
 
         self._bindWithLines(self.lines)
 
@@ -52,7 +53,7 @@ class LinesBox(Surface):
         smooth_time_period = 0.0
         if use_smooth_scroll:
             smooth_time_period = 0.2
-        self.relative = SmoothFloat(smooth_time_period, 0, SmoothFloat.INTERP_POLY2)
+        self.relative = ui.SmoothFloat(smooth_time_period, 0, ui.SmoothFloat.INTERP_POLY2)
         self.current_relative_value = self.relative.getCurrentValue()
         self._updateRelativeView(self.current_relative_value)
 

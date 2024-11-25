@@ -35,7 +35,7 @@ class LabelController:
             on_single_select: Callable[[Label], None] = None):
         self.canvas_size = (w, h)
         self.canvas = Canvas(
-            w, h, x, y,
+            w - 20, h - 20, x + 10, y + 10,
             margin_x=200,
             margin_y=200,
             smooth_factor=0.8

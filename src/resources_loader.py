@@ -4,11 +4,12 @@ from typing import Any, Union
 
 from pygame import Surface as pg_Surface
 
-from .pygame_gui import BaseComponent, logger, singleton
+from . import pygame_gui as ui
+from .pygame_gui import logger
 from .utils.constants import ROOT_PATH
 
 
-@singleton
+@ui.singleton
 class ImageLoader:
     '''
     Just use it as dict. (singleton object)
@@ -33,7 +34,7 @@ class ImageLoader:
                 value = self._loadImageDict(value)
             elif isinstance(value, str):
                 path = os.path.join(self.RESOURCES_PREFIX, value)
-                value = BaseComponent.loadImage(self, path)
+                value = ui.components.BaseComponent.loadImage(self, path)
             else:
                 logger.error(f'Invalid image path: {value}', ValueError, self)
             res[key] = value
@@ -42,7 +43,7 @@ class ImageLoader:
     def __getitem__(self, key: str) -> Union[pg_Surface, dict]:
         return self.image_dict[key]
 
-@singleton
+@ui.singleton
 class ConfigLoader:
     '''
     Just use it as dict. (singleton object)

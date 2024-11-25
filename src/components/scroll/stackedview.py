@@ -1,13 +1,13 @@
 from typing import Callable, List
 
+from ... import pygame_gui as ui
 from ...global_vars import VarArmorLabels
-from ...pygame_gui import Selectable, Surface, getCallable
 from .line import DesertedFileLine, ImageFileLine, TextImage
 from .line import _GenericFileLine as FileLine
 from .scrollview import DesertedScrollView, ImageScrollView, ScrollView
 
 
-class _Header(Surface, Selectable):
+class _Header(ui.components.RectContainer, ui.components.Selectable):
     '''
     _Header(w, h, x, y, text, on_select)
     * on_select() -> None
@@ -15,18 +15,22 @@ class _Header(Surface, Selectable):
     def __init__(self, w: int, h: int, x: int, y: int,
                  text: str,
                  on_select: Callable[[], None] = None):
-        Surface.__init__(self, w, h, x, y)
+        ui.components.RectContainer.__init__(self, w, h, x, y)
         self.selected = False
 
+        color_theme = ui.LightColorTheme()
+
         self.text = text
-        self.text_image = TextImage(text)
-        self.on_select = getCallable(on_select)
+        self.text_image = TextImage(text, color_theme.OnPrimaryContainer)
+        self.pressed_text_image = TextImage(text, color_theme.PrimaryContainer)
+        self.on_select = ui.getCallable(on_select)
 
         self._alignText(self.text_image)
+        self._alignText(self.pressed_text_image)
 
-        self.bg_color = (228, 249, 245)
-        self.bg_color_hover = (48, 227, 202)
-        self.bg_color_selected = (17, 153, 158)
+        self.bg_color = color_theme.PrimaryContainer
+        self.bg_color_hover = (self.bg_color[0] - 15, self.bg_color[1] - 29, self.bg_color[2] - 6)
+        self.bg_color_selected = color_theme.OnPrimaryContainer
 
         self.addChild(self.text_image)
 
@@ -38,6 +42,16 @@ class _Header(Surface, Selectable):
         self.text_image = None
         self.on_select = None
         super().kill()
+
+    def select(self) -> None:
+        self.removeChild(self.text_image)
+        self.addChild(self.pressed_text_image)
+        super().select()
+    
+    def unselect(self) -> None:
+        self.removeChild(self.pressed_text_image)
+        self.addChild(self.text_image)
+        super().unselect()
 
     def update(self, events=None) -> None:
         super().update(events)
@@ -52,7 +66,7 @@ class _Header(Surface, Selectable):
     def onLeftClick(self, x: int, y: int) -> None:
         self.on_select()
 
-class _StackHeader(Surface):
+class _StackHeader(ui.components.RectContainer):
     '''
     _StackedHeader(w, h, x, y)
     * on_page_changed(idx: int) -> None
@@ -60,7 +74,7 @@ class _StackHeader(Surface):
     def __init__(self, w: int, h: int, x: int, y: int,
                  on_page_changed: Callable[[int], None] = None):
         super().__init__(w, h, x, y)
-        self.on_page_changed = getCallable(on_page_changed)
+        self.on_page_changed = ui.getCallable(on_page_changed)
 
         def on_select_0() -> None:
             if self.current_page == 1:
@@ -89,7 +103,7 @@ class _StackHeader(Surface):
         self.header_1 = None
         super().kill()
 
-class StackedScrollView(Surface):
+class StackedScrollView(ui.components.RectContainer):
     '''
     page0: ImageScrollView
 
@@ -135,7 +149,7 @@ class StackedScrollView(Surface):
             self._onPageChanged
         )
 
-        self.on_page_changed = getCallable(on_page_changed)
+        self.on_page_changed = ui.getCallable(on_page_changed)
 
         self.pages: List[ScrollView] = [
             ImageScrollView(

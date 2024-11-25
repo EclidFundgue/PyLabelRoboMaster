@@ -1,6 +1,6 @@
 from typing import Callable, List, Union
 
-from ...pygame_gui import Surface, getCallable
+from ... import pygame_gui as ui
 from ...utils.dataproc import getImageFiles
 from .bar import ScrollBar
 from .line import DesertedFileLine, ImageFileLine
@@ -8,7 +8,7 @@ from .line import _GenericFileLine as FileLine
 from .lines import LinesBox
 
 
-class ScrollView(Surface):
+class ScrollView(ui.components.RectContainer):
     '''
     ScrollView(w, h, x, y, folder, on_selected, on_command, padding)
     * on_selected_changed(idx: int, line: FileLine) -> None
@@ -35,8 +35,8 @@ class ScrollView(Surface):
         self.folder = folder
         self.padding = padding
 
-        self.on_select: Callable[[int, FileLine], None] = getCallable(on_select)
-        self.on_command: Callable[[int, FileLine], None] = getCallable(on_command)
+        self.on_select: Callable[[int, FileLine], None] = ui.getCallable(on_select)
+        self.on_command: Callable[[int, FileLine], None] = ui.getCallable(on_command)
 
         self.lines = LinesBox(
             line_w, h, 0, padding,
@@ -116,7 +116,7 @@ class ImageScrollView(ScrollView):
                  on_select: Callable[[int, ImageFileLine], None] = None,
                  on_desert: Callable[[int, ImageFileLine], None] = None,
                  padding: int = 300):
-        self.on_desert = getCallable(on_desert)
+        self.on_desert = ui.getCallable(on_desert)
 
         super().__init__(
             w, h, x, y,
@@ -152,7 +152,7 @@ class DesertedScrollView(ScrollView):
                  on_select: Callable[[int, DesertedFileLine], None] = None,
                  on_restore: Callable[[int, DesertedFileLine], None] = None,
                  padding: int = 300):
-        self.on_restore = getCallable(on_restore)
+        self.on_restore = ui.getCallable(on_restore)
 
         super().__init__(
             w, h, x, y,
