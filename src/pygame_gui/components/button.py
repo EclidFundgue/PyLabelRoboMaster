@@ -3,10 +3,9 @@ from typing import Callable, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from .. import draw
-from ..color_system import LightColorTheme
+from .. import draw, time
+from ..color import LightColorTheme
 from ..decorators import getCallable
-from .. import time
 from .containers import BaseComponent
 
 

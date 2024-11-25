@@ -18,7 +18,7 @@ class _Header(ui.components.RectContainer, ui.components.Selectable):
         ui.components.RectContainer.__init__(self, w, h, x, y)
         self.selected = False
 
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
 
         self.text = text
         self.text_image = TextImage(text, color_theme.OnPrimaryContainer)

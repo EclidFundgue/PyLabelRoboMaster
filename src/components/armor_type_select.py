@@ -266,7 +266,7 @@ class ArmorIconsSelect(ui.components.RectContainer):
 
         color_box_bg.layer = -1
         type_box_bg.layer = -1
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         color_box_bg.setBackgroundColor(color_theme.OnPrimaryContainer)
         type_box_bg.setBackgroundColor(color_theme.PrimaryContainer)
 

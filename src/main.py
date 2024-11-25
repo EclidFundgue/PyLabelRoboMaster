@@ -1,12 +1,12 @@
+from . import pygame_gui as ui
 from .components.stacked_page import StackedPageView
 from .global_vars import VarArmorLabels
 from .pages.armor import ArmorPage
 from .pages.menus import LabelingMenu, MainMenu, SettingMenu
-from .pygame_gui import UIMain
 from .resources_loader import ConfigLoader
 
 
-class Main(UIMain):
+class Main(ui.Main):
     def __init__(self):
         cfg_loader = ConfigLoader()
 

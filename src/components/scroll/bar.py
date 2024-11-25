@@ -17,7 +17,7 @@ class _ScrollButton(ui.components.BaseComponent):
         h = w * 3
         super().__init__(w, h, x, y)
 
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.image = _ScrollButton._generateDefaultImage(
             w, h, color_theme.Secondary, color_theme.OnSecondary
         )

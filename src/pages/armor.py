@@ -62,7 +62,7 @@ class ArmorPage(StackedPage):
         )
 
         # -------------------- configure components --------------------
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.toolbar.setBackgroundColor(color_theme.SurfaceVariant)
         self.toolbar.scroll_box.reloadByGlobalVar()
         self._reloadNavigator()

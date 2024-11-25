@@ -41,7 +41,7 @@ class MainMenu(StackedPage):
         self.addChild(clock)
 
         # background
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.setBackgroundColor(color_theme.Surface)
 
     def _onPageChangeLabeling(self) -> None:
@@ -84,7 +84,7 @@ class LabelingMenu(StackedPage):
         self.addChild(btn_armor)
 
         # background
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.setBackgroundColor(color_theme.Surface)
 
     def _onPageChangeBack(self) -> None:
@@ -128,7 +128,7 @@ class SettingMenu(StackedPage):
         self.addChild(self.load_network_switch)
 
         # background
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.setBackgroundColor(color_theme.Surface)
 
     def _onLoadNetworkSwitch(self, state: int) -> None:

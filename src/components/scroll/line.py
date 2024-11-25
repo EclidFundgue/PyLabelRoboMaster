@@ -111,7 +111,7 @@ class _GenericFileLine(ui.components.Selectable):
         self.text_padx = text_padx
 
         # background color
-        color_theme = ui.LightColorTheme()
+        color_theme = ui.color.LightColorTheme()
         self.bg_color = color_theme.SecondaryContainer
         self.bg_color_hover = (self.bg_color[0] - 15, self.bg_color[1] - 29, self.bg_color[2] - 6)
         self.bg_color_selected = color_theme.OnSecondaryContainer
