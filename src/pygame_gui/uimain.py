@@ -2,7 +2,7 @@ import sys
 from typing import Tuple, Union
 
 import pygame
-from pygame import Surface as pg_Surface
+from pygame import Surface
 
 from . import components, logger
 
@@ -14,7 +14,7 @@ def win32MovePygameWindow(position: Tuple[int, int]) -> None:
     w, h = pygame.display.get_surface().get_size()
     windll.user32.MoveWindow(hwnd, x, y, w, h, False)
 
-def generateDefaultIcon() -> pg_Surface:
+def generateDefaultIcon() -> Surface:
     img = pygame.Surface((32, 32))
     img.fill((0, 0, 0))
     img.set_colorkey((0, 0, 0))
@@ -37,7 +37,7 @@ class UIMain:
         fps: int = 60,
         position: Tuple[int, int] = None,
         caption: str = 'default',
-        icon: Union[str, pg_Surface] = None
+        icon: Union[str, Surface] = None
     ):
         self.fps = fps
 
@@ -62,7 +62,7 @@ class UIMain:
         elif isinstance(icon, str):
             icon = components.BaseComponent.loadImage(self, icon)
 
-        if isinstance(icon, pg_Surface):
+        if isinstance(icon, Surface):
             pygame.display.set_icon(icon)
         else:
             logger.error(f'Invalid value of icon: {icon}', ValueError, self)
@@ -89,18 +89,18 @@ class UIMain:
             self.clock.tick(self.fps)
 
 '''
-This is an example to use UIMain in your project.
+This is an example to use UIMain in your project:
 
-class Demo(UIMain):
+import pygame_gui as ui
+
+class Demo(ui.Main):
     def __init__(self):
         super().__init__((640, 640))
-        
-        from .components.surface import Surface
 
         # create variables
-        navigater = Surface(640, 40, 0, 0)
-        canvas = Surface(440, 600, 0, 40)
-        control = Surface(200, 600, 440, 40)
+        navigater = ui.components.RectContainer(640, 40, 0, 0)
+        canvas = ui.components.RectContainer(440, 600, 0, 40)
+        control = ui.components.RectContainer(200, 600, 440, 40)
 
         # configure variables
         navigater.setBackgroundColor((190, 190, 220))
@@ -112,10 +112,8 @@ class Demo(UIMain):
         self.screen.addChild(canvas)
         self.screen.addChild(control)
 
-Use
 
->>> demo = Demo()
->>> demo.run()
-
-to run.
+if __name__ == '__main__':
+    demo = Demo()
+    demo.run()
 '''

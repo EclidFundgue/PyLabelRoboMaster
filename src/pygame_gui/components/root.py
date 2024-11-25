@@ -1,4 +1,4 @@
-from pygame import Surface as pg_Surface
+from pygame import Surface
 
 from .. import constants as consts
 from .base import BaseComponent
@@ -8,10 +8,10 @@ class Root(BaseComponent):
     '''
     Root screen of all components.
 
-    Root(pg_surface)
+    Root(surface)
     '''
-    def __init__(self, pg_surface: pg_Surface):
-        self.pg_surface = pg_surface
+    def __init__(self, surface: Surface):
+        self.pg_surface = surface
 
         w, h = tuple(self.pg_surface.get_size())
         super().__init__(w, h, 0, 0, is_root=True)

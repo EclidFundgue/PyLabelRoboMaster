@@ -1,8 +1,6 @@
-from typing import overload
+from pygame import Surface
 
-from pygame import Surface as pg_Surface
-
-from .. import constants, draw, logger
+from .. import constants, draw
 from .base import BaseComponent
 
 _KEY_COLOR = constants.CONTAINER_KEY_COLOR
@@ -23,7 +21,7 @@ class Container(BaseComponent):
     * draw(self, surface) -> None
     '''
     def __init__(self, w: int, h: int, x: int, y: int):
-        self.pg_surface = pg_Surface((w, h))
+        self.pg_surface = Surface((w, h))
         self.pg_surface.set_colorkey(_KEY_COLOR)
         self.backgournd_color = _KEY_COLOR
 
@@ -50,7 +48,7 @@ class Container(BaseComponent):
         self.alignHorizontalCenter(obj)
         self.alignVerticalCenter(obj)
 
-    def draw(self, surface: pg_Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         ''' Draw children to self, then draw self to parent component. '''
         self.clear()
         for ch in sorted(self.child_components, key=lambda x: x.layer):

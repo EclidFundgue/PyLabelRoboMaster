@@ -2,7 +2,7 @@ from . import pygame_gui as ui
 from .components.stacked_page import StackedPageView
 from .global_vars import VarArmorLabels
 from .pages.armor import ArmorPage
-from .pages.menus import LabelingMenu, MainMenu, SettingMenu
+from .pages.menu import LabelingMenu, MainMenu, SettingMenu
 from .resources_loader import ConfigLoader
 
 
