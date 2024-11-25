@@ -5,6 +5,7 @@ __all__ = [
     'constants',
     'draw',
     'logger',
+    'time',
 
     # UI
     'UIMain',
@@ -15,13 +16,9 @@ __all__ = [
 
     # Variables
     'LightColorTheme',
-    'SmoothColor',
-    'SmoothFloat',
-    'SmoothNormFloat'
 ]
 
-from . import components, constants, draw, logger
+from . import components, constants, draw, logger, time
 from .color_system import LightColorTheme
 from .decorators import getCallable, singleton
-from .smooth import SmoothColor, SmoothFloat, SmoothNormFloat
 from .uimain import UIMain

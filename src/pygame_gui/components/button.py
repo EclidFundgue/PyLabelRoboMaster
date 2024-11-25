@@ -6,7 +6,7 @@ from pygame import Surface as pg_Surface
 from .. import draw
 from ..color_system import LightColorTheme
 from ..decorators import getCallable
-from ..smooth import SmoothColor
+from .. import time
 from .containers import BaseComponent
 
 
@@ -159,7 +159,7 @@ class TextButton(_BaseButton):
         self.text_image = self.font.render(text, True, self.text_color)
         self.pressed_text_image = self.font.render(text, True, self.pressed_text_color)
 
-        self.smooth_color = SmoothColor(0.06, self.background_color)
+        self.smooth_color = time.TimedColor(0.06, self.background_color)
 
     def setFont(self, font: pygame.font.Font) -> None:
         self.font = font

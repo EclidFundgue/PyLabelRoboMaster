@@ -4,6 +4,10 @@ from typing import Tuple
 from . import logger
 
 
+INTERP_LINEAR = 0
+INTERP_POLY2 = 1
+INTERP_POLYN1 = 2
+
 def _interpolate_linear(t: float) -> float:
     ''' Linear interpolation function. '''
     return t
@@ -18,12 +22,12 @@ def _interpolate_polyn1(t: float) -> float:
     # (- 1 / (t * 2 + 0.5) + 2) / 1.6
     return - 0.625 / (t + t + 0.5) + 1.25
 
-class SmoothNormFloat:
+class ProgressTimer:
     '''
     Value is 0 when object is created, and smoothly transition to 1 over a
     time period using a specified interpolation function.
 
-    SmoothNormFloat(time_period_second, interpolation)
+    ProgressTimer(time_period_second, interpolation)
 
     Methods:
     * getCurrentValue() -> float
@@ -31,10 +35,6 @@ class SmoothNormFloat:
     * reset() -> None
     * finish() -> None
     '''
-
-    INTERP_LINEAR = 0
-    INTERP_POLY2 = 1
-    INTERP_POLYN1 = 2
     INTERP_FUNCTIONS = {
         INTERP_LINEAR: _interpolate_linear,
         INTERP_POLY2: _interpolate_poly2,
@@ -81,11 +81,11 @@ class SmoothNormFloat:
         self.end_time = time.time()
         self.start_time = self.end_time - self.time_period
 
-class SmoothFloat:
+class TimedFloat:
     '''
-    A class that smoothly transitions between two values over a specified time period.
+    Smoothly transitions between two values over a specified time period.
 
-    SmoothFloat(time_period_second, value, interpolation)
+    TimedFloat(time_period_second, value, interpolation)
 
     Methods:
     * getCurrentValue() -> float
@@ -93,17 +93,12 @@ class SmoothFloat:
     * isFinished() -> bool
     * setValue(value, use_smooth) -> None
     '''
-
-    INTERP_LINEAR = SmoothNormFloat.INTERP_LINEAR
-    INTERP_POLY2 = SmoothNormFloat.INTERP_POLY2
-    INTERP_POLYN1 = SmoothNormFloat.INTERP_POLYN1
-
     def __init__(self, time_period_second: float, value: float, interpolation: int = INTERP_LINEAR):
         self.time_period = time_period_second
         self.start_value = value
         self.end_value = value
 
-        self.value = SmoothNormFloat(time_period_second, interpolation)
+        self.value = ProgressTimer(time_period_second, interpolation)
 
     def getCurrentValue(self) -> float:
         ''' Returns the current value between the start and end values. '''
@@ -130,11 +125,11 @@ class SmoothFloat:
         else:
             self.value.finish()
 
-class SmoothColor:
+class TimedColor:
     '''
-    A class that smoothly transitions between two colors over a specified time period.
+    Smoothly transitions between two colors over a specified time period.
 
-    SmoothColor(time_period_second, color)
+    TimedColor(time_period_second, color)
 
     Methods:
     * getCurrentColor() -> Tuple[int, int, int]
@@ -145,7 +140,7 @@ class SmoothColor:
         self.start_color = color
         self.end_color = color
 
-        self.value = SmoothNormFloat(time_period_second, SmoothNormFloat.INTERP_LINEAR)
+        self.value = ProgressTimer(time_period_second, INTERP_LINEAR)
 
     def getCurrentColor(self) -> Tuple[int, int, int]:
         ''' Returns the current color as a tuple of (r, g, b) values. '''

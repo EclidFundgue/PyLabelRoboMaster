@@ -116,7 +116,7 @@ class _GenericFileLine(ui.components.Selectable):
         self.bg_color_hover = (self.bg_color[0] - 15, self.bg_color[1] - 29, self.bg_color[2] - 6)
         self.bg_color_selected = color_theme.OnSecondaryContainer
         smooth_time_period = 0.03 if smooth_color_change else 0.0
-        self.bg_smooth_color = ui.SmoothColor(smooth_time_period, self.bg_color)
+        self.bg_smooth_color = ui.time.TimedColor(smooth_time_period, self.bg_color)
 
         # text image
         self.text_img = TextImage(filename, color_theme.OnSecondaryContainer)
