@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from ..pygame_gui import Surface, f_error, f_warning
+from ..pygame_gui import Surface, logger
 
 
 class StackedPage(Surface):
@@ -23,7 +23,7 @@ class StackedPage(Surface):
     def setPage(self, page: Union[int, 'StackedPage']) -> None:
         ''' Set the current page of the stacked page view. '''
         if self._StackedPageView_onPageChange is None:
-            f_warning("It should be added to a StackedPageView before setting the page.", self)
+            logger.warning("It should be added to a StackedPageView before setting the page.", self)
         self._StackedPageView_onPageChange(page)
 
     def onShow(self) -> None: ...
@@ -49,7 +49,7 @@ class StackedPageView(Surface):
     def _setPageByIndex(self, page_index: int) -> None:
         ''' Internal method to set the current page by index. '''
         if page_index < 0 or page_index >= len(self.pages):
-            f_warning("Invalid page index.", self)
+            logger.warning("Invalid page index.", self)
             return
 
         if self.current_page_index >= 0:
@@ -61,7 +61,7 @@ class StackedPageView(Surface):
     def _setPageByPage(self, page: StackedPage) -> None:
         ''' Internal method to set the current page by page. '''
         if page not in self.pages:
-            f_warning("Page not in stacked pages.", self)
+            logger.warning("Page not in stacked pages.", self)
             return
 
         self._setPageByIndex(self.pages.index(page))
@@ -73,7 +73,7 @@ class StackedPageView(Surface):
         elif isinstance(page, StackedPage):
             self._setPageByPage(page)
         else:
-            f_error("Invalid page type.", TypeError, self)
+            logger.error("Invalid page type.", TypeError, self)
 
     def addPage(self, page: StackedPage) -> None:
         ''' Add a page to the stacked page view. '''

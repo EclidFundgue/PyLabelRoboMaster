@@ -4,7 +4,7 @@ from typing import Callable, List, Tuple
 import pygame
 from pygame import Surface as pg_Surface
 
-from ...pygame_gui import Selectable, f_error, f_warning, getCallable
+from ...pygame_gui import Selectable, getCallable, logger
 from ...utils.dataproc import sortedPoints
 from ...utils.geometry import in_polygon
 from .canvas import CanvasComponent
@@ -34,9 +34,9 @@ class Contour(CanvasComponent, Selectable):
         if points is None:
             points = []
         if size < 2:
-            f_error('size at least 2', ValueError, self)
+            logger.error('size at least 2', ValueError, self)
         if size < len(points):
-            f_error(f'size: {size} is smaller than points: {len(points)}',
+            logger.error(f'size: {size} is smaller than points: {len(points)}',
                     ValueError, self)
 
         self.size: int = size
@@ -77,7 +77,7 @@ class Contour(CanvasComponent, Selectable):
 
     def addKeypoint(self, keypoint: Keypoint) -> None:
         if len(self.points) >= self.size:
-            f_warning(f'keypoint number already reach size: {self.size}', self)
+            logger.warning(f'keypoint number already reach size: {self.size}', self)
             return
 
         self.points.append(keypoint)

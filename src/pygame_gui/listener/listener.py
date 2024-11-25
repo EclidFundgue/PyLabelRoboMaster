@@ -3,8 +3,8 @@ from typing import Callable
 
 from pygame import locals
 
+from .. import logger
 from ..decorators import singleton
-from ..f___loger import damn as f_warning
 from .event_types import MouseEventArgs as MArgs
 from .keyboard_event import KeyboardEvent
 from .mouse_event import MouseEvent
@@ -73,7 +73,7 @@ class Listener():
         for target in self.__targets_to_remove:
             ret = self.__events_dict.pop(target, None)
             if ret is None:
-                f_warning(f'Target "{target}" not in events dictionary.', self)
+                logger.warning(f'Target "{target}" not in events dictionary.', self)
         self.__targets_to_remove = []
 
     def _addTargetToEvents(self) -> None:

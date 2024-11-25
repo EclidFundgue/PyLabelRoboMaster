@@ -4,8 +4,8 @@ from typing import Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
+from . import logger
 from .components.surface import BaseComponent, RootSurface
-from .f___loger import fuck as f_error
 
 
 def win32MovePygameWindow(position: Tuple[int, int]) -> None:
@@ -63,7 +63,7 @@ class UIMain:
         if isinstance(icon, pg_Surface):
             pygame.display.set_icon(icon)
         else:
-            f_error(f'Invalid value of icon: {icon}', ValueError, self)
+            logger.error(f'Invalid value of icon: {icon}', ValueError, self)
 
         # position
         if sys.platform == 'win32':

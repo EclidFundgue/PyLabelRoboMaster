@@ -1,7 +1,7 @@
 import threading
 from typing import Callable
 
-from .f___loger import fuck as f_error
+from . import logger
 
 
 def singleton(cls: type):
@@ -25,5 +25,5 @@ def getCallable(func: Callable = None) -> Callable:
     if func is None:
         return __emtpyFunc
     if not callable(func):
-        f_error("The given function is not callable.", TypeError)
+        logger.error("The given function is not callable.", TypeError)
     return func

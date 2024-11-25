@@ -1,6 +1,6 @@
 from typing import Callable, List, Tuple, Union
 
-from ...pygame_gui import SmoothFloat, Surface, f_warning, getCallable
+from ...pygame_gui import SmoothFloat, Surface, getCallable, logger
 from .line import _GenericFileLine as FileLine
 
 
@@ -169,7 +169,7 @@ class LinesBox(Surface):
 
     def _selectByIndex(self, idx: int) -> None:
         if idx < 0 or idx >= len(self.lines):
-            f_warning(f"Line index out of range: {idx}", self)
+            logger.warning(f"Line index out of range: {idx}", self)
             return
 
         if idx == self.selected_idx:
@@ -222,7 +222,7 @@ class LinesBox(Surface):
         elif isinstance(line, FileLine):
             self._selectByLine(line)
         else:
-            f_warning(f"Invalid line type: {type(line)}", self)
+            logger.warning(f"Invalid line type: {type(line)}", self)
 
         self._constrainRelativeByIndex(self.selected_idx)
 
@@ -255,7 +255,7 @@ class LinesBox(Surface):
 
     def _deleteByIndex(self, idx: int) -> None:
         if idx < 0 or idx >= len(self.lines):
-            f_warning(f"Line index out of range: {idx}", self)
+            logger.warning(f"Line index out of range: {idx}", self)
             return
 
         # remove line from list
@@ -288,7 +288,7 @@ class LinesBox(Surface):
         elif isinstance(line, FileLine):
             self._deleteByLine(line)
         else:
-            f_warning(f"Invalid line type: {type(line)}", self)
+            logger.warning(f"Invalid line type: {type(line)}", self)
 
     def index(self, line: FileLine) -> int:
         '''

@@ -6,7 +6,7 @@ from pygame import locals
 
 from ...process.correct import correctLabels, relabel
 from ...process.label_io import ArmorLabelIO, loadLabel, saveLabel
-from ...pygame_gui import f_warning, getCallable
+from ...pygame_gui import getCallable, logger
 from ...utils.dataproc import sortedPoints, surface2mat
 from .armor_icon import TypeIcon
 from .canvas import Canvas, CanvasComponent
@@ -246,7 +246,7 @@ class Labels(CanvasComponent):
 
     def _deleteLabel(self, label: Label) -> None:
         if not label in self.labels:
-            f_warning(f"Label {label} not in labels.", self)
+            logger.warning(f"Label {label} not in labels.", self)
             return
 
         self.labels.remove(label)

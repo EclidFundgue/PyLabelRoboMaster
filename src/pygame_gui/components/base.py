@@ -4,8 +4,7 @@ from typing import Callable, List, Tuple, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from ..f___loger import damn as f_warning
-from ..f___loger import fuck as f_error
+from .. import logger
 from ..listener import EventType as ET
 from ..listener import Listener, MouseEventArgs
 
@@ -117,11 +116,11 @@ class BaseComponent:
         self.removeDead()
 
         if not child.alive:
-            f_warning(f'Operation on dead component {child}.', self)
+            logger.warning(f'Operation on dead component {child}.', self)
             return
 
         if child in self.child_components:
-            f_warning(f'{child} is already added.')
+            logger.warning(f'{child} is already added.')
             return
 
         self.child_components.append(child)
@@ -130,11 +129,11 @@ class BaseComponent:
         self.removeDead()
 
         if not child.alive:
-            f_warning(f'Operation on dead component {child}.', self)
+            logger.warning(f'Operation on dead component {child}.', self)
             return
 
         if child not in self.child_components:
-            f_warning(f'{child} is not child.', self)
+            logger.warning(f'{child} is not child.', self)
             return
 
         self.child_components.remove(child)
@@ -153,7 +152,7 @@ class BaseComponent:
         self.removeDead()
 
         if not self.alive:
-            f_warning(f'{self} has already been killed.', self)
+            logger.warning(f'{self} has already been killed.', self)
 
         for child in self.child_components:
             child.kill()
@@ -207,7 +206,7 @@ class BaseComponent:
     def update(self, events = None) -> None:
         if self.is_root:
             if events is None:
-                f_error('Root component should update by events.', ValueError, self)
+                logger.error('Root component should update by events.', ValueError, self)
             self._listener.update(events)
 
         self.removeDead()
@@ -222,6 +221,9 @@ class BaseComponent:
         if not self.active:
             return
 
+        # `removeDead` will make `child_components` a new list, so if 
+        # `child_components` changed by `func_ls` during iteration, it
+        # will not cause RuntimeError.
         self.removeDead()
 
         func_ls = self.__mouse_button_functions[event_type][key_type]
@@ -315,14 +317,14 @@ class BaseComponent:
         ''' Load a image and resize to (w, h). '''
         if isinstance(img, str):
             if not os.path.exists(img):
-                f_error(f'Path {img} not exists.', FileExistsError, self)
+                logger.error(f'Path {img} not exists.', FileExistsError, self)
             ret_img = pygame.image.load(img).convert_alpha()
 
         elif isinstance(img, pg_Surface):
             ret_img = img
 
         else:
-            f_error(f'Not accept image type: {type(img)}.', TypeError, self)
+            logger.error(f'Not accept image type: {type(img)}.', TypeError, self)
 
         if w is None:
             w = ret_img.get_size()[0]

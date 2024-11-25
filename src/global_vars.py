@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any, Union
 
-from .pygame_gui import BaseComponent, f_warning, singleton
+from .pygame_gui import BaseComponent, logger, singleton
 from .utils.dataproc import getLabelPath, makeFolder
 
 THEME_VAR_CHANGE = 'VAR_CHANGE'
@@ -16,11 +16,11 @@ class ObserveVar:
         self.removeDead()
 
         if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
+            logger.warning(f'Operation on dead component {observer}.', self)
             return
 
         if observer in self.observers:
-            f_warning(f'Observer {observer} has already attached to {self}.', self)
+            logger.warning(f'Observer {observer} has already attached to {self}.', self)
             return
 
         self.observers.append(observer)
@@ -30,11 +30,11 @@ class ObserveVar:
         self.removeDead()
 
         if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
+            logger.warning(f'Operation on dead component {observer}.', self)
             return
 
         if observer not in self.observers:
-            f_warning(f'Observer {observer} has not attach to {self} yet.', self)
+            logger.warning(f'Observer {observer} has not attach to {self} yet.', self)
             return
 
         self.observers.remove(observer)

@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from pygame import Surface as pg_Surface
 
-from .pygame_gui import BaseComponent, f_error, singleton
+from .pygame_gui import BaseComponent, logger, singleton
 from .utils.constants import ROOT_PATH
 
 
@@ -35,7 +35,7 @@ class ImageLoader:
                 path = os.path.join(self.RESOURCES_PREFIX, value)
                 value = BaseComponent.loadImage(self, path)
             else:
-                f_error(f'Invalid image path: {value}', ValueError, self)
+                logger.error(f'Invalid image path: {value}', ValueError, self)
             res[key] = value
         return res
 

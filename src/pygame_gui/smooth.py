@@ -1,7 +1,7 @@
 import time
 from typing import Tuple
 
-from .f___loger import fuck as f_error
+from . import logger
 
 
 def _interpolate_linear(t: float) -> float:
@@ -43,7 +43,7 @@ class SmoothNormFloat:
 
     def __init__(self, time_period_second: float = 0, interpolation: int = INTERP_LINEAR):
         if time_period_second < 0:
-            f_error("Time period must be non-negative.", ValueError, self)
+            logger.error("Time period must be non-negative.", ValueError, self)
 
         self.time_period = time_period_second
         self.interpolation = interpolation

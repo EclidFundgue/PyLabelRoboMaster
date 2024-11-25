@@ -4,7 +4,7 @@ import pygame
 from pygame import Surface as pg_Surface
 
 from ..global_vars import THEME_VAR_CHANGE
-from ..pygame_gui import BaseComponent, f_error, f_warning, getCallable
+from ..pygame_gui import BaseComponent, getCallable, logger
 
 
 class NSwitch(BaseComponent):
@@ -31,7 +31,7 @@ class NSwitch(BaseComponent):
             cursor_change: bool = True):
 
         if len(images)!= num_states:
-            f_error(
+            logger.error(
                 f'Number of images ({len(images)}) is not equal to number of states ({num_states}).',
                 ValueError, self
             )
@@ -50,7 +50,7 @@ class NSwitch(BaseComponent):
 
     def turnTo(self, state: int) -> None:
         if state < 0 or state >= self.num_states:
-            f_warning(f'Invalid state {state}.', self)
+            logger.warning(f'Invalid state {state}.', self)
             return
         self.state = state
 
@@ -146,11 +146,11 @@ class Switch(BaseComponent):
         self.removeDead()
 
         if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
+            logger.warning(f'Operation on dead component {observer}.', self)
             return
 
         if observer in self.observers:
-            f_warning(f'Observer {observer} has already attached to {self}.', self)
+            logger.warning(f'Observer {observer} has already attached to {self}.', self)
             return
 
         self.observers.append(observer)
@@ -160,11 +160,11 @@ class Switch(BaseComponent):
         self.removeDead()
 
         if not observer.alive:
-            f_warning(f'Operation on dead component {observer}.', self)
+            logger.warning(f'Operation on dead component {observer}.', self)
             return
 
         if observer not in self.observers:
-            f_warning(f'Observer {observer} has not attach to {self} yet.', self)
+            logger.warning(f'Observer {observer} has not attach to {self} yet.', self)
             return
 
         self.observers.remove(observer)

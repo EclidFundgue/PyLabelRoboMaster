@@ -1,7 +1,7 @@
 import math
 from typing import List, Tuple
 
-from ...pygame_gui import BaseComponent, Surface, f_error
+from ...pygame_gui import BaseComponent, Surface, logger
 
 
 class CanvasComponent(BaseComponent):
@@ -209,7 +209,7 @@ class Canvas(Surface):
 
     def addChild(self, child: CanvasComponent) -> None:
         if not isinstance(child, CanvasComponent):
-            f_error("Child must be CanvasComponent.", ValueError, self)
+            logger.error("Child must be CanvasComponent.", ValueError, self)
             return
         child.onCanvasViewChanged(self.scale_current, *self.view_current)
         super().addChild(child)
