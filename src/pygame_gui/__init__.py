@@ -9,14 +9,11 @@ __all__ = [
     'time',
 
     # UI
-    'UIMain',
+    'Main',
 
     # Functions
     'getCallable',
     'singleton',
-
-    # Variables
-    'LightColorTheme',
 ]
 
 from . import color, components, constants, draw, logger, time
