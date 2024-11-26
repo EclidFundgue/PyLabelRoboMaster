@@ -6,7 +6,7 @@ __all__ = [
     'constants',
     'draw',
     'logger',
-    'time',
+    'timer',
 
     # UI
     'Main',
@@ -16,6 +16,6 @@ __all__ = [
     'singleton',
 ]
 
-from . import color, components, constants, draw, logger, time
+from . import color, components, constants, draw, logger, timer
 from .decorators import getCallable, singleton
 from .uimain import UIMain as Main

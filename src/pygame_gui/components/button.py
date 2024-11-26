@@ -3,7 +3,7 @@ from typing import Callable, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from .. import constants, time
+from .. import constants, timer
 from ..color import LightColorTheme
 from ..decorators import getCallable
 from .containers import BaseComponent, RoundedRectContainer
@@ -147,7 +147,7 @@ class TextButton(_BaseButton):
         self.background_color = color_theme.OnPrimaryContainer
         self.hover_color = color_theme.light(self.background_color, 3)
         self.pressed_color = color_theme.light(self.background_color, 8)
-        self.smooth_color = time.TimedColor(0.1, self.background_color)
+        self.smooth_color = timer.TimedColor(0.1, self.background_color)
 
         self.label = Label(
             w, h, 0, 0,

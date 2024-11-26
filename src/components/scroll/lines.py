@@ -53,7 +53,7 @@ class LinesBox(ui.components.RectContainer):
         smooth_time_period = 0.0
         if use_smooth_scroll:
             smooth_time_period = 0.2
-        self.relative = ui.time.TimedFloat(smooth_time_period, 0, ui.time.INTERP_POLY2)
+        self.relative = ui.timer.TimedFloat(smooth_time_period, 0, ui.timer.INTERP_POLY2)
         self.current_relative_value = self.relative.getCurrentValue()
         self._updateRelativeView(self.current_relative_value)
 
