@@ -1,6 +1,5 @@
 from pygame import Surface
 
-from .. import constants as consts
 from .base import BaseComponent
 
 
@@ -18,8 +17,7 @@ class Root(BaseComponent):
 
         self.backgournd_color = (0, 0, 0)
 
-    def setBackgroundColor(self, color: tuple = consts.CONTAINER_KEY_COLOR) -> None:
-        ''' Set CONTAINER_KEY_COLOR to be transparent. '''
+    def setBackgroundColor(self, color) -> None:
         self.backgournd_color = color
 
     def draw(self) -> None:

@@ -1,9 +1,7 @@
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import List, Sequence, Tuple, Union
 
 from pygame import draw as pg_draw
-from pygame import transform as pg_transform
 from pygame.color import Color
-from pygame.locals import SRCALPHA
 from pygame.rect import Rect
 from pygame.surface import Surface as pg_Surface
 
@@ -17,27 +15,8 @@ def acircle(
     center: Union[Tuple[float, float], Sequence[float]],
     radius: float,
     width: int = 0,
-    blend: float = 2,
-    draw_top_right: Optional[bool] = False,
-    draw_top_left: Optional[bool] = False,
-    draw_bottom_left: Optional[bool] = False,
-    draw_bottom_right: Optional[bool] = False,
 ) -> None:
-    _radius = radius * (blend + 1)
-    _surface = pg_Surface((_radius * 2, _radius * 2), SRCALPHA)
-    pg_draw.circle(
-        _surface,
-        color,
-        (_radius, _radius),
-        _radius,
-        width,
-        draw_top_right,
-        draw_top_left,
-        draw_bottom_left,
-        draw_bottom_right,
-    )
-    _surface = pg_transform.smoothscale(_surface, (radius * 2, radius * 2))
-    surface.blit(_surface, (center[0] - radius, center[1] - radius))
+    raise NotImplementedError("Not implemented yet")
 
 def rounded_rect(
     surface: pg_Surface,
@@ -47,16 +26,15 @@ def rounded_rect(
 ) -> None:
     if isinstance(rect, tuple):
         rect = Rect(rect)
-    _surface = pg_Surface(rect.size, SRCALPHA)
 
+    xl, xr = rect.left + radius, rect.right - radius
+    yt, yb = rect.top + radius, rect.bottom - radius
     # draw the rounded corners
-    acircle(_surface, color, (radius, radius), radius, draw_top_left=True)
-    acircle(_surface, color, (rect.width - radius, radius), radius, draw_top_right=True)
-    acircle(_surface, color, (radius, rect.height - radius), radius, draw_bottom_left=True)
-    acircle(_surface, color, (rect.width - radius, rect.height - radius), radius, draw_bottom_right=True)
+    pg_draw.circle(surface, color, (xl, yt), radius)
+    pg_draw.circle(surface, color, (xr, yt), radius)
+    pg_draw.circle(surface, color, (xl, yb), radius)
+    pg_draw.circle(surface, color, (xr, yb), radius)
 
     # fill the center
-    pg_draw.rect(_surface, color, (radius, 0, rect.width - radius * 2, rect.height))
-    pg_draw.rect(_surface, color, (0, radius, rect.width, rect.height - radius * 2))
-
-    surface.blit(_surface, rect.topleft)
+    pg_draw.rect(surface, color, (rect.left, yt, rect.width, rect.height - radius * 2))
+    pg_draw.rect(surface, color, (xl, rect.top, rect.width - radius * 2, rect.height))

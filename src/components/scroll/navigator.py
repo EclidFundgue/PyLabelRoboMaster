@@ -75,8 +75,6 @@ class Navigator(ui.components.RectContainer):
         super().kill()
 
     def draw(self, surface: pg_Surface) -> None:
-        self.clear()
-
         img_w, img_h = self.index_img.get_size()
         pady = (self.h - img_h) // 2
         self.pg_surface.blit(

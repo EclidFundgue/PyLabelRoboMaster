@@ -1,0 +1,51 @@
+{
+    "Primary colors":
+    {
+        "Primary": "#6750A4",
+        "On primary": "#FFFFFF",
+        "Primary container": "#EADDFF",
+        "On primary container": "#4F378B"
+    },
+    "Secondary colors":
+    {
+        "Secondary": "#625B71",
+        "On secondary": "#FFFFFF",
+        "Secondary container": "#E8DEF8",
+        "On secondary container": "#4A4458"
+    },
+    "Tertiary colors":
+    {
+        "Tertiary": "#7D5260",
+        "On tertiary": "#FFFFFF",
+        "Tertiary container": "#FFD8E4",
+        "On tertiary container": "#633B48"
+    },
+    "Error colors":
+    {
+        "Error": "#B3261E",
+        "On error": "#FFFFFF",
+        "Error container": "#F9DEDC",
+        "On error container": "#8C1D18"
+    },
+    "Surface colors":
+    {
+        "Surface": "#FEF7FF",
+        "On surface": "#1D1B20",
+        "Surface variant": "#E7E0EC",
+        "On surface variant": "#49454F",
+        "Surface Container Highest": "#E6E0E9",
+        "Surface Container High": "#ECE6F0",
+        "Surface Container": "#F3EDF7",
+        "Surface Container Low": "#F7F2FA",
+        "Surface Container Lowest": "#FFFFFF",
+        "Inverse surface": "#322F35",
+        "Inverse on surface": "#F5EFF7",
+        "Surface tint": "#6750A4",
+        "Surface tint color": "#6750A4"
+    },
+    "Outline colors":
+    {
+        "Outline": "#79747E",
+        "Outline Variant": "#CAC4D0"
+    }
+}

@@ -3,10 +3,11 @@ from typing import Callable, Union
 import pygame
 from pygame import Surface as pg_Surface
 
-from .. import draw, time
+from .. import constants, time
 from ..color import LightColorTheme
 from ..decorators import getCallable
-from .containers import BaseComponent
+from .containers import BaseComponent, RoundedRectContainer
+from .label import Label
 
 
 class _BaseButton(BaseComponent):
@@ -126,8 +127,6 @@ class TextButton(_BaseButton):
     * setFont(font)
     '''
 
-    DEFAULT_FONT = None
-
     def __init__(self,
             w: int, h: int, x: int, y: int,
             text: str,
@@ -141,33 +140,42 @@ class TextButton(_BaseButton):
             cursor_change
         )
 
-        # Initialize DEFAULT_FONT after pygame initialized.
-        if TextButton.DEFAULT_FONT is None:
-            TextButton.DEFAULT_FONT = pygame.font.SysFont('simsun', 16)
-
-        self.text = text
-        self.font = TextButton.DEFAULT_FONT
-
         color_theme = LightColorTheme()
+
         self.text_color = color_theme.PrimaryContainer
         self.pressed_text_color = color_theme.PrimaryContainer
         self.background_color = color_theme.OnPrimaryContainer
         self.hover_color = color_theme.light(self.background_color, 3)
         self.pressed_color = color_theme.light(self.background_color, 8)
+        self.smooth_color = time.TimedColor(0.1, self.background_color)
 
-        self.text_image = self.font.render(text, True, self.text_color)
-        self.pressed_text_image = self.font.render(text, True, self.pressed_text_color)
+        self.label = Label(
+            w, h, 0, 0,
+            text=text,
+            text_color=self.text_color,
+        )
+        self.container = RoundedRectContainer(
+            w, h, x, y,
+            radius=min(w, h) // 4
+        )
 
-        self.smooth_color = time.TimedColor(0.06, self.background_color)
+        self.label.setAlignment(
+            align_x=constants.ALIGN_CENTER,
+            align_y=constants.ALIGN_CENTER
+        )
+
+        self.container.addChild(self.label)
+        self.addChild(self.container)
 
     def setFont(self, font: pygame.font.Font) -> None:
-        self.font = font
-        self.text_image = self.font.render(self.text, True, self.text_color)
-        self.pressed_text_image = self.font.render(self.text, True, self.pressed_text_color)
+        self.label.setFont(font)
 
-    def update(self, events=None) -> None:
-        super().update(events)
+    def kill(self):
+        self.label = None
+        self.container = None
+        super().kill()
 
+    def _updateSmoothColor(self) -> None:
         if self.pressed:
             self.smooth_color.setColor(self.pressed_color)
         elif self.active:
@@ -175,12 +183,23 @@ class TextButton(_BaseButton):
         else:
             self.smooth_color.setColor(self.background_color)
 
-    def draw(self, surface: pg_Surface) -> None:
-        w, h, x, y = self.getRect()
-        # pygame.draw.rect(surface, self.smooth_color.getCurrentColor(), (x, y, w, h))
-        draw.rounded_rect(surface, self.smooth_color.getCurrentColor(), (x, y, w, h), 10)
+    def _updateTextColor(self) -> None:
+        if self.pressed:
+            self.label.setColor(self.pressed_text_color)
+        else:
+            self.label.setColor(self.text_color)
 
-        text_img = self.pressed_text_image if self.pressed else self.text_image
-        text_x = x + (w - text_img.get_width()) // 2
-        text_y = y + (h - text_img.get_height()) // 2
-        surface.blit(text_img, (text_x, text_y))
+    def update(self, events=None) -> None:
+        super().update(events)
+
+        self._updateSmoothColor()
+        self._updateTextColor()
+
+        self.container.setBackgroundColor(self.smooth_color.getCurrentColor())
+
+    def setRect(self, w: int, h: int, x: int, y: int) -> None:
+        super().setRect(w, h, x, y)
+        self.container.setRect(w, h, x, y)
+
+    def draw(self, surface: pg_Surface) -> None:
+        self.container.draw(surface)

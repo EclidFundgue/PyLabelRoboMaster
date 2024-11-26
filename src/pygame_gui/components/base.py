@@ -37,6 +37,13 @@ class BaseComponent:
 
     3. ---------- Display ----------
     * loadImage(img, w, h) -> Surface
+    * setW(w) -> None
+    * setH(h) -> None
+    * setX(x) -> None
+    * setY(y) -> None
+    * setWH(w, h) -> None
+    * setXY(x, y) -> None
+    * setRect(w, h, x, y) -> None
     * getRect() -> Tuple[int]
     * draw(surface) -> None
 
@@ -45,17 +52,20 @@ class BaseComponent:
     * update() -> None
     * update(events) -> None
     '''
-    def __init__(self, w: int = 0, h: int = 0,
-                 x: int = 0, y: int = 0, is_root: bool = False):
+    def __init__(self,
+            w: int = 0, h: int = 0,
+            x: int = 0, y: int = 0,
+            is_root: bool = False
+        ):
         self.child_components: List[BaseComponent] = []
         self._listener = Listener()
         self.active = False # True when mouse hover on the component
         self.alive = True # Component will be removed when not alive
         self.layer = 0 # Higher layer will cover lower layer when draw
-        self.x = x
-        self.y = y
         self.w = w
         self.h = h
+        self.x = x
+        self.y = y
 
         # One program should only have one root component. Such as root screen.
         # All components are children of root, then update in chain.
@@ -336,6 +346,30 @@ class BaseComponent:
             return ret_img
         else:
             return pygame.transform.scale(ret_img, (w, h))
+
+    def setW(self, w: int) -> None:
+        self.setRect(w, self.h, self.x, self.y)
+
+    def setH(self, h: int) -> None:
+        self.setRect(self.w, h, self.x, self.y)
+
+    def setX(self, x: int) -> None:
+        self.setRect(self.w, self.h, x, self.y)
+
+    def setY(self, y: int) -> None:
+        self.setRect(self.w, self.h, self.x, y)
+
+    def setWH(self, w: int, h: int) -> None:
+        self.setRect(w, h, self.x, self.y)
+
+    def setXY(self, x: int, y: int) -> None:
+        self.setRect(self.w, self.h, x, y)
+
+    def setRect(self, w: int, h: int, x: int, y: int) -> None:
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
 
     def getRect(self) -> Tuple[int]:
         ''' (w, h, x, y) '''

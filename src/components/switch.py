@@ -1,78 +1,12 @@
 from typing import Any, Callable, List, Tuple, Union
 
 import pygame
-from pygame import Surface as pg_Surface
+from pygame import Surface
 
 from .. import pygame_gui as ui
 from ..global_vars import THEME_VAR_CHANGE
 from ..pygame_gui import logger
 
-
-class NSwitch(ui.components.BaseComponent):
-    '''
-    A Switch has a specific number of states.
-
-    NSwitch(
-        w, h, x, y,
-        num_states,
-        images,
-        on_turn,
-        cursor_change
-    )
-
-    Methods:
-    * turn() -> None
-    * turnTo(state: int) -> None
-    '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            num_states: int,
-            images: List[Union[str, pg_Surface]],
-            on_turn: Callable[[int], None] = None,
-            cursor_change: bool = True):
-
-        if len(images)!= num_states:
-            logger.error(
-                f'Number of images ({len(images)}) is not equal to number of states ({num_states}).',
-                ValueError, self
-            )
-
-        super().__init__(w, h, x, y)
-
-        self.num_states = num_states
-        self.images = [self.loadImage(image, w, h) for image in images]
-        self.on_turn = ui.getCallable(on_turn)
-        self.cursor_change = cursor_change
-
-        self.state = 0
-
-    def turn(self) -> None:
-        self.state = (self.state + 1) % self.num_states
-
-    def turnTo(self, state: int) -> None:
-        if state < 0 or state >= self.num_states:
-            logger.warning(f'Invalid state {state}.', self)
-            return
-        self.state = state
-
-    def kill(self) -> None:
-        self.on_turn = None
-        super().kill()
-
-    def onHover(self, x: int, y: int) -> None:
-        if self.cursor_change:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-
-    def offHover(self) -> None:
-        if self.cursor_change:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-
-    def onLeftClick(self, x: int, y: int) -> None:
-        self.turn()
-        self.on_turn(self.state)
-
-    def draw(self, surface: pg_Surface) -> None:
-        surface.blit(self.images[self.state], (self.x, self.y))
 
 class Switch(ui.components.BaseComponent):
     '''
@@ -94,10 +28,11 @@ class Switch(ui.components.BaseComponent):
     def __init__(self,
             w: int, h: int,
             x: int, y: int,
-            image_on: Union[str, pg_Surface],
-            image_off: Union[str, pg_Surface],
+            image_on: Union[str, Surface],
+            image_off: Union[str, Surface],
             on_turn: Callable[[bool], None] = None,
-            cursor_change: bool = True):
+            cursor_change: bool = True
+        ):
         super().__init__(w, h, x, y)
 
         self.image_on = self.loadImage(image_on, w, h)
@@ -133,7 +68,7 @@ class Switch(ui.components.BaseComponent):
         self.on = not self.on
         self.on_turn(self.on)
 
-    def draw(self, surface: pg_Surface) -> None:
+    def draw(self, surface: Surface) -> None:
         if self.on:
             surface.blit(self.image_on, (self.x, self.y))
         else:
@@ -185,32 +120,99 @@ class Switch(ui.components.BaseComponent):
         ''' Receive a mesage. '''
         pass
 
-class NTextSwitch(NSwitch):
+class NTextSwitch(ui.components.BaseComponent):
+    '''
+    A Switch has a specific number of states.
+
+    NTextSwitch(
+        w, h, x, y,
+        num_states,
+        texts,
+        font,
+        text_color,
+        background_color,
+        on_turn,
+        cursor_change
+    )
+
+    Methods:
+    * turn() -> None
+    * turnTo(state: int) -> None
+    '''
     def __init__(self,
             w: int, h: int, x: int, y: int,
             num_states: int,
             texts: List[str],
             font: pygame.font.Font = None,
+            text_color: Tuple[int, int, int] = (0, 0, 0),
             background_color: Tuple[int, int, int] = (255, 255, 255),
             on_turn: Callable[[int], None] = None,
-            cursor_change: bool = True):
+            cursor_change: bool = True
+        ):
+        super().__init__(w, h, x, y)
 
-        self.font = font if font is not None else pygame.font.SysFont('simsun', 24)
-        self.background_color = background_color
+        self.num_states = num_states
+        self.texts = texts
+        self.on_turn = ui.getCallable(on_turn)
+        self.cursor_change = cursor_change
 
-        images = [self._createTextSurface(text, w, h) for text in texts]
-        super().__init__(w, h, x, y, num_states, images, on_turn, cursor_change)
+        self.state = 0
 
-    def _createTextSurface(self, text: str, w: int, h: int) -> pg_Surface:
-        text_surface = self.font.render(text, True, (0, 0, 0))
-        text_w, text_h = text_surface.get_size()
-        x = (w - text_w) // 2
-        y = (h - text_h) // 2
+        self.label = ui.components.Label(
+            w, h, 0, 0,
+            text=texts[0],
+            font=font,
+            text_color=text_color,
+        )
+        self.container = ui.components.RoundedRectContainer(
+            w, h, x, y,
+            radius=min(w, h) // 4,
+        )
 
-        ret_surface = pg_Surface((w, h))
-        ret_surface.fill(self.background_color)
-        ret_surface.blit(text_surface, (x, y))
-        return ret_surface
+        self.label.setAlignment(
+            align_x=ui.constants.ALIGN_CENTER,
+            align_y=ui.constants.ALIGN_CENTER
+        )
+        self.container.setBackgroundColor(background_color)
+
+        self.container.addChild(self.label)
+        self.addChild(self.container)
+
+    def turn(self) -> None:
+        self.state = (self.state + 1) % self.num_states
+        self.label.setText(self.texts[self.state])
+
+    def turnTo(self, state: int) -> None:
+        if state < 0 or state >= self.num_states:
+            logger.warning(f'Invalid state {state}.', self)
+            return
+        self.state = state
+        self.label.setText(self.texts[state])
+
+    def kill(self) -> None:
+        self.label = None
+        self.container = None
+        self.on_turn = None
+        super().kill()
+
+    def onHover(self, x: int, y: int) -> None:
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def offHover(self) -> None:
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+    def onLeftClick(self, x: int, y: int) -> None:
+        self.turn()
+        self.on_turn(self.state)
+
+    def setRect(self, w: int, h: int, x: int, y: int):
+        super().setRect(w, h, x, y)
+        self.container.setRect(w, h, x, y)
+
+    def draw(self, surface: Surface) -> None:
+        self.container.draw(surface)
 
 class ThemeBasedSwitchTrigger(ui.components.BaseComponent):
     '''

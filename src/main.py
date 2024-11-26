@@ -2,7 +2,7 @@ from . import pygame_gui as ui
 from .components.stacked_page import StackedPageView
 from .global_vars import VarArmorLabels
 from .pages.armor import ArmorPage
-from .pages.menu import LabelingMenu, MainMenu, SettingMenu
+from .pages.menu import MainMenu
 from .resources_loader import ConfigLoader
 
 
@@ -26,14 +26,10 @@ class Main(ui.Main):
         rect = (cfg_loader['resolution'][0], cfg_loader['resolution'][1], 0, 0)
         page_incidies = {
             'main_menu': 0,
-            'labeling_menu': 1,
-            'setting_menu': 2,
-            'armor_page': 3
+            'armor_page': 1,
         }
         self.stacked_page_view = StackedPageView(*rect)
         self.stacked_page_view.addPage(MainMenu(*rect, page_incidies))
-        self.stacked_page_view.addPage(LabelingMenu(*rect, page_incidies))
-        self.stacked_page_view.addPage(SettingMenu(*rect, page_incidies))
         self.stacked_page_view.addPage(ArmorPage(*rect, page_incidies))
         self.stacked_page_view.setPage(0)
 
