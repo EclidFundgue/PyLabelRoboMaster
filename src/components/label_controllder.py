@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Tuple
 
 from ..global_vars import VarArmorLabels
 from ..pygame_gui import getCallable
@@ -13,6 +13,7 @@ class LabelController:
     LabelController(w: int, h: int, x: int, y: int)
 
     Methods:
+    * createCanvas(w: int, h: int, x: int, y: int) -> None
     * getCanvas() -> Canvas
     * loadImage(path) -> None
     * loadLabels(path) -> None
@@ -30,21 +31,23 @@ class LabelController:
     * save() -> None
     * switchPreprocess(state) -> None
     '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            on_single_select: Callable[[Label], None] = None):
-        self.canvas_size = (w, h)
-        self.canvas = Canvas(
-            w - 20, h - 20, x + 10, y + 10,
-            margin_x=200,
-            margin_y=200,
-            smooth_factor=0.8
-        )
+    def __init__(self, on_single_select: Callable[[Label], None] = None):
+        self.canvas_size: Tuple[int, int] = None
+        self.canvas: Canvas = None
         self.image: Image = None
         self.labels: Labels = None
         self.on_single_select = getCallable(on_single_select)
 
         self.var_armor_labels = VarArmorLabels()
+
+    def createCanvas(self, w: int, h: int, x: int, y: int) -> None:
+        self.canvas_size = (w, h)
+        self.canvas = Canvas(
+            w, h, x, y,
+            margin_x=200,
+            margin_y=200,
+            smooth_factor=0.8
+        )
 
     def getCanvas(self) -> Canvas:
         return self.canvas

@@ -62,22 +62,6 @@ class ToolBar(ui.components.RectContainer):
         )
         self.addChild(self.btn_delete)
 
-        self.btn_undo = ui.components.Button(*rect_undo,
-            img_loader['button']['undo'],
-            img_loader['button']['undo_pressed'],
-            on_press=ui.getCallable(on_undo),
-            cursor_change=True
-        )
-        self.addChild(self.btn_undo)
-
-        self.btn_redo = ui.components.Button(*rect_redo,
-            img_loader['button']['redo'],
-            img_loader['button']['redo_pressed'],
-            on_press=ui.getCallable(on_redo),
-            cursor_change=True
-        )
-        self.addChild(self.btn_redo)
-
         self.btn_find = ui.components.Button(*rect_find,
             img_loader['button']['search'],
             img_loader['button']['search_pressed'],
@@ -115,25 +99,6 @@ class ToolBar(ui.components.RectContainer):
             on_turn=ui.getCallable(on_switch_auto)
         )
         self.addChild(self.swch_auto)
-
-        self.type_box = ArmorIconsSelect(
-            20, 270,
-            on_select=ui.getCallable(on_type_change)
-        )
-        self.addChild(self.type_box)
-
-        var_path = VarArmorLabels()
-        self.scroll_box = StackedScrollView(
-            240, 320, 20, 490,
-            200, 30,
-            var_path.image_folder,
-            var_path.deserted_folder,
-            on_page_changed=ui.getCallable(on_scroll_page_change),
-            on_select=ui.getCallable(on_scroll_select),
-            on_desert=ui.getCallable(on_scroll_desert),
-            on_restore=ui.getCallable(on_scroll_restore)
-        )
-        self.addChild(self.scroll_box)
 
         self.navigator = Navigator(
             240, 30, 25, 450,

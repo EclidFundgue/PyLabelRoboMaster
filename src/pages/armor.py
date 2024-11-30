@@ -1,6 +1,5 @@
-import os
-
 from pygame import locals
+import os
 
 from .. import pygame_gui as ui
 from ..components.canvas.label import Label
@@ -8,9 +7,11 @@ from ..components.label_controllder import LabelController
 from ..components.scroll.line import (DesertedFileLine, ImageFileLine,
                                       _GenericFileLine)
 from ..components.stacked_page import StackedPage
-from ..components.toolbar import ToolBar
 from ..global_vars import VarArmorLabels
 from ..resources_loader import ConfigLoader, ImageLoader
+from ..components.scroll.stackedview import StackedScrollView
+from ..components.armor_type_select import ArmorIconsSelect
+from ..components.scroll.navigator import Navigator as ToolbarNavigator
 
 
 class ArmorPage(StackedPage):
@@ -19,59 +20,173 @@ class ArmorPage(StackedPage):
 
         self.page_incides = page_incides
 
-        cfg_loader = ConfigLoader()
+        # initialize basic variables
+        color_theme = ui.color.LightColorTheme()
         img_loader = ImageLoader()
-        # global variables
+        cfg_loader = ConfigLoader()
+        var_path = VarArmorLabels()
+
+        border_width = 1
+        navigator_h = 50
+        canvas_w = 3 * w // 4
+
+        self.label_controller = LabelController(
+            self.canvas_onSingleSelect
+        )
         self.var_armor_labels = VarArmorLabels(
             cfg_loader['user_data'],
             cfg_loader['image_folder'],
             cfg_loader['label_folder'],
             cfg_loader['deserted_image_folder']
         )
-        # components
-        self.toolbar = ToolBar(
-            1000, 0,
-            on_add=self.toolbar_onAdd,
-            on_delete=self.toolbar_onDelete,
-            on_undo=self.toolbar_onUndo,
-            on_redo=self.toolbar_onRedo,
-            on_find=self.toolbar_onFind,
-            on_correct=self.toolbar_onCorrect,
-            on_save=self.toolbar_onSave,
-            on_switch_preproc=self.toolbar_onSwitchPreproc,
-            on_switch_auto=self.toolbar_onSwitchAuto,
-            on_type_change=self.toolbar_onTypeChange,
-            on_scroll_page_change=self.toolbar_onScrollPageChange,
-            on_scroll_select=self.toolbar_onScrollSelect,
-            on_scroll_desert=self.toolbar_onScrollDesert,
-            on_scroll_restore=self.toolbar_onScrollRestore,
-            on_navigator_prev=self.toolbar_onNavigatorPrev,
-            on_navigator_next=self.toolbar_onNavigatorNext
-        )
-        self.label_controller = LabelController(
-            1000, 840, 0, 0,
-            on_single_select=self.canvas_onSingleSelect
-        )
 
-        self.back_button = ui.components.Button(
-            32, 32, 1230, 20,
+        # create components
+        # on page
+        navigator = ui.components.RectContainer(
+            w=w,
+            h=navigator_h - border_width,
+            x=0,
+            y=0
+        )
+        toolbar = ui.components.RectContainer(
+            w=w - canvas_w - border_width,
+            h=h - navigator_h,
+            x=canvas_w,
+            y=navigator_h
+        )
+        canvas = ui.components.RectContainer(
+            w=canvas_w,
+            h=h - navigator_h,
+            x=0,
+            y=navigator_h
+        )
+        border_navigator = ui.components.RectContainer(
+            w=w,
+            h=border_width,
+            x=0,
+            y=navigator_h - border_width
+        )
+        border_toolbar = ui.components.RectContainer(
+            w=border_width,
+            h=h - navigator_h,
+            x=canvas_w,
+            y=navigator_h - border_width
+        )
+        # on navigator
+        button_undo = ui.components.Button(
+            w=32,
+            h=32,
+            x=20,
+            y=0,
+            image=img_loader['button']['undo'],
+            pressed_image=img_loader['button']['undo_pressed'],
+            on_press=self.toolbar_onUndo,
+            cursor_change=True
+        )
+        button_redo = ui.components.Button(
+            w=32,
+            h=32,
+            x=80,
+            y=0,
+            image=img_loader['button']['redo'],
+            pressed_image=img_loader['button']['redo_pressed'],
+            on_press=self.toolbar_onRedo,
+            cursor_change=True
+        )
+        self.button_back = ui.components.Button(
+            w=32,
+            h=32,
+            x=w - 50,
+            y=0,
             image=img_loader['button']['back'],
             pressed_image=img_loader['button']['back_pressed'],
             on_press=self.onBack,
             cursor_change=True
         )
+        # on toolbar
+        self.type_box = ArmorIconsSelect(
+            x=20,
+            y=270,
+            on_select=self.toolbar_onTypeChange
+        )
+        self.scroll_box = StackedScrollView(
+            240, 320, 20, 490,
+            line_w=200,
+            line_h=30,
+            image_folder=var_path.image_folder,
+            deserted_folder=var_path.deserted_folder,
+            on_page_changed=self.toolbar_onScrollPageChange,
+            on_select=self.toolbar_onScrollSelect,
+            on_desert=self.toolbar_onScrollDesert,
+            on_restore=self.toolbar_onScrollRestore
+        )
+        self.toolbar_navigator = ToolbarNavigator(
+            240, 30, 25, 450,
+            num=self.scroll_box.getCurrentPageFileNumber(),
+            font_color=(0, 0, 0),
+            on_prev=self.toolbar_onNavigatorPrev,
+            on_next=self.toolbar_onNavigatorNext
+        )
 
-        # -------------------- configure components --------------------
-        color_theme = ui.color.LightColorTheme()
-        self.toolbar.setBackgroundColor(color_theme.SurfaceVariant)
-        self.toolbar.scroll_box.reloadByGlobalVar()
-        self._reloadNavigator()
-        self.label_controller.getCanvas().setBackgroundColor(color_theme.Surface)
-        self.label_controller.reload()
-        self.back_button.layer = 10
-        self.setBackgroundColor(color_theme.SurfaceVariant)
+        # set component styles
+        navigator.setBackgroundColor(color_theme.dark(color_theme.Surface, 3))
+        toolbar.setBackgroundColor(color_theme.dark(color_theme.Surface, 2))
+        canvas.setBackgroundColor(color_theme.Surface)
+        border_navigator.setBackgroundColor(color_theme.Outline)
+        border_toolbar.setBackgroundColor(color_theme.OutlineVariant)
 
-        # -------------------- add event listeners --------------------
+        navigator.alignVerticalCenter(button_undo)
+        navigator.alignVerticalCenter(button_redo)
+        navigator.alignVerticalCenter(self.button_back)
+
+        self.label_controller.createCanvas(canvas_w, h - navigator_h, 0, 0)
+
+        # manage component hierarchy
+        self.addChild(navigator)
+        self.addChild(toolbar)
+        self.addChild(canvas)
+        self.addChild(border_navigator)
+        self.addChild(border_toolbar)
+        navigator.addChild(button_undo)
+        navigator.addChild(button_redo)
+        navigator.addChild(self.button_back)
+        toolbar.addChild(self.type_box)
+        toolbar.addChild(self.scroll_box)
+        toolbar.addChild(self.toolbar_navigator)
+        canvas.addChild(self.label_controller.getCanvas())
+
+        # # components
+        # self.toolbar = ToolBar(
+        #     1000, 0,
+        #     on_add=self.toolbar_onAdd,
+        #     on_delete=self.toolbar_onDelete,
+        #     on_undo=self.toolbar_onUndo,
+        #     on_redo=self.toolbar_onRedo,
+        #     on_find=self.toolbar_onFind,
+        #     on_correct=self.toolbar_onCorrect,
+        #     on_save=self.toolbar_onSave,
+        #     on_switch_preproc=self.toolbar_onSwitchPreproc,
+        #     on_switch_auto=self.toolbar_onSwitchAuto,
+        #     on_type_change=self.toolbar_onTypeChange,
+        #     on_scroll_page_change=self.toolbar_onScrollPageChange,
+        #     on_scroll_select=self.toolbar_onScrollSelect,
+        #     on_scroll_desert=self.toolbar_onScrollDesert,
+        #     on_scroll_restore=self.toolbar_onScrollRestore,
+        #     on_navigator_prev=self.toolbar_onNavigatorPrev,
+        #     on_navigator_next=self.toolbar_onNavigatorNext
+        # )
+
+        # # -------------------- configure components --------------------
+        # color_theme = ui.color.LightColorTheme()
+        # self.toolbar.setBackgroundColor(color_theme.SurfaceVariant)
+        # self.toolbar.scroll_box.reloadByGlobalVar()
+        # self._reloadNavigator()
+        # self.label_controller.getCanvas().setBackgroundColor(color_theme.Surface)
+        # self.label_controller.reload()
+        # self.back_button.layer = 10
+        # self.setBackgroundColor(color_theme.SurfaceVariant)
+
+        # add event listeners
         self.addKeydownEvent(locals.K_q, self.keyboard_PrevImage)
         self.addKeydownEvent(locals.K_e, self.keyboard_NextImage)
         self.addKeydownEvent(locals.K_f, self.keyboard_Relabel)
@@ -89,21 +204,16 @@ class ArmorPage(StackedPage):
         self.addKeydownEvent(locals.K_r, lambda: self.keyboard_ColorChange(1))
         self.addKeyCtrlEvent(locals.K_f, self.keyboard_SwitchAuto)
 
-        # -------------------- succeed management --------------------
-        self.addChild(self.toolbar)
-        self.addChild(self.label_controller.getCanvas())
-        self.addChild(self.back_button)
-
     def _reloadNavigator(self) -> None:
-        page = self.toolbar.scroll_box.pages[self.var_armor_labels.curr_page]
+        page = self.scroll_box.pages[self.var_armor_labels.curr_page]
         image_path = self.var_armor_labels.getCurrentImagePath()
 
         if image_path is None:
-            self.toolbar.navigator.setInfomation(filename='', idx=0, num=0)
+            self.toolbar_navigator.setInfomation(filename='', idx=0, num=0)
             return
 
         image_file = os.path.split(image_path)[1]
-        self.toolbar.navigator.setInfomation(
+        self.toolbar_navigator.setInfomation(
             filename=image_file,
             idx=page.getSelectedIndex(),
             num=page.getFileNumber()
@@ -113,23 +223,23 @@ class ArmorPage(StackedPage):
         self.setPage(self.page_incides['main_menu'])
 
     def keyboard_PrevImage(self) -> None:
-        self.toolbar.scroll_box.selectPrev()
+        self.scroll_box.selectPrev()
         self.label_controller.reload()
         self.var_armor_labels.saveUserData()
 
     def keyboard_NextImage(self) -> None:
-        self.toolbar.scroll_box.selectNext()
+        self.scroll_box.selectNext()
         self.label_controller.reload()
         self.var_armor_labels.saveUserData()
 
     def keyboard_TypeChange(self, type_id: int) -> None:
         self.var_armor_labels.setType(type_id)
-        self.toolbar.type_box.setType(self.var_armor_labels.curr_type)
+        self.type_box.setType(self.var_armor_labels.curr_type)
         self.label_controller.setSelectedType(self.var_armor_labels.curr_type)
 
     def keyboard_ColorChange(self, color_id: int) -> None:
         self.var_armor_labels.setColor(color_id)
-        self.toolbar.type_box.setType(self.var_armor_labels.curr_type)
+        self.type_box.setType(self.var_armor_labels.curr_type)
         self.label_controller.setSelectedType(self.var_armor_labels.curr_type)
 
     def keyboard_Relabel(self) -> None:
@@ -193,31 +303,31 @@ class ArmorPage(StackedPage):
 
     def toolbar_onScrollDesert(self, idx: int, file_line: ImageFileLine) -> None:
         self.var_armor_labels.delete(file_line.filename)
-        self.toolbar.scroll_box.addLine(1, DesertedFileLine(
+        self.scroll_box.addLine(1, DesertedFileLine(
             file_line.w, file_line.h, file_line.filename
         ))
         self.var_armor_labels.saveUserData()
 
     def toolbar_onScrollRestore(self, idx: int, file_line: DesertedFileLine) -> None:
         self.var_armor_labels.restore(file_line.filename)
-        self.toolbar.scroll_box.addLine(0, ImageFileLine(
+        self.scroll_box.addLine(0, ImageFileLine(
             file_line.w, file_line.h, file_line.filename
         ))
 
     def toolbar_onNavigatorPrev(self) -> None:
-        self.toolbar.scroll_box.selectPrev()
+        self.scroll_box.selectPrev()
         self._reloadNavigator()
         self.label_controller.reload()
         self.var_armor_labels.saveUserData()
 
     def toolbar_onNavigatorNext(self) -> None:
-        self.toolbar.scroll_box.selectNext()
+        self.scroll_box.selectNext()
         self._reloadNavigator()
         self.label_controller.reload()
         self.var_armor_labels.saveUserData()
 
     def canvas_onSingleSelect(self, label: Label) -> None:
-        self.toolbar.type_box.setType(label.type_id)
+        self.type_box.setType(label.type_id)
 
     def kill(self) -> None:
         self.toolbar = None

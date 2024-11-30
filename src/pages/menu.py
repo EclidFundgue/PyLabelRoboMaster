@@ -13,25 +13,42 @@ class MainMenu(StackedPage):
 
         self.page_incidies = page_incidies
 
+        # initialize basic variables
         color_theme = ui.color.LightColorTheme()
         font = pygame.font.SysFont('microsoftyaheibold', 40)
         font_small = pygame.font.SysFont('microsoftyaheibold', 30)
 
-        # settings
-        container_w = w // 3
-        container_h = h - 40
-        padding = 20
+        settings_w = w // 3
+        settings_h = h - 40
+        settings_pad = 20
+
+        button_w = 300
+        button_h = 50
+        button_padx = 50
+        button_pady = 50
+
+        # create components
+        clock = Clock(20, 700)
         self.settings_container = ui.components.RoundedRectContainer(
-            container_w, container_h, 2 * w // 3 - padding, padding,
-            radius=padding
+            w=settings_w,
+            h=settings_h,
+            x=2 * w // 3 - settings_pad,
+            y=settings_pad,
+            radius=settings_pad
         )
         settings_label = ui.components.Label(
-            container_w, 35, 0, padding,
+            w=settings_w,
+            h=35,
+            x=0,
+            y=settings_pad,
             text='Settings',
             font=font,
         )
         load_network_switch = NTextSwitch(
-            container_w - 2 * padding, 45, 0, padding + container_h // 10,
+            w=settings_w - 2 * settings_pad,
+            h=45,
+            x=0,
+            y=settings_pad + settings_h // 10,
             num_states=2,
             texts=['Load Network: Off', 'Load Network: On'],
             font=font_small,
@@ -40,7 +57,26 @@ class MainMenu(StackedPage):
             on_turn=self._onLoadNetworkSwitch,
             cursor_change=True
         )
+        button_armor = ui.components.TextButton(
+            w=button_w,
+            h=button_h,
+            x=button_padx,
+            y=button_pady,
+            text='Armor',
+            on_press=self._onPageChangeArmor,
+            cursor_change=True
+        )
+        button_buff = ui.components.TextButton(
+            w=button_w,
+            h=button_h,
+            x=button_padx,
+            y=button_pady + 70,
+            text='Buff',
+            cursor_change=True
+        )
 
+        # set component styles
+        self.setBackgroundColor(color_theme.Surface)
         self.settings_container.setBackgroundColor(color_theme.SurfaceVariant)
         settings_label.setAlignment(
             align_x=ui.constants.ALIGN_CENTER,
@@ -48,43 +84,16 @@ class MainMenu(StackedPage):
         )
         self.settings_container.alignHorizontalCenter(settings_label)
         self.settings_container.alignHorizontalCenter(load_network_switch)
+        button_armor.setFont(font)
+        button_buff.setFont(font)
 
+        # manage component hierarchy
+        self.addChild(clock)
+        self.addChild(self.settings_container)
+        self.addChild(button_armor)
+        self.addChild(button_buff)
         self.settings_container.addChild(settings_label)
         self.settings_container.addChild(load_network_switch)
-        self.addChild(self.settings_container)
-
-        # labeling button
-        paddingx = 50
-        paddingy = 40
-        btn_armor = ui.components.TextButton(
-            300, 50, paddingx, paddingy,
-            text='Armor',
-            on_press=self._onPageChangeArmor,
-            cursor_change=True
-        )
-        btn_armor.setFont(font)
-        self.addChild(btn_armor)
-
-        btn_buff = ui.components.TextButton(
-            300, 50, paddingx, paddingy + 70,
-            text='Buff',
-            cursor_change=True
-        )
-        btn_buff.setFont(font)
-        self.addChild(btn_buff)
-
-        # clock
-        clock = Clock(20, 700)
-        self.addChild(clock)
-
-        # backgrounds
-        self.setBackgroundColor(color_theme.Surface)
-
-    def _onPageChangeLabeling(self) -> None:
-        self.setPage(self.page_incidies['labeling_menu'])
-
-    def _onPageChangeSetting(self) -> None:
-        self.setPage(self.page_incidies['setting_menu'])
 
     def _onLoadNetworkSwitch(self, state: int) -> None:
         loader = ConfigLoader()
