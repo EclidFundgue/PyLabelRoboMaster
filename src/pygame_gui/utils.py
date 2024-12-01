@@ -1,6 +1,6 @@
+import os
 import threading
 from typing import Callable, Tuple, Union
-import os
 
 import pygame
 
