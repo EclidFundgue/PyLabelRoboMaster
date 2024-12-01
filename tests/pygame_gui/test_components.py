@@ -1,14 +1,16 @@
+import os
+import sys
 import unittest
 from unittest.mock import MagicMock
+
 import pygame
-import sys
-import os
 
 print(os.path.dirname(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from src.pygame_gui.components.root import *
 from src.pygame_gui.components.base import *
+from src.pygame_gui.components.root import *
+
 
 class TestRoot(unittest.TestCase):
     def setUp(self):
