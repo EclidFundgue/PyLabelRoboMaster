@@ -29,7 +29,3 @@ class TestRoot(unittest.TestCase):
     def test_init(self):
         root = Root()
         self.assertIsInstance(root, Root)
-    
-
-if __name__ == "__main__":
-    unittest.main()
