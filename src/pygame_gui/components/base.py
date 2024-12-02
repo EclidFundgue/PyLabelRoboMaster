@@ -176,3 +176,16 @@ class Base:
         ''' Needs to be implemented by child class. '''
 
     # ---------- Kill ---------- #
+    def kill(self) -> None:
+        self.removeDeadChildren()
+
+        if not self.alive:
+            logger.warning(f'{self} has already been killed.', self)
+
+        for ch in self._children:
+            ch.kill()
+        self._parent = None
+        self._children = None
+
+        self.alive = False
+        self.active = False
