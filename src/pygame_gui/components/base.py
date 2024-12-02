@@ -56,6 +56,7 @@ class Base:
         self.layer: int = 0
         self.redraw_parent: bool = True
         self.alive: bool = True
+        self.active: bool = False
 
         # internal variables
         self._parent: Base = None
@@ -152,9 +153,11 @@ class Base:
     def getRect(self) -> Tuple[int]:
         ''' (w, h, x, y) '''
         return (self.w, self.h, self.x, self.y)
-
-    # ---------- Draw ---------- #
-    def draw(self, surface: pygame.Surface) -> None:
+    
+    def isHovered(self, x: int, y: int) -> bool:
+        return 0 <= x <= self.w and 0 <= y <= self.h
+    
+    def update(self, x: int, y: int, wheel: int) -> None:
         ''' Needs to be implemented by child class. '''
 
     # ---------- Draw ---------- #
