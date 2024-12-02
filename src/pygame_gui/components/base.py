@@ -38,6 +38,14 @@ class _RedrawNode:
             subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
             child.drawRecurse(subsurface)
 
+    def drawAll(self, surface: pygame.Surface) -> None:
+        self.component.draw(surface)
+        for ch_comp in self.component._children:
+            child = _RedrawNode(ch_comp, True)
+            w, h, x, y = utils.clipRect(child.component.getRect(), surface)
+            subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
+            child.drawAll(subsurface)
+
 class Base:
     # ---------- Special Methods ---------- #
     def __init__(self, w: int, h: int, x: int, y: int):
@@ -149,6 +157,7 @@ class Base:
     def draw(self, surface: pygame.Surface) -> None:
         ''' Needs to be implemented by child class. '''
 
+    # ---------- Draw ---------- #
     def _redrawRecurse(self, redraw_chain: List[_RedrawNode]) -> None:
         redraw_chain.append(_RedrawNode(self._parent, self.redraw_parent))
         self._parent._redrawRecurse(redraw_chain)
@@ -159,5 +168,8 @@ class Base:
 
         redraw_chain = [_RedrawNode(self, True)]
         self._redrawRecurse(redraw_chain)
+
+    def draw(self, surface: pygame.Surface) -> None:
+        ''' Needs to be implemented by child class. '''
 
     # ---------- Kill ---------- #

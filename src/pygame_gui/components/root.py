@@ -19,7 +19,8 @@ class Root(Base):
         self.redraw_tree.updateRecurse(redraw_chain)
 
     def redraw(self):
-        logger.warning("Root can not be redrawn directly.", self)
+        self.redraw_tree.drawAll(self.screen)
+        pygame.display.flip()
 
     def draw(self, surface: pygame.Surface = None) -> None:
         # drawRecurse will call this method with surface
