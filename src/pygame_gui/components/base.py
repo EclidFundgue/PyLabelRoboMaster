@@ -3,6 +3,7 @@ from typing import Callable, List, Tuple
 import pygame
 
 from .. import logger, utils
+from .events import KeyboardEventHandler
 
 
 class _RedrawNode:
@@ -87,29 +88,35 @@ class Base:
     def onMouseLeave(self) -> None: ...
 
     # ---------- Keyboard Events ---------- #
-    def addKeydownEvent(self, key: int, func: Callable, target = None, once = False) -> None:
+    def addKeyDownEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        # self._listener.addEventListener(ET.KEY_DOWN, func, target, key, once)
+        handler = KeyboardEventHandler()
+        handler.addKeyDownEvent(func, target, key, once)
 
     def addKeyPressEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        # self._listener.addEventListener(ET.KEY_PRESS, func, target, key, once)
+        handler = KeyboardEventHandler()
+        handler.addKeyPressEvent(func, target, key, once)
 
-    def addKeyReleaseEvent(self, key: int, func: Callable, target = None, once = False) -> None:
+    def addKeyUpEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        # self._listener.addEventListener(ET.KEY_UP, func, target, key, once)
+        handler = KeyboardEventHandler()
+        handler.addKeyUpEvent(func, target, key, once)
 
     def addKeyCtrlEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        # self._listener.addEventListener(ET.KEY_CTRL, func, target, key, once)
+        handler = KeyboardEventHandler()
+        handler.addKeyCtrlEvent(func, target, key, once)
 
     def removeEvents(self, target: str = None) -> None:
         if target is None:
             target = str(id(self))
+        handler = KeyboardEventHandler()
+        handler.removeEvent(target)
 
     # ---------- Child Management ---------- #
     def removeDeadChildren(self) -> None:

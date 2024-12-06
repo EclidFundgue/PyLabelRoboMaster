@@ -1,56 +1,10 @@
-from typing import List, Tuple
+from typing import List
 
 import pygame
 
-from .. import logger
 from .base import Base, _RedrawNode
+from .events import KeyboardEventHandler, MouseEventHandler
 
-
-class MouseEventHandler:
-    LEFT = 0
-    MID = 1
-    RIGHT = 2
-    ALL = 3
-
-    def __init__(self):
-        self.x: int = 0
-        self.y: int = 0
-        self.vx: int = 0
-        self.vy: int = 0
-        self.wheel: int = 0
-        self.buttons_last: Tuple[bool, bool, bool] = (0, 0, 0)
-        self.buttons_now: Tuple[bool, bool, bool] = (0, 0, 0)
-        self.is_down: bool = False
-        self.is_up: bool = False
-        self.motion: bool = False
-
-    def update(self, x: int, y: int) -> None:
-        self.vx = x - self.x
-        self.vy = y - self.y
-        self.x = x
-        self.y = y
-        self.buttons_last = self.buttons_now
-        self.buttons_now = pygame.mouse.get_pressed()
-
-        self.wheel = 0
-        self.is_down = False
-        self.is_up = False
-        self.motion = False
-
-    def down(self, key: int = ALL) -> bool:
-        if key == self.ALL:
-            return self.is_down
-        return (not self.buttons_last[key]) and self.buttons_now[key]
-
-    def up(self, key: int = ALL) -> bool:
-        if key == self.ALL:
-            return self.is_up
-        return self.buttons_last[key] and (not self.buttons_now[key])
-
-    def pressed(self, key: int = ALL) -> bool:
-        if key == self.ALL:
-            return any(self.buttons_now)
-        return self.buttons_now[key]
 
 def updateRecurse(
     obj: Base,
@@ -113,6 +67,7 @@ class Root(Base):
 
         self.redraw_tree: _RedrawNode = _RedrawNode(self, False)
         self.mouse = MouseEventHandler()
+        self.keyboard = KeyboardEventHandler()
 
     def _redrawRecurse(self, redraw_chain: List[_RedrawNode]) -> None:
         self.redraw_tree.needs_redraw = True
@@ -120,6 +75,7 @@ class Root(Base):
 
     def update(self, events: List[pygame.event.Event]) -> None:
         self.mouse.update(*pygame.mouse.get_pos())
+        self.keyboard.update()
 
         for event in events:
             if event.type == pygame.MOUSEWHEEL:
@@ -130,6 +86,10 @@ class Root(Base):
                 self.mouse.is_up = True
             elif event.type == pygame.MOUSEMOTION:
                 self.mouse.motion = True
+            elif event.type == pygame.KEYDOWN:
+                self.keyboard.is_down = True
+            elif event.type == pygame.KEYUP:
+                self.keyboard.is_up = True
 
         for ch in self._children:
             updateRecurse(ch, 0, 0, self.mouse)
