@@ -60,8 +60,7 @@ class _RedrawNode:
         self.needs_redraw_children = []
 
 class Base:
-    '''
-    Methods:
+    '''Methods:
     1. ----- Mouse Events -----
     * on [Left/Mid/Right] Click(x, y) -> None
     * on [Left/Mid/Right] Press(x, y) -> None

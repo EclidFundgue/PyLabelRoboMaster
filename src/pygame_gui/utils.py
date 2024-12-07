@@ -67,3 +67,24 @@ def singleton(cls: type):
         return instances[cls]
 
     return get_instance
+
+def drawRoundedRect(
+    surface: pygame.Surface,
+    color: Tuple[int, int, int],
+    rect: Union[pygame.Rect, Tuple[int, int, int, int]],
+    radius: float,
+) -> None:
+    if isinstance(rect, tuple):
+        rect = pygame.Rect(rect)
+
+    xl, xr = rect.left + radius, rect.right - radius
+    yt, yb = rect.top + radius, rect.bottom - radius
+    # draw rounded corners
+    pygame.draw.circle(surface, color, (xl, yt), radius)
+    pygame.draw.circle(surface, color, (xr, yt), radius)
+    pygame.draw.circle(surface, color, (xl, yb), radius)
+    pygame.draw.circle(surface, color, (xr, yb), radius)
+
+    # fill center
+    pygame.draw.rect(surface, color, (rect.left, yt, rect.width, rect.height - radius * 2))
+    pygame.draw.rect(surface, color, (xl, rect.top, rect.width - radius * 2, rect.height))

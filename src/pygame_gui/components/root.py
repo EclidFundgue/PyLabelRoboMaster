@@ -18,8 +18,8 @@ def updateRecurse(
 
     # mouse events callbacks
     active = obj.isHovered(x, y)
-    on_enter = obj.active and not active
-    on_leave = not obj.active and active
+    on_enter = not obj.active and active
+    on_leave = obj.active and not active
     obj.active = active
     if on_enter:
         obj.onMouseEnter()
