@@ -3,7 +3,6 @@ from typing import Tuple
 
 from . import logger
 
-
 INTERP_LINEAR = 0
 INTERP_POLY2 = 1
 INTERP_POLYN1 = 2

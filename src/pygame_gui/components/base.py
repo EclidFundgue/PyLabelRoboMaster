@@ -14,40 +14,87 @@ class _RedrawNode:
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} ' \
-               f'component={self.component}'
+               f'component={self.component}' \
+               f'redraw={self.needs_redraw}>'
 
-    def updateRecurse(self, redraw_chain: List['_RedrawNode']) -> None:
-        # the last element in redraw_chain is the current node
-        if redraw_chain.pop().needs_redraw:
+    def merge(self, other: '_RedrawNode') -> '_RedrawNode':
+        if other.component is not self.component:
+            logger.error(f'Cannot merge redraw nodes for different components', ValueError, self)
+
+        if other.needs_redraw or self.needs_redraw:
             self.needs_redraw = True
-
-        if len(redraw_chain) == 0:
+            self.needs_redraw_children = []
             return
 
-        child_redraw_node = redraw_chain[-1]
-        if not child_redraw_node in self.needs_redraw_children:
-            self.needs_redraw_children.append(child_redraw_node)
-        child_redraw_node.updateRecurse(redraw_chain)
+        if len(other.needs_redraw_children) == 0:
+            logger.error('Leave node needs_redraw == False.', ValueError, self)
+        elif len(other.needs_redraw_children) != 1:
+            logger.error('Cannot merge redraw nodes with multiple children.', ValueError, self)
 
-    def drawRecurse(self, surface: pygame.Surface) -> None:
+        child = other.needs_redraw_children[0]
+        for my_child in self.needs_redraw_children:
+            if my_child.component is child.component:
+                my_child.merge(child)
+                return
+
+        self.needs_redraw_children.append(child)
+        child.merge(child)
+
+    def draw(self, surface: pygame.Surface) -> None:
         if self.needs_redraw:
             self.component.draw(surface)
-            self.needs_redraw = False
+            for child in self.component._children:
+                child_node = _RedrawNode(child, True)
+                w, h, x, y = utils.clipRect(child_node.component.getRect(), surface)
+                subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
+                child_node.draw(subsurface)
+            return
 
         for child in self.needs_redraw_children:
             w, h, x, y = utils.clipRect(child.component.getRect(), surface)
             subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
-            child.drawRecurse(subsurface)
+            child.draw(subsurface)
 
-    def drawAll(self, surface: pygame.Surface) -> None:
-        self.component.draw(surface)
-        for ch_comp in self.component._children:
-            child = _RedrawNode(ch_comp, True)
-            w, h, x, y = utils.clipRect(child.component.getRect(), surface)
-            subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
-            child.drawAll(subsurface)
+    def clear(self) -> None:
+        self.needs_redraw = False
+        self.needs_redraw_children = []
 
 class Base:
+    '''
+    Methods:
+    1. ----- Mouse Events -----
+    * on [Left/Mid/Right] Click(x, y) -> None
+    * on [Left/Mid/Right] Press(x, y) -> None
+    * on [Left/Mid/Right] Drag(vx, vy) -> None
+    * on [Left/Mid/Right] Release() -> None
+    * onMouseEnter() -> None
+    * onMouseLeave() -> None
+
+    2. ----- Keyboard Events -----
+    * addKeyDownEvent(key, func, target, once) -> None
+    * addKeyPressEvent(key, func, target, once) -> None
+    * addKeyUpEvent(key, func, target, once) -> None
+    * addKeyCtrlEvent(key, func, target, once) -> None
+    * removeEvents(target) -> None
+
+    3. ----- Child Management -----
+    * removeDeadChildren() -> None
+    * addChild(child) -> None
+    * removeChild(child) -> None
+    * setChildren(children) -> None
+
+    4. ----- Update -----
+    * getRect() -> Tuple[int, int, int, int]
+    * isHovered(x, y) -> bool
+    * update(x, y, wheel) -> None
+
+    5. ----- Draw -----
+    * redraw() -> None
+    * draw(surface) -> None
+
+    6. ----- Kill -----
+    * kill() -> None
+    '''
     # ---------- Special Methods ---------- #
     def __init__(self, w: int, h: int, x: int, y: int):
         self.w = w
@@ -168,16 +215,14 @@ class Base:
         ''' Needs to be implemented by child class. '''
 
     # ---------- Draw ---------- #
-    def _redrawRecurse(self, redraw_chain: List[_RedrawNode]) -> None:
-        redraw_chain.append(_RedrawNode(self._parent, self.redraw_parent))
-        self._parent._redrawRecurse(redraw_chain)
-
-    def redraw(self) -> None:
+    def _submitDrawStack(self, redraw_stack: List['Base']) -> None:
         if self._parent is None:
             logger.error('No parent set for this component.', AttributeError, self)
+        redraw_stack.append(self._parent)
+        self._parent._submitDrawStack(redraw_stack)
 
-        redraw_chain = [_RedrawNode(self, True)]
-        self._redrawRecurse(redraw_chain)
+    def redraw(self) -> None:
+        self._submitDrawStack([self])
 
     def draw(self, surface: pygame.Surface) -> None:
         ''' Needs to be implemented by child class. '''

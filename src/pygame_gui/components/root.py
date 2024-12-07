@@ -69,9 +69,15 @@ class Root(Base):
         self.mouse = MouseEventHandler()
         self.keyboard = KeyboardEventHandler()
 
-    def _redrawRecurse(self, redraw_chain: List[_RedrawNode]) -> None:
-        self.redraw_tree.needs_redraw = True
-        self.redraw_tree.updateRecurse(redraw_chain)
+    def _submitDrawStack(self, redraw_stack: List[Base]) -> None:
+        redraw_chain = _RedrawNode(redraw_stack[0], True)
+        for i in range(1, len(redraw_stack)):
+            needs_redraw = redraw_chain.needs_redraw and redraw_chain.component.redraw_parent
+            tmp_node = _RedrawNode(redraw_stack[i], needs_redraw)
+            tmp_node.needs_redraw_children.append(redraw_chain)
+            redraw_chain = tmp_node
+
+        self.redraw_tree.merge(redraw_chain)
 
     def update(self, events: List[pygame.event.Event]) -> None:
         self.mouse.update(*pygame.mouse.get_pos())
@@ -95,15 +101,14 @@ class Root(Base):
             updateRecurse(ch, 0, 0, self.mouse)
 
     def redraw(self):
-        self.redraw_tree.drawAll(self.screen)
-        pygame.display.flip()
+        self.redraw_tree.clear()
+        self.redraw_tree.needs_redraw = True
 
     def draw(self, surface: pygame.Surface = None) -> None:
         # drawRecurse will call this method with surface
         # to avoid infinite recursion, only call drawRecurse with no surface
         if surface is not None:
             return
-        if not self.redraw_tree.needs_redraw:
-            return
-        self.redraw_tree.drawRecurse(self.screen)
+        self.redraw_tree.draw(self.screen)
+        self.redraw_tree.clear()
         pygame.display.flip()
