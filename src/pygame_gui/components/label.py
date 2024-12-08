@@ -86,8 +86,5 @@ class Label(Base):
             else:
                 logger.error(f"Invalid align_y: {align_y}", ValueError, self)
 
-        if with_redraw and (align_x is not None or align_y is not None):
-            self.redraw()
-
     def draw(self, surface: Surface) -> None:
         surface.blit(self.text_surface, (self.padx, self.pady))

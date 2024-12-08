@@ -156,11 +156,9 @@ class TextButton(_Button):
 
     def setFont(self, font: pygame.font.Font) -> None:
         self.label.setFont(font)
-        self.label.redraw()
 
     def setText(self, text: str) -> None:
         self.label.setText(text)
-        self.label.redraw()
 
     def kill(self):
         self.label = None
