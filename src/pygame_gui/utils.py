@@ -11,12 +11,14 @@ def clipRect(
     rect: Tuple[int, int, int, int],
     surface: pygame.Surface
 ) -> Tuple[int, int, int, int]:
-    w, h, x, y = rect
-    x = max(0, min(x, surface.get_width() - 1))
-    y = max(0, min(y, surface.get_height() - 1))
-    w = max(0, min(w, surface.get_width() - x))
-    h = max(0, min(h, surface.get_height() - y))
-    return (w, h, x, y)
+    w, h, xl, yt = rect
+    xr = xl + w
+    yb = yt + h
+    xl = max(0, min(xl, surface.get_width()))
+    yt = max(0, min(yt, surface.get_height()))
+    xr = max(0, min(xr, surface.get_width()))
+    yb = max(0, min(yb, surface.get_height()))
+    return (xr - xl, yb - yt, xl, yt)
 
 def __emtpyFunc(*args, **kwargs):
     pass
