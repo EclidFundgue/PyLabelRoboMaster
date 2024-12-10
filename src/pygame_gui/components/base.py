@@ -216,7 +216,7 @@ class Base:
     # ---------- Draw ---------- #
     def _submitDrawStack(self, redraw_stack: List['Base']) -> None:
         if self._parent is None:
-            logger.error('No parent set for this component.', AttributeError, self)
+            return
         redraw_stack.append(self._parent)
         self._parent._submitDrawStack(redraw_stack)
 

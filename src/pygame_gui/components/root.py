@@ -14,7 +14,7 @@ def updateRecurse(
 ) -> None:
     x = mouse.x - parent_x - obj.x
     y = mouse.y - parent_y - obj.y
-    obj.update(x, y, mouse.wheel)
+    obj.removeDeadChildren()
 
     # mouse events callbacks
     active = obj.isHovered(x, y)
@@ -56,6 +56,7 @@ def updateRecurse(
         if mouse.up(mouse.RIGHT):
             obj.onRightRelease()
 
+    obj.update(x, y, mouse.wheel)
     for ch in obj._children:
         updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse)
 
