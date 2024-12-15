@@ -105,11 +105,11 @@ class Root(Base):
         self.redraw_tree.clear()
         self.redraw_tree.needs_redraw = True
 
-    def draw(self, surface: pygame.Surface = None) -> None:
+    def draw(self, surface: pygame.Surface = None, x_start: int = 0, y_start: int = 0) -> None:
         # drawRecurse will call this method with surface
         # to avoid infinite recursion, only call drawRecurse with no surface
         if surface is not None:
             return
-        self.redraw_tree.draw(self.screen)
+        self.redraw_tree.draw(self.screen, x_start, y_start)
         self.redraw_tree.clear()
         pygame.display.flip()

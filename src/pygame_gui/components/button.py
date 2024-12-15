@@ -109,7 +109,7 @@ class IconButton(_Button):
             pressed_image = image
         self.pressed_image = utils.loadImage(pressed_image, w, h)
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if self.pressed:
             surface.blit(self.pressed_image, (0, 0))
         else:
@@ -160,7 +160,7 @@ class TextButton(_Button):
     def setText(self, text: str) -> None:
         self.label.setText(text)
 
-    def kill(self):
+    def kill(self) -> None:
         self.label = None
         super().kill()
 
@@ -181,11 +181,11 @@ class TextButton(_Button):
         if color != self.label.color:
             self.label.setColor(color)
 
-    def update(self, x, y, wheel):
+    def update(self, x, y, wheel) -> None:
         self._updateSmoothColor()
         self._updateTextColor()
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         utils.drawRoundedRect(
             surface,
             color=self.current_color,

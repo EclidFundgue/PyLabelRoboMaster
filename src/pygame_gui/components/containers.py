@@ -1,4 +1,4 @@
-from pygame import Surface
+import pygame
 
 from .. import utils
 from .base import Base
@@ -31,7 +31,7 @@ class Container(Base):
         self.alignVerticalCenter(obj)
 
 class RectContainer(Container):
-    def draw(self, surface: Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if self.backgournd_color is not None:
             surface.fill(self.backgournd_color)
 
@@ -40,7 +40,7 @@ class RoundedRectContainer(Container):
         super().__init__(w, h, x, y)
         self.radius = radius
 
-    def draw(self, surface: Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if self.backgournd_color is not None:
             utils.drawRoundedRect(
                 surface,

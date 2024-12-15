@@ -40,20 +40,26 @@ class _RedrawNode:
         self.needs_redraw_children.append(child)
         child.merge(child)
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def _drawChildNode(self, surface: pygame.Surface, child: '_RedrawNode') -> None:
+        w, h, x, y = child.component.getRect()
+        x += min(0, self.component.x)
+        y += min(0, self.component.y)
+        x_start = min(0, x)
+        y_start = min(0, y)
+        w, h, x, y = utils.clipRect((w, h, x, y), surface)
+        subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
+        child.draw(subsurface, x_start, y_start)
+
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if self.needs_redraw:
-            self.component.draw(surface)
+            self.component.draw(surface, x_start, y_start)
             for child in self.component._children:
                 child_node = _RedrawNode(child, True)
-                w, h, x, y = utils.clipRect(child_node.component.getRect(), surface)
-                subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
-                child_node.draw(subsurface)
+                self._drawChildNode(surface, child_node)
             return
 
         for child in self.needs_redraw_children:
-            w, h, x, y = utils.clipRect(child.component.getRect(), surface)
-            subsurface = surface.subsurface(pygame.Rect(x, y, w, h))
-            child.draw(subsurface)
+            self._drawChildNode(surface, child)
 
     def clear(self) -> None:
         self.needs_redraw = False
@@ -223,7 +229,7 @@ class Base:
     def redraw(self) -> None:
         self._submitDrawStack([self])
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         ''' Needs to be implemented by child class. '''
 
     # ---------- Kill ---------- #
