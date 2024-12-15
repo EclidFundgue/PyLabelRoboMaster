@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable, Tuple, Union
 
 import pygame
 
@@ -39,6 +39,13 @@ class _Button(Base):
         self.pressed = False
 
         self.cursor_change = cursor_change
+
+    def resetState(self) -> None:
+        self.pressed = False
+        self.active = False
+        self.continue_press_time = 0
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def kill(self) -> None:
         self.on_press = None
@@ -192,3 +199,55 @@ class TextButton(_Button):
             rect=surface.get_rect(),
             radius=min(self.w, self.h) // 4
         )
+
+class CloseButton(_Button):
+    def __init__(self,
+            w: int, h: int, x: int, y: int,
+            color: Tuple[int, int, int],
+            cross_color: Tuple[int, int, int] = (255, 255, 255),
+            on_press: Callable = None,
+            continue_press = -1,
+            cursor_change: bool = False):
+        super().__init__(
+            w, h, x, y,
+            on_press,
+            continue_press,
+            cursor_change
+        )
+
+        color_theme = LightColorTheme()
+
+        self.color = color
+        self.color2 = color_theme.Error # hovered
+        self.color3 = color_theme.light(color_theme.Error, 5) # pressed
+        self.cross_color = cross_color
+
+        self.smooth_color = timer.TimedColor(0.1, self.color)
+        self.current_color = self.smooth_color.getCurrentColor()
+
+    def resetState(self) -> None:
+        super().resetState()
+        self.smooth_color.setColor(self.color, False)
+        self.current_color = self.smooth_color.getCurrentColor()
+
+    def update(self, x, y, wheel) -> None:
+        if self.pressed:
+            self.smooth_color.setColor(self.color3)
+        elif self.active:
+            self.smooth_color.setColor(self.color2)
+        else:
+            self.smooth_color.setColor(self.color)
+
+        if self.smooth_color.getCurrentColor() != self.current_color:
+            self.current_color = self.smooth_color.getCurrentColor()
+            self.redraw()
+
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
+        surface.fill(self.current_color)
+
+        cx = self.w // 2 + x_start
+        cy = self.h // 2 + y_start
+        r = min(self.w, self.h) // 6
+        cross_color = (255, 255, 255) if self.active or self.pressed else self.cross_color
+        pygame.draw.line(surface, cross_color, (cx - r, cy - r), (cx + r, cy + r), 2)
+        pygame.draw.line(surface, cross_color, (cx - r, cy + r), (cx + r, cy - r), 2)

@@ -46,3 +46,4 @@ class Clock(ui.components.Base):
         if self.time_seconds!= int(time.time()):
             self.time_seconds = int(time.time())
             self._setCurrentTime()
+            self.redraw()
