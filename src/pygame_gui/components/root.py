@@ -11,7 +11,11 @@ def updateRecurse(
     parent_x: int,
     parent_y: int,
     mouse: MouseEventHandler,
+    keyboard: KeyboardEventHandler
 ) -> None:
+    if not obj.alive:
+        return
+
     x = mouse.x - parent_x - obj.x
     y = mouse.y - parent_y - obj.y
     obj.removeDeadChildren()
@@ -56,9 +60,16 @@ def updateRecurse(
         if mouse.up(mouse.RIGHT):
             obj.onRightRelease()
 
+    # keyboard events callbacks
+    for event in obj._keyboard_events:
+        event(keyboard)
+    obj._keyboard_events_once = list(
+        filter(lambda e: not e(keyboard), obj._keyboard_events_once)
+    )
+
     obj.update(x, y, mouse.wheel)
     for ch in obj._children:
-        updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse)
+        updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse, keyboard)
 
 class Root(Base):
     def __init__(self):
@@ -99,7 +110,7 @@ class Root(Base):
                 self.keyboard.is_up = True
 
         for ch in self._children:
-            updateRecurse(ch, 0, 0, self.mouse)
+            updateRecurse(ch, 0, 0, self.mouse, self.keyboard)
 
     def redraw(self):
         self.redraw_tree.clear()

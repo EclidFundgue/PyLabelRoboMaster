@@ -3,7 +3,7 @@ from typing import Callable, List, Tuple
 import pygame
 
 from .. import logger, utils
-from .events import KeyboardEventHandler
+from .events import KeyboardEvent
 
 
 class _RedrawNode:
@@ -51,6 +51,9 @@ class _RedrawNode:
         child.draw(subsurface, x_start, y_start)
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
+        if not self.component.alive:
+            return
+
         if self.needs_redraw:
             self.component.draw(surface, x_start, y_start)
             for child in self.component._children:
@@ -114,6 +117,8 @@ class Base:
         # internal variables
         self._parent: Base = None
         self._children: List[Base] = []
+        self._keyboard_events: List[KeyboardEvent] = []
+        self._keyboard_events_once: List[KeyboardEvent] = []
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} ' \
@@ -140,35 +145,41 @@ class Base:
     def onMouseLeave(self) -> None: ...
 
     # ---------- Keyboard Events ---------- #
+    def _addEvent(self, event: KeyboardEvent, once: bool) -> None:
+        # Use copy to avoid modifying original list during iteration.
+        if once:
+            events = self._keyboard_events_once[:]
+            events.append(event)
+            self._keyboard_events_once = events
+        else:
+            events = self._keyboard_events[:]
+            events.append(event)
+            self._keyboard_events = events
+
     def addKeyDownEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        handler = KeyboardEventHandler()
-        handler.addKeyDownEvent(func, target, key, once)
+        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.DOWN, target), once)
 
     def addKeyPressEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        handler = KeyboardEventHandler()
-        handler.addKeyPressEvent(func, target, key, once)
+        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.PRESSED, target), once)
 
     def addKeyUpEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        handler = KeyboardEventHandler()
-        handler.addKeyUpEvent(func, target, key, once)
+        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.UP, target), once)
 
     def addKeyCtrlEvent(self, key: int, func: Callable, target = None, once = False) -> None:
         if target is None:
             target = str(id(self))
-        handler = KeyboardEventHandler()
-        handler.addKeyCtrlEvent(func, target, key, once)
+        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.CTRL, target), once)
 
     def removeEvents(self, target: str = None) -> None:
         if target is None:
             target = str(id(self))
-        handler = KeyboardEventHandler()
-        handler.removeEvent(target)
+        self._keyboard_events = list(filter(lambda e: e.target != target, self._keyboard_events))
 
     # ---------- Child Management ---------- #
     def removeDeadChildren(self) -> None:
@@ -243,6 +254,8 @@ class Base:
             ch.kill()
         self._parent = None
         self._children = None
+        self._keyboard_events = None
+        self._keyboard_events_once = None
 
         self.alive = False
         self.active = False

@@ -60,11 +60,12 @@ class KeyboardEvent:
     PRESSED = 2
     CTRL = 3
 
-    def __init__(self, key: int, func: Callable, _type: int):
+    def __init__(self, key: int, func: Callable, _type: int, target: str):
         self.func = func
         self.condition: Condition = self._getConditionFunction(key, _type)
         if self.condition is None:
             logger.error(f'Invalid event type: {_type}.', ValueError, self)
+        self.target = target
 
     def __call__(self, handler: 'KeyboardEventHandler') -> bool:
         if self.condition(handler):
@@ -112,13 +113,6 @@ class KeyboardEventHandler:
         self.is_down: bool = False
         self.is_up: bool = False
 
-        self.__events_dict = defaultdict(list)                      # dict: {target: [event, ...]}
-        self.__events_list_once: List[KeyboardEvent] = []           # list: [event, ...]
-
-        self.__targets_to_remove: List[str] = []
-        self.__events_to_add: List[Tuple[str, KeyboardEvent]] = []  # list: [(target, event), ...]
-        self.__events_to_add_once: List[KeyboardEvent] = []         # list: [event, ...]
-
     def down(self, key: int = ALL) -> bool:
         if key is self.ALL:
             return self.is_down
@@ -136,91 +130,5 @@ class KeyboardEventHandler:
         self.keys_last = self.keys_now
         self.keys_now = pygame.key.get_pressed()
 
-        for ls in self.__events_dict.values():
-            for event in ls:
-                event(self)
-
-        self.__events_list_once = list(
-            filter(lambda e: not e(self), self.__events_list_once)
-        )
-
-        # change event queue only if iteration finished
-        self._removeStoredEvents()
-        self._addStoredEvents()
-
-    def _removeStoredEvents(self) -> None:
-        if not self.__targets_to_remove:
-            return
-
-        for target in self.__targets_to_remove:
-            ret = self.__events_dict.pop(target, None)
-            if ret is None:
-                logger.warning(f'Target "{target}" not in events dictionary.', self)
-        self.__targets_to_remove = []
-
-    def _addStoredEvents(self) -> None:
-        if self.__events_to_add:
-            for target, event in self.__events_to_add:
-                self.__events_dict[target].append(event)
-            self.__events_to_add = []
-
-        if self.__events_to_add_once:
-            for event in self.__events_to_add_once:
-                self.__events_list_once.append(event)
-            self.__events_to_add_once = []
-
-    def addKeyDownEvent(self,
-        func: Callable,
-        target: str = 'default',
-        key: int = None,
-        once = False
-    ) -> None:
-        event = KeyboardEvent(key, func, KeyboardEvent.DOWN)
-        if once:
-            self.__events_to_add_once.append(event)
-        else:
-            self.__events_to_add.append((target, event))
-
-    def addKeyPressEvent(self,
-        func: Callable,
-        target: str = 'default',
-        key: int = None,
-        once = False
-    ) -> None:
-        event = KeyboardEvent(key, func, KeyboardEvent.PRESSED)
-        if once:
-            self.__events_to_add_once.append(event)
-        else:
-            self.__events_to_add.append((target, event))
-
-    def addKeyUpEvent(self,
-        func: Callable,
-        target: str = 'default',
-        key: int = None,
-        once = False
-    ) -> None:
-        event = KeyboardEvent(key, func, KeyboardEvent.UP)
-        if once:
-            self.__events_to_add_once.append(event)
-        else:
-            self.__events_to_add.append((target, event))
-
-    def addKeyCtrlEvent(self,
-        func: Callable,
-        target: str = 'default',
-        key: int = None,
-        once = False
-    ) -> None:
-        event = KeyboardEvent(key, func, KeyboardEvent.CTRL)
-        if once:
-            self.__events_to_add_once.append(event)
-        else:
-            self.__events_to_add.append((target, event))
-
-    def removeEvent(self, target: str) -> None:
-        '''
-        We can not remove it directly. Because in some cases, it may be
-        called in event update loop. Then we will receive RuntimeError:
-        dictionary changed size during iteration.
-        '''
-        self.__targets_to_remove.append(target)
+        self.is_down = False
+        self.is_up = False
