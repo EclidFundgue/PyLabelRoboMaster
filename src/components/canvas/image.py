@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import cv2
 import pygame
 
-from ...pygame_gui import utils
+from ... import pygame_gui as ui
 from ...utils.dataproc import mat2surface, surface2mat
 from .canvas import CanvasComponent
 
@@ -15,7 +15,7 @@ class Image(CanvasComponent):
     * switchProc() -> None
     '''
     def __init__(self, path: str, preproc_func: Callable[[cv2.Mat], cv2.Mat]):
-        self.orig_image = utils.loadImage(path)
+        self.orig_image = ui.utils.loadImage(path)
         super().__init__(*self.orig_image.get_size(), 0, 0)
 
         self.path = path
@@ -81,7 +81,7 @@ class Image(CanvasComponent):
 
         image = self.proc_image if self.enable_proc else self.orig_image
         rect = self._getCutRect(surface)
-        rect = utils.clipRect(rect, image)
+        rect = ui.utils.clipRect(rect, image)
         self.blit_offset = self._getBlitOffset(rect)
         self.cut_surface = pygame.transform.scale(
             image.subsurface(rect),

@@ -1,7 +1,6 @@
 from typing import List, Union
 
 from .. import pygame_gui as ui
-from ..pygame_gui import logger
 
 
 class StackedPage(ui.components.RectContainer):
@@ -24,7 +23,7 @@ class StackedPage(ui.components.RectContainer):
     def setPage(self, page: Union[int, 'StackedPage'], redraw: bool = False) -> None:
         ''' Set the current page of the stacked page view. '''
         if self._StackedPageView_set is None:
-            logger.warning("It should be added to a StackedPageView before setting the page.", self)
+            ui.logger.warning("It should be added to a StackedPageView before setting the page.", self)
         self._StackedPageView_set(page, redraw)
 
     def onShow(self) -> None: ...
@@ -43,7 +42,7 @@ class StackedPageView(ui.components.RectContainer):
 
     def _setPageByIndex(self, page_index: int) -> None:
         if page_index < 0 or page_index >= len(self.pages):
-            logger.warning("Invalid page index.", self)
+            ui.logger.warning("Invalid page index.", self)
             return
 
         if self.current_page_index >= 0:
@@ -54,7 +53,7 @@ class StackedPageView(ui.components.RectContainer):
 
     def _setPageByPage(self, page: StackedPage) -> None:
         if page not in self.pages:
-            logger.warning("Page not in stacked pages.", self)
+            ui.logger.warning("Page not in stacked pages.", self)
             return
 
         self._setPageByIndex(self.pages.index(page))
@@ -65,7 +64,7 @@ class StackedPageView(ui.components.RectContainer):
         elif isinstance(page, StackedPage):
             self._setPageByPage(page)
         else:
-            logger.error("Invalid page type.", TypeError, self)
+            ui.logger.error("Invalid page type.", TypeError, self)
         if redraw:
             self.redraw()
 

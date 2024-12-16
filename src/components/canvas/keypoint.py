@@ -2,7 +2,7 @@ from typing import Callable, Tuple
 
 import pygame
 
-from ...pygame_gui import utils
+from ... import pygame_gui as ui
 from .canvas import CanvasComponent
 
 
@@ -21,7 +21,7 @@ class Keypoint(CanvasComponent):
         h = 24
         super().__init__(w, h, x - w // 2, y - h // 2, fix_size=True)
 
-        self.on_click = utils.getCallable(on_click)
+        self.on_click = ui.utils.getCallable(on_click)
 
     def setCenter(self, x: int, y: int) -> None:
         self._x = x

@@ -2,7 +2,6 @@ import math
 from typing import List, Tuple
 
 from ... import pygame_gui as ui
-from ...pygame_gui import logger, timer
 
 
 class CanvasComponent(ui.components.Base):
@@ -45,7 +44,7 @@ class CanvasComponent(ui.components.Base):
 
     def addChild(self, child: 'CanvasComponent') -> None:
         if not isinstance(child, CanvasComponent):
-            logger.error("Child must be CanvasComponent.", ValueError, self)
+            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
             return
         child.setCanvasView(self.scale, 0, 0)
         child.redraw()
@@ -56,7 +55,7 @@ class Canvas(ui.components.RectContainer):
         super().__init__(w, h, x, y)
         self._children: List[CanvasComponent]
 
-        self.smooth_timer = timer.ProgressTimer(0.1, timer.INTERP_POLYN1)
+        self.smooth_timer = ui.timer.ProgressTimer(0.1, ui.timer.INTERP_POLYN1)
 
         self.scale_before = 1.0
         self.scale_dst = 1.0
@@ -112,7 +111,7 @@ class Canvas(ui.components.RectContainer):
 
     def addChild(self, child: CanvasComponent) -> None:
         if not isinstance(child, CanvasComponent):
-            logger.error("Child must be CanvasComponent.", ValueError, self)
+            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
             return
         child.setCanvasView(self.scale_dst, *self.view_dst)
         super().addChild(child)

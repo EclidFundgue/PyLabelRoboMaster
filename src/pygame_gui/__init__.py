@@ -4,8 +4,11 @@ __all__ = [
     'color',
     'components',
     'constants',
+    'logger',
+    'timer',
     'Main',
+    'utils',
 ]
 
-from . import color, components, constants
+from . import color, components, constants, logger, timer, utils
 from .uimain import Main
