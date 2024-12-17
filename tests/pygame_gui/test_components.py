@@ -10,7 +10,7 @@ class TestBase(unittest.TestCase):
     def test_init(self):
         base = Base(0,0,0,0)
         self.assertIsInstance(base, Base)
-        
+
 class TestRoot(unittest.TestCase):
     def setUp(self):
         pygame.init()
@@ -18,7 +18,7 @@ class TestRoot(unittest.TestCase):
 
     def tearDown(self):
         pygame.quit()
-        
+
     def test_init(self):
         root = Root()
         self.assertIsInstance(root, Root)

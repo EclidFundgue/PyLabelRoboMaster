@@ -39,22 +39,22 @@ class LightColorTheme:
     Outline = (121, 116, 126)
     OutlineVariant = (202, 196, 208)
 
-    def _setEelevation(self, color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
-        '''
-        Elevation is an integer between 0 and 12.
-        For static widget, elevation should not larger than 6.
-        7 to 12 for interacting, such as dragging, hovering, etc.
+def _setEelevation(color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
+    '''
+    Elevation is an integer between 0 and 12.
+    For static widget, elevation should not larger than 6.
+    7 to 12 for interacting, such as dragging, hovering, etc.
 
-        Five levels of recommended elevations are [1, 3, 6, 8, 12]
-        '''
-        r, g, b = color
-        r = int(r - 8 * elevation)
-        g = int(g - 8 * elevation)
-        b = int(b - 8 * elevation)
-        return (min(255, max(0, r)), min(255, max(0, g)), min(255, max(0, b)))
+    Five levels of recommended elevations are [1, 3, 6, 8, 12]
+    '''
+    r, g, b = color
+    r = int(r - 8 * elevation)
+    g = int(g - 8 * elevation)
+    b = int(b - 8 * elevation)
+    return (min(255, max(0, r)), min(255, max(0, g)), min(255, max(0, b)))
 
-    def dark(self, color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
-        return self._setEelevation(color, elevation)
+def dark(color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
+    return _setEelevation(color, elevation)
 
-    def light(self, color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
-        return self._setEelevation(color, -elevation)
+def light(color: Tuple[int, int, int], elevation: int) -> Tuple[int, int, int]:
+    return _setEelevation(color, -elevation)

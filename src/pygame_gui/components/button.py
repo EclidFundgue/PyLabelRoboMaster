@@ -2,8 +2,8 @@ from typing import Callable, Tuple, Union
 
 import pygame
 
+from .. import color as _color
 from .. import timer, utils
-from ..color import LightColorTheme
 from .base import Base
 from .label import Label
 
@@ -137,13 +137,13 @@ class TextButton(_Button):
         )
         self.redraw_parent = False
 
-        color_theme = LightColorTheme()
+        color_theme = _color.LightColorTheme()
 
         self.text_color = color_theme.PrimaryContainer
         self.text_color2 = color_theme.PrimaryContainer # pressed
         self.color = color_theme.OnPrimaryContainer
-        self.color2 = color_theme.light(self.color, 3) # hovered
-        self.color3 = color_theme.light(self.color, 8) # pressed
+        self.color2 = _color.light(self.color, 3) # hovered
+        self.color3 = _color.light(self.color, 8) # pressed
 
         self.smooth_color = timer.TimedColor(0.1, self.color)
         self.current_color = self.smooth_color.getCurrentColor()
@@ -210,11 +210,11 @@ class CloseButton(_Button):
             cursor_change
         )
 
-        color_theme = LightColorTheme()
+        color_theme = _color.LightColorTheme()
 
         self.color = color
         self.color2 = color_theme.Error # hovered
-        self.color3 = color_theme.light(color_theme.Error, 5) # pressed
+        self.color3 = _color.light(color_theme.Error, 5) # pressed
         self.cross_color = cross_color
 
         self.smooth_color = timer.TimedColor(0.1, self.color)
