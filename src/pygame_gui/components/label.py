@@ -25,6 +25,7 @@ class Label(Base):
             color: tuple = constants.DEFAULT_TEXT_COLOR
         ):
         super().__init__(w, h, x, y)
+        self.interactive_when_active = True
 
         # Initialize DEFAULT_FONT after pygame initialized.
         if Label.DEFAULT_FONT is None:

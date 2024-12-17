@@ -20,6 +20,7 @@ class Keypoint(CanvasComponent):
         w = 24
         h = 24
         super().__init__(w, h, x - w // 2, y - h // 2, fix_size=True)
+        self.interactive_when_active = True
 
         self.on_click = ui.utils.getCallable(on_click)
 
@@ -42,9 +43,6 @@ class Keypoint(CanvasComponent):
         self.y = int(self._y * scale - self.h // 2 - view_y)
 
     def onLeftClick(self, x: int, y: int) -> None:
-        if not self.active:
-            return
-
         self.on_click()
 
     def kill(self) -> None:

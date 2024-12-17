@@ -54,6 +54,7 @@ class Canvas(ui.components.RectContainer):
     def __init__(self, w: int, h: int, x: int, y: int):
         super().__init__(w, h, x, y)
         self._children: List[CanvasComponent]
+        self.interactive_when_active = True
 
         self.smooth_timer = ui.timer.ProgressTimer(0.1, ui.timer.INTERP_POLYN1)
 
@@ -86,8 +87,6 @@ class Canvas(ui.components.RectContainer):
         self.smooth_timer.reset()
 
     def onRightDrag(self, vx: int, vy: int) -> None:
-        if not self.active:
-            return
         if vx == 0 and vy == 0:
             return
         self.view_dst = (self.view_dst[0] - vx, self.view_dst[1] - vy)

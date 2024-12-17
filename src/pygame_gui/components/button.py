@@ -30,6 +30,7 @@ class _Button(Base):
             continue_press = -1,
             cursor_change: bool = True):
         super().__init__(w, h, x, y)
+        self.interactive_when_active = True
 
         self.on_press = utils.getCallable(on_press)
 
@@ -52,16 +53,10 @@ class _Button(Base):
         super().kill()
 
     def onLeftClick(self, x: int, y: int) -> None:
-        if not self.isHovered(x, y):
-            return
-
         self.pressed = True
         self.on_press()
 
     def onLeftPress(self, x: int, y: int) -> None:
-        if not self.isHovered(x, y):
-            return
-
         if not self.pressed or self.continue_press_thresh < 0:
             return
 

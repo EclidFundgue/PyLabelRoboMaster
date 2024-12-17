@@ -111,6 +111,7 @@ class Base:
         self.y = y
         self.layer: int = 0
         self.redraw_parent: bool = True
+        self.interactive_when_active: bool = False
         self.alive: bool = True
         self.active: bool = False
 

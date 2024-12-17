@@ -27,7 +27,7 @@ class Image(CanvasComponent):
         self.blit_offset = (0, 0)
 
         self.enable_proc = False
-        self.need_update = True
+        self.need_update_cut_surface = True
 
         # image layer is behind other components
         self.layer = -1
@@ -60,22 +60,22 @@ class Image(CanvasComponent):
 
     def enableProc(self) -> None:
         self.enable_proc = True
-        self.need_update = True
+        self.need_update_cut_surface = True
 
     def disableProc(self) -> None:
         self.enable_proc = False
-        self.need_update = True
+        self.need_update_cut_surface = True
 
     def switchProc(self) -> None:
         self.enable_proc = not self.enable_proc
-        self.need_update = True
+        self.need_update_cut_surface = True
 
     def setCanvasView(self, scale: float, view_x: float, view_y: float) -> None:
         super().setCanvasView(scale, view_x, view_y)
-        self.need_update = True
+        self.need_update_cut_surface = True
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        if not self.need_update:
+        if not self.need_update_cut_surface:
             surface.blit(self.cut_surface, self.blit_offset)
             return
 
@@ -89,4 +89,4 @@ class Image(CanvasComponent):
              int(rect[3] * self.scale))
         )
         surface.blit(self.cut_surface, self.blit_offset)
-        self.need_update = False
+        self.need_update_cut_surface = False

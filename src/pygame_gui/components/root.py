@@ -6,30 +6,13 @@ from .base import Base, _RedrawNode
 from .events import KeyboardEventHandler, MouseEventHandler
 
 
-def updateRecurse(
+def _interact(
     obj: Base,
-    parent_x: int,
-    parent_y: int,
+    x: int, y: int,
     mouse: MouseEventHandler,
     keyboard: KeyboardEventHandler
 ) -> None:
-    if not obj.alive:
-        return
-
-    x = mouse.x - parent_x - obj.x
-    y = mouse.y - parent_y - obj.y
-    obj.removeDeadChildren()
-
     # mouse events callbacks
-    active = obj.isHovered(x, y)
-    on_enter = not obj.active and active
-    on_leave = obj.active and not active
-    obj.active = active
-    if on_enter:
-        obj.onMouseEnter()
-    elif on_leave:
-        obj.onMouseLeave()
-
     if mouse.down():
         if mouse.down(mouse.LEFT):
             obj.onLeftClick(x, y)
@@ -67,9 +50,37 @@ def updateRecurse(
         filter(lambda e: not e(keyboard), obj._keyboard_events_once)
     )
 
+def _updateRecurse(
+    obj: Base,
+    parent_x: int,
+    parent_y: int,
+    mouse: MouseEventHandler,
+    keyboard: KeyboardEventHandler,
+    interactive: bool = True
+) -> None:
+    if not obj.alive:
+        return
+
+    x = mouse.x - parent_x - obj.x
+    y = mouse.y - parent_y - obj.y
+    obj.removeDeadChildren()
+
+    active = obj.isHovered(x, y)
+    on_enter = not obj.active and active
+    on_leave = obj.active and not active
+    obj.active = active
+    if on_enter:
+        obj.onMouseEnter()
+    elif on_leave:
+        obj.onMouseLeave()
+
+    interactive = (obj.active or not obj.interactive_when_active) and interactive
+    if interactive:
+        _interact(obj, x, y, mouse, keyboard)
+
     obj.update(x, y, mouse.wheel)
     for ch in obj._children:
-        updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse, keyboard)
+        _updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse, keyboard, interactive)
 
 class Root(Base):
     def __init__(self):
@@ -110,7 +121,7 @@ class Root(Base):
                 self.keyboard.is_up = True
 
         for ch in self._children:
-            updateRecurse(ch, 0, 0, self.mouse, self.keyboard)
+            _updateRecurse(ch, 0, 0, self.mouse, self.keyboard)
 
     def redraw(self):
         self.redraw_tree.clear()
