@@ -55,7 +55,7 @@ def __logGeneric(
         raise err_type(print_out_str)
 
 def error(info: str, err_type: Exception, self: object = None) -> None:
-    __logGeneric(info, 'fuck', __Color.RED, err_type, self)
+    __logGeneric(info, 'error', __Color.RED, err_type, self)
 
 def warning(info: str, self: object = None) -> None:
-    __logGeneric(info, 'damn', __Color.YELLOW, None, self)
+    __logGeneric(info, 'warning', __Color.YELLOW, None, self)

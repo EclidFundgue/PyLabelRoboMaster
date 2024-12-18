@@ -92,7 +92,7 @@ class Canvas(ui.components.RectContainer):
         self.view_dst = (self.view_dst[0] - vx, self.view_dst[1] - vy)
 
     def update(self, x: int, y: int, wheel: int) -> None:
-        if wheel != 0:
+        if self.active and wheel != 0:
             self._setMouseWheel(x, y, wheel)
 
         if not self.smooth_timer.isFinished():

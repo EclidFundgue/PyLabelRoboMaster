@@ -88,4 +88,4 @@ class Label(Base):
                 logger.error(f"Invalid align_y: {align_y}", ValueError, self)
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        surface.blit(self.text_surface, (self.padx, self.pady))
+        surface.blit(self.text_surface, (self.padx + x_start, self.pady + y_start))

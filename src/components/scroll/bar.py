@@ -72,7 +72,8 @@ class ScrollBar(ui.components.RectContainer):
         self.rail = ui.components.RectContainer(w, h, 0, 0)
         self.button = _ScrollButton(w, 0, 0)
 
-        self.rail.setBackgroundColor((228, 249, 245))
+        color_theme = ui.color.LightColorTheme()
+        self.rail.setBackgroundColor(color_theme.Surface)
 
         self.addChild(self.rail)
         self.addChild(self.button)

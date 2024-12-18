@@ -313,6 +313,6 @@ class LinesBox(ui.components.RectContainer):
             self.on_relative_changed(self.current_relative_value)
             self.redraw()
 
-        if wheel != 0:
+        if self.active and wheel != 0:
             dr = -self.MOUSE_SCROLL_SPEED * wheel / self.total_height
             self.setRelativeWithSmooth(self.relative.getEndValue() + dr)
