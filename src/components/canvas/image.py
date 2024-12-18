@@ -4,7 +4,7 @@ import cv2
 import pygame
 
 from ... import pygame_gui as ui
-from ...utils.dataproc import mat2surface, surface2mat
+from ...utils import imgproc
 from .canvas import CanvasComponent
 
 
@@ -20,8 +20,8 @@ class Image(CanvasComponent):
 
         self.path = path
         self.preproc_func = preproc_func
-        self.proc_image = mat2surface(
-            self.preproc_func(surface2mat(self.orig_image))
+        self.proc_image = imgproc.mat2surface(
+            self.preproc_func(imgproc.surface2mat(self.orig_image))
         )
         self.cut_surface = self.orig_image
         self.blit_offset = (0, 0)

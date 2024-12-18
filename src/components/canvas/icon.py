@@ -1,5 +1,4 @@
 import os
-from typing import Callable, Tuple
 
 import pygame
 
@@ -14,10 +13,15 @@ class ArmorIcon(CanvasComponent):
     * setPos(point) -> None
     '''
 
+    STATE_NORMAL = 0
+    STATE_ACTIVE = 1
+    STATE_SELECTED = 2
+
     IMG_CLASSES = None # 8 classes
     IMG_LIGHTS = None # blue, red
+    BACKGROUND_COLORS = None # normal, active, selected
 
-    def __init__(self, x: int, y: int, cls_id: int, on_click: Callable[[], None] = None):
+    def __init__(self, cls_id: int):
         prefix = './resources/armor_icons'
         if ArmorIcon.IMG_CLASSES is None:
             ArmorIcon.IMG_CLASSES = [
@@ -35,19 +39,17 @@ class ArmorIcon(CanvasComponent):
                 ui.utils.loadImage(os.path.join(prefix, 'bg_blue.png')),
                 ui.utils.loadImage(os.path.join(prefix, 'bg_red.png')),
             ]
+        if ArmorIcon.BACKGROUND_COLORS is None:
+            color_theme = ui.color.LightColorTheme()
+            ArmorIcon.BACKGROUND_COLORS = [
+                color_theme.OnPrimaryContainer,
+                ui.color.light(color_theme.OnPrimaryContainer, 5),
+                ui.color.light(color_theme.OnPrimaryContainer, 11)
+            ]
 
-        super().__init__(*self.IMG_CLASSES[0].get_size(), x, y, fix_size=True)
+        super().__init__(*self.IMG_CLASSES[0].get_size(), 0, 0, fix_size=True)
         self.cls_id = cls_id
-        self.on_click = ui.utils.getCallable(on_click)
-
-        self.label_state: int = 0 # 0-normal, 1-active, 2-selected
-
-        color_theme = ui.color.LightColorTheme()
-        self.icon_colors = [
-            color_theme.OnPrimaryContainer,
-            ui.color.light(color_theme.OnPrimaryContainer, 5),
-            ui.color.light(color_theme.OnPrimaryContainer, 11)
-        ]
+        self.label_state = self.STATE_NORMAL
 
     def setClassId(self, cls_id: int) -> None:
         self.cls_id = cls_id
@@ -63,6 +65,6 @@ class ArmorIcon(CanvasComponent):
         self.y = int(self._y * scale - view_y + 10)
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        surface.fill(self.icon_colors[self.label_state])
+        surface.fill(self.BACKGROUND_COLORS[self.label_state])
         surface.blit(self.IMG_LIGHTS[self.cls_id // 8], (x_start, y_start))
         surface.blit(self.IMG_CLASSES[self.cls_id % 8], (x_start, y_start))

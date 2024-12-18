@@ -16,10 +16,10 @@ class Keypoint(CanvasComponent):
     * getCenter() -> Tuple[int, int]
     * move(vx, vy) -> None
     '''
-    def __init__(self, x: int, y: int, on_click: Callable[[], None] = None):
+    def __init__(self, on_click: Callable[[], None] = None):
         w = 24
         h = 24
-        super().__init__(w, h, x - w // 2, y - h // 2, fix_size=True)
+        super().__init__(w, h, 0, 0, fix_size=True)
         self.interactive_when_active = True
 
         self.on_click = ui.utils.getCallable(on_click)
@@ -30,7 +30,7 @@ class Keypoint(CanvasComponent):
         self.setCanvasView(self.scale, self.view_x, self.view_y)
 
     def getCenter(self) -> Tuple[int, int]:
-        return (self._x + self._w // 2, self._y + self._h // 2)
+        return (self._x, self._y)
 
     def move(self, vx: int, vy: int) -> None:
         self._x += vx / self.scale
