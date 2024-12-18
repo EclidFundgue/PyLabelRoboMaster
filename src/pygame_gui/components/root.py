@@ -43,6 +43,10 @@ def _interact(
         if mouse.up(mouse.RIGHT):
             obj.onRightRelease()
 
+    # Object may be killed during interation.
+    if not obj.alive:
+        return
+
     # keyboard events callbacks
     for event in obj._keyboard_events:
         event(keyboard)
@@ -77,6 +81,10 @@ def _updateRecurse(
     interactive = (obj.active or not obj.interactive_when_active) and interactive
     if interactive:
         _interact(obj, x, y, mouse, keyboard)
+
+    # Object may be killed during interation.
+    if not obj.alive:
+        return
 
     obj.update(x, y, mouse.wheel)
     for ch in obj._children:
