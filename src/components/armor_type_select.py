@@ -1,5 +1,5 @@
-from typing import Callable, Union
 import os
+from typing import Callable, Union
 
 import pygame
 

@@ -62,6 +62,9 @@ class Switch(ui.components.Base):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def onLeftClick(self, x: int, y: int) -> None:
+        if not self.active:
+            return
+
         self.on = not self.on
         self.on_turn(self.on)
         self.redraw()
@@ -153,6 +156,9 @@ class NTextSwitch(ui.components.Base):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def onLeftClick(self, x: int, y: int) -> None:
+        if not self.active:
+            return
+
         self.turn()
         self.on_turn(self.state)
         self.redraw()

@@ -55,6 +55,7 @@ class _Button(Base):
     def onLeftClick(self, x: int, y: int) -> None:
         self.pressed = True
         self.on_press()
+        self.redraw()
 
     def onLeftPress(self, x: int, y: int) -> None:
         if not self.pressed or self.continue_press_thresh < 0:
@@ -68,14 +69,17 @@ class _Button(Base):
     def onLeftRelease(self) -> None:
         self.pressed = False
         self.continue_press_time = 0
+        self.redraw()
 
     def onMouseEnter(self):
         if self.cursor_change:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
 
     def onMouseLeave(self):
-        self.pressed = False
-        self.continue_press_time = 0
+        if self.pressed:
+            self.pressed = False
+            self.continue_press_time = 0
+            self.redraw()
         if self.cursor_change:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 

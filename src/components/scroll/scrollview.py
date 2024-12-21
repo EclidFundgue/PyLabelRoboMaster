@@ -52,7 +52,6 @@ class ScrollView(ui.components.RectContainer):
     def _getOnCommandFunc(self, line: FileLine):
         def ret():
             self.on_command(self.lines.index(line), line)
-            self.lines.delete(line)
         return ret
 
     def _loadFileLines(self, w: int, h: int, folder: str) -> List[FileLine]:
@@ -132,6 +131,11 @@ class ImageScrollView(ScrollView):
         for line in ret:
             line.command = self._getOnCommandFunc(line)
         return ret
+    
+    def addLine(self, line: FileLine):
+        if isinstance(line, DesertedFileLine):
+            line = ImageFileLine(*line.getRect()[:2], line.filename)
+        super().addLine(line)
 
     def kill(self) -> None:
         self.on_desert = None
@@ -168,6 +172,11 @@ class DesertedScrollView(ScrollView):
         for line in ret:
             line.command = self._getOnCommandFunc(line)
         return ret
+
+    def addLine(self, line: FileLine):
+        if isinstance(line, ImageFileLine):
+            line = DesertedFileLine(*line.getRect()[:2], line.filename)
+        super().addLine(line)
 
     def kill(self) -> None:
         self.on_restore = None

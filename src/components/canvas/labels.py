@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import pygame
 
@@ -100,7 +100,7 @@ class Label:
         else:
             self.icon.label_state = self.icon.STATE_NORMAL
 
-def _createAddingPoint(cx: int, cy: int, on_click: Callable[[], None]) -> Keypoint:
+def _createKeypoint(cx: int, cy: int, on_click: Callable[[], None] = None) -> Keypoint:
     kpt = Keypoint(on_click)
     kpt.setCenter(cx, cy)
     return kpt
@@ -127,15 +127,18 @@ class Labels(CanvasComponent):
     3. ---------- save & load ----------
     * undo() -> None
     * redo() -> None
+    * load(path, img_rect) -> None
     * saveToPath(path) -> None
     '''
     def __init__(self,
         w: int, h: int, x: int, y: int,
         num_keypoints: int,
+        on_select: Callable[[Label], None] = None
     ):
         super().__init__(w, h, x, y)
 
         self.num_keypoints = num_keypoints
+        self.on_select = ui.utils.getCallable(on_select)
 
         self.dragging_point: Keypoint = None
         self.adding_label: Label = None
@@ -149,8 +152,6 @@ class Labels(CanvasComponent):
 
         self.snapshot_index = 0
         self.snapshots: List[dict] = []
-
-        self._snapshot()
 
         self.addKeyDownEvent(pygame.K_a, self.startAdd)
         self.addKeyDownEvent(pygame.K_ESCAPE, self.cancelAdd)
@@ -265,7 +266,7 @@ class Labels(CanvasComponent):
             return
 
         # Continue add process.
-        self.adding_point = _createAddingPoint(*self.curr_mouse_pos, self._onAddPoint)
+        self.adding_point = _createKeypoint(*self.curr_mouse_pos, self._onAddPoint)
         self.adding_label.points.append(self.adding_point)
         self.addChild(self.adding_point)
 
@@ -273,7 +274,7 @@ class Labels(CanvasComponent):
         if self.adding_label is not None:
             return
 
-        self.adding_point = _createAddingPoint(*self.curr_mouse_pos, self._onAddPoint)
+        self.adding_point = _createKeypoint(*self.curr_mouse_pos, self._onAddPoint)
         self.adding_label = Label([self.adding_point])
         self.addChild(self.adding_point)
 
@@ -412,10 +413,33 @@ class Labels(CanvasComponent):
         self.snapshot_index += 1
         self.redraw()
 
-    def saveToPath(self, path: str) -> None:
+    def load(self, path: str, orig_img_size: Tuple[int, int]) -> None:
+        labels_io = fmt.loadLabel(path)
+        for label_io in labels_io:
+            keypoints = []
+            for x, y in label_io.kpts:
+                cx = int(x * orig_img_size[0] - self._x)
+                cy = int(y * orig_img_size[1] - self._y)
+                kpt = _createKeypoint(cx, cy)
+                kpt.on_click = self._getKeypointOnClickFunction(kpt)
+                keypoints.append(kpt)
+                self.addChild(kpt)
+            label = Label(keypoints, label_io.id)
+            label.icon = _createArmorIcon(keypoints[2], label_io.id)
+            self.addChild(label.icon)
+            self.labels.append(label)
+
+        self._snapshot()
+        self.redraw()
+
+    def saveToPath(self, path: str, orig_img_size: Tuple[int, int]) -> None:
         io_labels = []
         for label in self.labels:
             points = [p.getCenter() for p in label.points]
+            points = [
+                ((x+self._x)/orig_img_size[0],
+                 (y+self._y)/orig_img_size[1]) for x, y in points
+            ]
             io_labels.append(fmt.ArmorLabelIO(label.cls_id, points))
         fmt.saveLabel(path, io_labels)
 
@@ -455,6 +479,10 @@ class Labels(CanvasComponent):
         for label in self.labels:
             if label.inHover(x, y):
                 clicked_labels.append(label)
+
+        if len(clicked_labels) > 0:
+            for label in clicked_labels:
+                self.on_select(label)
 
         if not self.key_ctrl_pressed:
             for label in self.selected_labels:
