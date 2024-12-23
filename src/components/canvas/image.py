@@ -1,144 +1,92 @@
-import os
 from typing import Callable, Tuple
 
 import cv2
 import pygame
-from pygame import Surface as pg_Surface
 
-from ...resources_loader import ImageLoader
-from ...utils.dataproc import mat2surface, surface2mat
+from ... import pygame_gui as ui
+from ...utils import imgproc
 from .canvas import CanvasComponent
 
 
 class Image(CanvasComponent):
-    '''
-    Load image and display on canvas.
-
-    Image(path, preproc_func)
-
-    Methods:
-    * scale(scale_rate, center) -> None
-    * move(vx, vy) -> None
+    '''Methods:
     * enableProc() -> None
     * disableProc() -> None
     * switchProc() -> None
     '''
-    def __init__(self,
-            path: str,
-            canvas_size: Tuple[int, int],
-            preproc_func: Callable[[cv2.Mat], cv2.Mat] = None):
+    def __init__(self, path: str, preproc_func: Callable[[cv2.Mat], cv2.Mat]):
+        self.orig_image = ui.utils.loadImage(path)
+        super().__init__(*self.orig_image.get_size(), 0, 0)
+
         self.path = path
-        self.canvas_size = canvas_size
-        self.preproc_func = self._getPreprocFunc(preproc_func)
-        self.enable_proc = False
-        self.found: bool = False
-
-        self._safeLoadImage(path)
-        super().__init__(self.orig_w, self.orig_h, 0, 0)
-        self.layer = -1 # image layer is behind all other components
-
-        if self.found:
-            self._updateDisplaySurface()
-
-    def _getPreprocFunc(self, func: Callable[[cv2.Mat], cv2.Mat] = None) -> Callable[[cv2.Mat], cv2.Mat]:
-        def _none(img: cv2.Mat) -> cv2.Mat:
-            return img
-        if func is None:
-            return _none
-        return func
-
-    def _getPreprocImage(self) -> pg_Surface:
-        return mat2surface(
-            self.preproc_func(
-                surface2mat(self.orig_image)
-            )
+        self.preproc_func = preproc_func
+        self.proc_image = imgproc.mat2surface(
+            self.preproc_func(imgproc.surface2mat(self.orig_image))
         )
+        self.cut_surface = self.orig_image
+        self.blit_offset = (0, 0)
 
-    def _safeLoadImage(self, img: str) -> None:
-        ''' If path not found, load default image. '''
-        if not os.path.exists(img):
-            loader = ImageLoader()
-            img = loader['other']['not_found']
-            self.found = False
-        else:
-            self.found = True
+        self.enable_proc = False
+        self.need_update_cut_surface = True
 
-        self.orig_image = self.loadImage(img)
-        if self.found:
-            self.proced_image = self._getPreprocImage()
+        # image layer is behind other components
+        self.layer = -1
 
-        self.orig_w, self.orig_h = self.orig_image.get_size()
+    def _getCutRect(self, surface: pygame.Surface) -> pygame.rect.Rect:
+        surf_w, surf_h = surface.get_size()
 
-    def _updateDisplaySurface(self) -> None:
-        '''
-        Calculate display surface and position by:\n
-            * self.x, self.y\n
-            * self.w, self.h\n
-            * self.scale_rate
-        '''
-        w, h = self.getDisplaySize()
-        x, y = self.getDisplayPos()
+        left = -int(self.x / self.scale) if self.x < 0 else 0
+        right = self.orig_image.get_width()
+        if self.x < 0 and self.x + self.w > surf_w:
+            right = int((surf_w - self.x) / self.scale) + 1
+        elif self.x >= 0 and self.w > surf_w:
+            right = int(surf_w / self.scale) + 1
 
-        # if image is not too large, scale directly
-        if w <= self.canvas_size[0] and h <= self.canvas_size[1]:
-            if self.enable_proc:
-                surf = pygame.transform.scale(self.proced_image, (w, h))
-            else:
-                surf = pygame.transform.scale(self.orig_image, (w, h))
-            self.cut_rect_surface = surf
-            self.cut_rect_pos = (x, y)
-            return
+        top = -int(self.y / self.scale) if self.y < 0 else 0
+        bottom = self.orig_image.get_height()
+        if self.y < 0 and self.y + self.h > surf_h:
+            bottom = int((surf_h - self.y) / self.scale) + 1
+        elif self.y >= 0 and self.h > surf_h:
+            bottom = int(surf_h / self.scale) + 1
 
-        # cut the display part of image, then scale the small part
-        cut_rect = self._getCutRect()
-        if self.enable_proc:
-            cut_surf = self.proced_image.subsurface(cut_rect)
-        else:
-            cut_surf = self.orig_image.subsurface(cut_rect)
-        rect_w = int(cut_rect.w * self.scale)
-        rect_h = int(cut_rect.h * self.scale)
-        self.cut_rect_surface = pygame.transform.scale(cut_surf, (rect_w, rect_h))
+        return pygame.rect.Rect(left, top, right - left, bottom - top)
 
-        x += cut_rect.left * self.scale
-        y += cut_rect.top * self.scale
-        self.cut_rect_pos = (int(x), int(y))
-
-    def _getCutRect(self):
-        ''' Return a rect on original image to display. '''
-        left, right = 0, self.orig_w
-        top, bottom = 0, self.orig_h
-
-        w, h = self.getDisplaySize()
-        x, y = self.getDisplayPos()
-
-        if x + w > self.canvas_size[0]:
-            right = int((self.canvas_size[0] - x) / self.scale + 1)
-        if y + h > self.canvas_size[1]:
-            bottom = int((self.canvas_size[1] - y) / self.scale + 1)
-        if x < 0:
-            left = int(-x / self.scale - 1)
-        if y < 0:
-            top = int(-y / self.scale - 1)
-
-        width = right - left
-        height = bottom - top
-        return pygame.rect.Rect(left, top, width, height)
+    def _getBlitOffset(self, cut_rect: Tuple[int, int, int, int]) -> Tuple[int, int]:
+        x, y = cut_rect[:2]
+        return (
+            self.x + x * self.scale if self.x < 0 else 0,
+            self.y + y * self.scale if self.y < 0 else 0
+        )
 
     def enableProc(self) -> None:
         self.enable_proc = True
-        self._updateDisplaySurface()
+        self.need_update_cut_surface = True
 
     def disableProc(self) -> None:
         self.enable_proc = False
-        self._updateDisplaySurface()
+        self.need_update_cut_surface = True
 
     def switchProc(self) -> None:
         self.enable_proc = not self.enable_proc
-        self._updateDisplaySurface()
+        self.need_update_cut_surface = True
 
-    def onCanvasViewChanged(self, scale: float, view_x: float, view_y: float) -> None:
-        super().onCanvasViewChanged(scale, view_x, view_y)
-        self._updateDisplaySurface()
+    def setCanvasView(self, scale: float, view_x: float, view_y: float) -> None:
+        super().setCanvasView(scale, view_x, view_y)
+        self.need_update_cut_surface = True
 
-    def draw(self, surface: pygame.Surface):
-        surface.blit(self.cut_rect_surface, self.cut_rect_pos)
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
+        if not self.need_update_cut_surface:
+            surface.blit(self.cut_surface, self.blit_offset)
+            return
+
+        image = self.proc_image if self.enable_proc else self.orig_image
+        rect = self._getCutRect(surface)
+        rect = ui.utils.clipRect(rect, image)
+        self.blit_offset = self._getBlitOffset(rect)
+        self.cut_surface = pygame.transform.scale(
+            image.subsurface(rect),
+            (int(rect[2] * self.scale),
+             int(rect[3] * self.scale))
+        )
+        surface.blit(self.cut_surface, self.blit_offset)
+        self.need_update_cut_surface = False

@@ -1,27 +1,18 @@
 import math
 from typing import List, Tuple
 
-from ...pygame_gui import BaseComponent, Surface, f_error
+from ... import pygame_gui as ui
 
 
-class CanvasComponent(BaseComponent):
+class CanvasComponent(ui.components.Base):
+    '''Methods:
+    * setCanvasView(scale, view_x, view_y) -> None
     '''
-    Special component responsibe for drawing in canvas.
-    You can override `getDisplayPos`, `getDisplaySize`,
-    `getScaleByWidth`, `getScaleByHeight` to adjust size
-    and position of canvas.
-
-    CanvasComponent(w, h, x, y)
-
-    Methods:
-    * getDisplayPos(scale) -> Tuple[float, float]
-    * getDisplaySize(scale) -> Tuple[float, float]
-    * getScaleByWidth(width) -> float
-    * getScaleByHeight(height) -> float
-    * onCanvasViewChanged(scale, view_x, view_y) -> None
-    '''
-    def __init__(self, w: int, h: int, x: int, y: int):
+    def __init__(self, w: int, h: int, x: int, y: int, fix_size: bool = False):
         super().__init__(w, h, x, y)
+        self._children: List[CanvasComponent]
+
+        # original size and position
         self._w = w
         self._h = h
         self._x = x
@@ -31,185 +22,95 @@ class CanvasComponent(BaseComponent):
         # view start position
         self.view_x = 0
         self.view_y = 0
+        self.fix_size = fix_size
 
-    @property
-    def w(self) -> int: return int(self.getDisplaySize()[0])
-    @property
-    def h(self) -> int: return int(self.getDisplaySize()[1])
-    @property
-    def x(self) -> int: return int(self.getDisplayPos()[0])
-    @property
-    def y(self) -> int: return int(self.getDisplayPos()[1])
-    @w.setter
-    def w(self, value: int) -> None: self._w = value
-    @h.setter
-    def h(self, value: int) -> None: self._h = value
-    @x.setter
-    def x(self, value: int) -> None: self._x = value
-    @y.setter
-    def y(self, value: int) -> None: self._y = value
-
-    def getDisplayPos(self,
-            scale: float = None,
-            view_x: float = None,
-            view_y: float = None) -> Tuple[float, float]:
-        scale = scale or self.scale
-        view_x = view_x or self.view_x
-        view_y = view_y or self.view_y
-        return (self._x * scale - view_x, self._y * scale - view_y)
-
-    def getDisplaySize(self, scale: float = None) -> Tuple[float, float]:
-        scale = scale or self.scale
-        return (self._w * scale, self._h * scale)
-
-    def getScaleByWidth(self, width: int) -> float:
-        ''' Help componet to adjust size to fit canvas. '''
-        return width / self._w
-
-    def getScaleByHeight(self, height: int) -> float:
-        ''' Help componet to adjust size to fit canvas. '''
-        return height / self._h
-
-    def onCanvasViewChanged(self, scale: float, view_x: float, view_y: float) -> None:
+    def setCanvasView(self, scale: float, view_x: float, view_y: float) -> None:
         self.scale = scale
         self.view_x = view_x
         self.view_y = view_y
 
-class Canvas(Surface):
-    '''
-    Canvas(
-        w, h, x, y,
-        main_component,
-        default_align,
-        margin_x,
-        margin_y,
-        smooth_factor
-    )
+        if self.fix_size:
+            self.w = self._w
+            self.h = self._h
+        else:
+            self.w = int(self._w * scale)
+            self.h = int(self._h * scale)
 
-    Methods:
-    * alignCenter() -> None
-    '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            main_component: CanvasComponent = None,
-            default_align: bool = True,
-            margin_x: int = 0,
-            margin_y: int = 0,
-            smooth_factor: float = 0.6):
+        self.x = int(self._x * scale - view_x)
+        self.y = int(self._y * scale - view_y)
+
+        for ch in self._children:
+            ch.setCanvasView(scale, 0, 0)
+
+    def addChild(self, child: 'CanvasComponent') -> None:
+        if not isinstance(child, CanvasComponent):
+            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
+            return
+        child.setCanvasView(self.scale, 0, 0)
+        child.redraw()
+        super().addChild(child)
+
+class Canvas(ui.components.RectContainer):
+    def __init__(self, w: int, h: int, x: int, y: int):
         super().__init__(w, h, x, y)
-        self.child_components: List[CanvasComponent]
+        self._children: List[CanvasComponent]
+        self.interactive_when_active = True
 
-        self.main_component = main_component
-        self.margin_x = margin_x
-        self.margin_y = margin_y
-        self.smooth_factor = smooth_factor
+        self.smooth_timer = ui.timer.ProgressTimer(0.1, ui.timer.INTERP_POLYN1)
 
-        self.scale_current = 1.0
+        self.scale_before = 1.0
         self.scale_dst = 1.0
-        self.view_current = (0, 0)
+
+        self.view_before = (0, 0)
         self.view_dst = (0, 0)
 
-        if default_align:
-            self.alignCenter()
-        self.updateChildrenView()
+        self._updateView(self.scale_dst, self.view_dst, False)
 
-    def _constraintedView(self,
-            view_x: float,
-            view_y: float,
-            scale: float) -> Tuple[float, float]:
-        if self.main_component is None:
-            return (view_x, view_y)
+    def _updateView(self, scale: float, view: Tuple[float, float], redraw: bool = False) -> None:
+        for ch in self._children:
+            ch.setCanvasView(scale, *view)
+        if redraw:
+            self.redraw()
 
-        main_w, main_h = self.main_component.getDisplaySize(scale)
-        main_x, main_y = self.main_component.getDisplayPos(scale, view_x, view_y)
-        main_xr = main_x + main_w
-        main_yr = main_y + main_h
-
-        if main_w + 2 * self.margin_x < self.w:
-            view_x += (main_w - self.w) / 2.0 + main_x
-        else:
-            if main_x > self.margin_x:
-                view_x += main_x - self.margin_x
-            if main_xr < self.w - self.margin_x:
-                view_x += main_xr - (self.w - self.margin_x)
-        if main_h + 2 * self.margin_y < self.h:
-            view_y += (main_h - self.h) / 2.0 + main_y
-        else:
-            if main_y > self.margin_y:
-                view_y += main_y - self.margin_y
-            if main_yr < self.h - self.margin_y:
-                view_y += main_yr - (self.h - self.margin_y)
-
-        return (view_x, view_y)
-
-    def alignCenter(self) -> None:
-        if self.main_component is None:
-            return
-
-        self.scale_dst = min(
-            self.main_component.getScaleByWidth(self.w),
-            self.main_component.getScaleByHeight(self.h)
-        )
-        self.scale_current = self.scale_dst
-        main_w, main_h = self.main_component.getDisplaySize(self.scale_dst)
-        main_x, main_y = self.main_component.getDisplayPos(self.scale_dst)
-
-        view_x = (main_w - self.w) / 2.0 + main_x + self.main_component.view_x
-        view_y = (main_h - self.h) / 2.0 + main_y + self.main_component.view_y
-        self.view_dst = (view_x, view_y)
-        self.view_current = self.view_dst
-        self.updateChildrenView()
-
-    def onMouseWheel(self, x: int, y: int, v: int) -> None:
+    def _setMouseWheel(self, x: int, y: int, v: int) -> None:
         rate = math.exp(v * 0.2)
-        view_x, view_y = self.view_dst
+        self.scale_before = self.scale_dst
+        self.view_before = self.view_dst
 
         self.scale_dst *= rate
-        self.view_dst = self._constraintedView(
+        view_x, view_y = self.view_dst
+        self.view_dst = (
             rate * (view_x + x) - x,
-            rate * (view_y + y) - y,
-            self.scale_dst
+            rate * (view_y + y) - y
         )
-        self.updateChildrenView()
+        self._updateView(self.scale_before, self.view_before, True)
+        self.smooth_timer.reset()
 
     def onRightDrag(self, vx: int, vy: int) -> None:
         if vx == 0 and vy == 0:
             return
+        self.view_dst = (self.view_dst[0] - vx, self.view_dst[1] - vy)
 
-        view_x, view_y = self.view_dst
-        self.view_dst = self._constraintedView(
-            view_x - vx, view_y - vy, self.scale_dst
-        )
+    def update(self, x: int, y: int, wheel: int) -> None:
+        if self.active and wheel != 0:
+            self._setMouseWheel(x, y, wheel)
 
-        self.scale_current = self.scale_dst
-        self.view_current = self.view_dst
-        self.updateChildrenView()
-
-    def update(self, events=None) -> None:
-        super().update(events)
-
-        if abs(self.scale_current - self.scale_dst) >= 1e-6:
-            self.scale_current = self.smooth_factor * self.scale_current \
-                               + (1 - self.smooth_factor) * self.scale_dst
-            view_x, view_y = self.view_dst
-            curr_x, curr_y = self.view_current
-            self.view_current = (
-                self.smooth_factor * curr_x + (1 - self.smooth_factor) * view_x,
-                self.smooth_factor * curr_y + (1 - self.smooth_factor) * view_y
+        if not self.smooth_timer.isFinished():
+            p = self.smooth_timer.getCurrentValue()
+            scale = self.scale_before * (1 - p) + self.scale_dst * p
+            view = (
+                self.view_before[0] * (1 - p) + self.view_dst[0] * p,
+                self.view_before[1] * (1 - p) + self.view_dst[1] * p
             )
-            self.updateChildrenView()
-        elif self.view_dst != self.view_current:
-            self.scale_current = self.scale_dst
-            self.view_current = self.view_dst
-            self.updateChildrenView()
-
-    def updateChildrenView(self) -> None:
-        for ch in self.child_components:
-            ch.onCanvasViewChanged(self.scale_current, *self.view_current)
+            self._updateView(scale, view, True)
+        elif self.scale_before != self.scale_dst or self.view_before != self.view_dst:
+            self.scale_before = self.scale_dst
+            self.view_before = self.view_dst
+            self._updateView(self.scale_dst, self.view_dst, True)
 
     def addChild(self, child: CanvasComponent) -> None:
         if not isinstance(child, CanvasComponent):
-            f_error("Child must be CanvasComponent.", ValueError, self)
+            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
             return
-        child.onCanvasViewChanged(self.scale_current, *self.view_current)
+        child.setCanvasView(self.scale_dst, *self.view_dst)
         super().addChild(child)

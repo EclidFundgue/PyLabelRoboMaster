@@ -1,11 +1,10 @@
 from typing import Callable, List, Tuple, Union
 
-from ...pygame_gui import Surface, f_warning
-from ...pygame_gui.decorators import getCallable
+from ... import pygame_gui as ui
 from .line import _GenericFileLine as FileLine
 
 
-class LinesBox(Surface):
+class LinesBox(ui.components.RectContainer):
     '''
     Contains list of FileLine, display them by relative position.
     Automacically control position of each line, and handle mouse
@@ -31,29 +30,29 @@ class LinesBox(Surface):
 
     MOUSE_SCROLL_SPEED = 50
 
-    def __init__(self, w: int, h: int, x: int, y: int,
-                 lines: List[FileLine] = None,
-                 smooth_factor: float = 0.6,
-                 on_relative_changed: Callable[[float], None] = None,
-                 on_selected_changed: Callable[[int, FileLine], None] = None):
+    def __init__(self,
+        w: int, h: int, x: int, y: int,
+        lines: List[FileLine] = None,
+        on_relative_changed: Callable[[float], None] = None,
+        on_selected_changed: Callable[[int, FileLine], None] = None
+    ):
         super().__init__(w, h, x, y)
 
         self.lines = lines if lines is not None else []
         self.total_height, self.heights = self._getLinesHieghts(self.lines)
         self.child_top_idx = 0 # line_idx = child_idx + child_top_idx
 
-        self.smooth_factor = smooth_factor
-        self.on_relative_changed: Callable[[float], None] = getCallable(on_relative_changed)
-        self.on_selected_changed: Callable[[int, FileLine], None] = getCallable(on_selected_changed)
+        self.on_relative_changed: Callable[[float], None] = ui.utils.getCallable(on_relative_changed)
+        self.on_selected_changed: Callable[[int, FileLine], None] = ui.utils.getCallable(on_selected_changed)
 
         self._bindWithLines(self.lines)
 
         self.selected_idx = -1
         self.selected_line = None
 
-        self.relative = 0
-        self.dst_relative = 0
-        self._forceSetRelative(0) 
+        self.relative = ui.timer.TimedFloat(0.2, 0, ui.timer.INTERP_POLY2)
+        self.current_relative_value = self.relative.getCurrentValue()
+        self._updateRelativeView(self.current_relative_value)
 
     def _bindWithLines(self, lines: List[FileLine]):
         def get_on_select(_line: FileLine, orig_on_select: Callable):
@@ -105,11 +104,11 @@ class LinesBox(Surface):
             l = self.lines[i]
             l.x = 0
             l.y = self.heights[i] + offset
-        self.child_components = self.lines[start_idx: end_idx + 1]
+        self.setChildren(self.lines[start_idx: end_idx + 1])
         self.child_top_idx = start_idx
 
-    def _forceSetRelative(self, r: float) -> None:
-        self.relative = r
+    def _updateRelativeView(self, r: float) -> None:
+        ''' Update childs position and display range. '''
         y_offset = self._getPixelOffset(r)
         start, end = self._searchDisplayRange(y_offset)
         self._updateChilds(y_offset, start, end)
@@ -119,19 +118,28 @@ class LinesBox(Surface):
             r = 0
         elif r > 1:
             r = 1
-        if abs(r - self.dst_relative) < 1e-6:
+        if abs(r - self.relative.getEndValue()) < 1e-6:
             return
 
-        self.dst_relative = r
+        self.relative.setValue(r)
+        self.current_relative_value = self.relative.getCurrentValue()
 
     def setRelativeWithoutSmooth(self, r: float) -> None:
-        self.setRelativeWithSmooth(r)
-        self._forceSetRelative(self.dst_relative)
-        self.on_relative_changed(self.relative)
+        if r < 0:
+            r = 0
+        elif r > 1:
+            r = 1
+        if abs(r - self.relative.getEndValue()) < 1e-6:
+            return
+
+        self.relative.setValue(r, use_smooth=False)
+        self.current_relative_value = self.relative.getCurrentValue()
+        self._updateRelativeView(self.current_relative_value)
+        self.on_relative_changed(self.current_relative_value)
 
     def getRelative(self) -> float:
-        return self.relative
-    
+        return self.current_relative_value
+
     def getSelectedLine(self) -> Union[FileLine, None]:
         return self.selected_line
 
@@ -149,9 +157,9 @@ class LinesBox(Surface):
         line.on_select = get_on_select(line, line.on_select)
 
         # update box
-        self.removeDead()
+        self.removeDeadChildren()
         self.total_height, self.heights = self._getLinesHieghts(self.lines)
-        self._forceSetRelative(self.relative)
+        self._updateRelativeView(self.current_relative_value)
 
         # update selected line index
         if self.selected_line is not None:
@@ -159,7 +167,7 @@ class LinesBox(Surface):
 
     def _selectByIndex(self, idx: int) -> None:
         if idx < 0 or idx >= len(self.lines):
-            f_warning(f"Line index out of range: {idx}", self)
+            ui.logger.warning(f"Line index out of range: {idx}", self)
             return
 
         if idx == self.selected_idx:
@@ -194,9 +202,9 @@ class LinesBox(Surface):
 
     def _constrainRelativeByIndex(self, idx: int) -> float:
         min_r, max_r = self.getMinMaxRelative(idx)
-        if self.dst_relative < min_r:
+        if self.relative.getEndValue() < min_r:
             self.setRelativeWithSmooth(min_r)
-        elif self.dst_relative > max_r:
+        elif self.relative.getEndValue() > max_r:
             self.setRelativeWithSmooth(max_r)
 
     def select(self, line: Union[int, str, FileLine]) -> None:
@@ -212,7 +220,7 @@ class LinesBox(Surface):
         elif isinstance(line, FileLine):
             self._selectByLine(line)
         else:
-            f_warning(f"Invalid line type: {type(line)}", self)
+            ui.logger.warning(f"Invalid line type: {type(line)}", self)
 
         self._constrainRelativeByIndex(self.selected_idx)
 
@@ -245,7 +253,7 @@ class LinesBox(Surface):
 
     def _deleteByIndex(self, idx: int) -> None:
         if idx < 0 or idx >= len(self.lines):
-            f_warning(f"Line index out of range: {idx}", self)
+            ui.logger.warning(f"Line index out of range: {idx}", self)
             return
 
         # remove line from list
@@ -258,9 +266,9 @@ class LinesBox(Surface):
             self.selected_line = None
 
         # update box
-        self.removeDead()
+        self.removeDeadChildren()
         self.total_height, self.heights = self._getLinesHieghts(self.lines)
-        self._forceSetRelative(self.relative)
+        self._updateRelativeView(self.current_relative_value)
 
         # update selected line index
         if self.selected_line is not None:
@@ -278,7 +286,7 @@ class LinesBox(Surface):
         elif isinstance(line, FileLine):
             self._deleteByLine(line)
         else:
-            f_warning(f"Invalid line type: {type(line)}", self)
+            ui.logger.warning(f"Invalid line type: {type(line)}", self)
 
     def index(self, line: FileLine) -> int:
         '''
@@ -298,17 +306,13 @@ class LinesBox(Surface):
         self.on_selected_changed = None
         super().kill()
 
-    def update(self, events=None) -> None:
-        super().update(events)
+    def update(self, x: int, y: int, wheel: int) -> None:
+        if abs(self.current_relative_value - self.relative.getEndValue()) * self.total_height > 1:
+            self.current_relative_value = self.relative.getCurrentValue()
+            self._updateRelativeView(self.current_relative_value)
+            self.on_relative_changed(self.current_relative_value)
+            self.redraw()
 
-        if abs(self.dst_relative - self.relative) * self.total_height < 1:
-            return
-        else:
-            curr_r = self.dst_relative * (1 - self.smooth_factor) \
-                   + self.relative * self.smooth_factor
-            self._forceSetRelative(curr_r)
-            self.on_relative_changed(self.relative)
-
-    def onMouseWheel(self, x: int, y: int, v: int) -> None:
-        dr = -self.MOUSE_SCROLL_SPEED * v / self.total_height
-        self.setRelativeWithSmooth(self.relative + dr)
+        if self.active and wheel != 0:
+            dr = -self.MOUSE_SCROLL_SPEED * wheel / self.total_height
+            self.setRelativeWithSmooth(self.relative.getEndValue() + dr)

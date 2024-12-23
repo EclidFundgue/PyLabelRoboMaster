@@ -1,0 +1,11 @@
+from pygame.constants import *
+
+DEFAULT_FONT_NAME = 'simsun'
+DEFAULT_FONT_SIZE = 16
+DEFAULT_TEXT_COLOR = (0, 0, 0)
+
+ALIGN_CENTER = 0
+ALIGN_LEFT = 1
+ALIGN_RIGHT = 2
+ALIGN_TOP = 3
+ALIGN_BOTTOM = 4

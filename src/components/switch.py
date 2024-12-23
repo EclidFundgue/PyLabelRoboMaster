@@ -1,14 +1,11 @@
-from typing import Any, Callable, Union
+from typing import Any, Callable, List, Tuple, Union
 
 import pygame
-from pygame import Surface as pg_Surface
 
-from ..global_vars import THEME_VAR_CHANGE
-from ..pygame_gui import BaseComponent
-from ..pygame_gui.decorators import getCallable
+from .. import pygame_gui as ui
 
 
-class Switch(BaseComponent):
+class Switch(ui.components.Base):
     '''
     A Switch has two states: on and off.
 
@@ -28,16 +25,17 @@ class Switch(BaseComponent):
     def __init__(self,
             w: int, h: int,
             x: int, y: int,
-            image_on: Union[str, pg_Surface],
-            image_off: Union[str, pg_Surface],
+            image_on: Union[str, pygame.Surface],
+            image_off: Union[str, pygame.Surface],
             on_turn: Callable[[bool], None] = None,
-            cursor_change: bool = True):
+            cursor_change: bool = True
+        ):
         super().__init__(w, h, x, y)
 
-        self.image_on = self.loadImage(image_on, w, h)
-        self.image_off = self.loadImage(image_off, w, h)
+        self.image_on = ui.utils.loadImage(image_on, w, h)
+        self.image_off = ui.utils.loadImage(image_off, w, h)
 
-        self.on_turn = getCallable(on_turn)
+        self.on_turn = ui.utils.getCallable(on_turn)
         self.cursor_change = cursor_change
 
         self.on = False
@@ -55,49 +53,112 @@ class Switch(BaseComponent):
         self.on_turn = None
         super().kill()
 
-    def onHover(self, x: int, y: int) -> None:
+    def onMouseEnter(self) -> None:
         if self.cursor_change:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
 
-    def offHover(self) -> None:
+    def onMouseLeave(self) -> None:
         if self.cursor_change:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def onLeftClick(self, x: int, y: int) -> None:
+        if not self.active:
+            return
+
         self.on = not self.on
         self.on_turn(self.on)
+        self.redraw()
 
-    def draw(self, surface: pg_Surface) -> None:
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int):
         if self.on:
-            surface.blit(self.image_on, (self.x, self.y))
+            surface.blit(self.image_on, (x_start, y_start))
         else:
-            surface.blit(self.image_off, (self.x, self.y))
+            surface.blit(self.image_off, (x_start, y_start))
 
-class ThemeBasedSwitchTrigger(BaseComponent):
+class NTextSwitch(ui.components.Base):
     '''
-    Bind switch and variables. Change switch when variable changed.
+    A Switch has a specific number of states.
 
-    ThemeBasedSwitchTrigger()
+    NTextSwitch(
+        w, h, x, y,
+        num_states,
+        texts,
+        font,
+        text_color,
+        background_color,
+        on_turn,
+        cursor_change
+    )
+
+    Methods:
+    * turn() -> None
+    * turnTo(state: int) -> None
     '''
-    def __init__(self, var, switch: Switch):
-        super().__init__()
+    def __init__(self,
+            w: int, h: int, x: int, y: int,
+            num_states: int,
+            texts: List[str],
+            font: pygame.font.Font = None,
+            text_color: Tuple[int, int, int] = (0, 0, 0),
+            background_color: Tuple[int, int, int] = (255, 255, 255),
+            on_turn: Callable[[int], None] = None,
+            cursor_change: bool = True
+        ):
+        super().__init__(w, h, x, y)
 
-        self.var: BaseComponent = var
-        self.switch = switch
+        self.num_states = num_states
+        self.texts = texts
+        self.on_turn = ui.utils.getCallable(on_turn)
+        self.cursor_change = cursor_change
 
-        self.var.addObserver(self)
+        self.state = 0
+
+        self.label = ui.components.Label(
+            w, h, 0, 0,
+            text=texts[0],
+            font=font,
+            color=text_color,
+        )
+        self.container = ui.components.RoundedRectContainer(
+            w, h, 0, 0,
+            radius=min(w, h) // 4,
+        )
+
+        self.label.setAlignment(ui.constants.ALIGN_CENTER, ui.constants.ALIGN_CENTER)
+        self.container.setBackgroundColor(background_color)
+
+        self.container.addChild(self.label)
+        self.addChild(self.container)
+
+    def turn(self) -> None:
+        self.state = (self.state + 1) % self.num_states
+        self.label.setText(self.texts[self.state])
+
+    def turnTo(self, state: int) -> None:
+        if state < 0 or state >= self.num_states:
+            ui.logger.warning(f'Invalid state {state}.', self)
+            return
+        self.state = state
+        self.label.setText(self.texts[state])
 
     def kill(self) -> None:
-        if self.var.alive:
-            self.var.removeObserver(self)
-        self.var = None
-        self.switch = None
-        return super().kill()
-    
-    def onReceive(self, sender_id: int, theme: str, message: Any) -> None:
-        if theme == THEME_VAR_CHANGE and sender_id == id(self.var):
-            state: bool = message
-            if state:
-                self.switch.turnOn()
-            else:
-                self.switch.turnOff()
+        self.label = None
+        self.container = None
+        self.on_turn = None
+        super().kill()
+
+    def onMouseEnter(self):
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def onMouseLeave(self):
+        if self.cursor_change:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+    def onLeftClick(self, x: int, y: int) -> None:
+        if not self.active:
+            return
+
+        self.turn()
+        self.on_turn(self.state)
+        self.redraw()
