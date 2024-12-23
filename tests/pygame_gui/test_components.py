@@ -1,7 +1,5 @@
 import unittest
 
-import pygame
-
 from src.pygame_gui.components.base import Base
 from src.pygame_gui.components.root import Root
 from tests.screen import TestCaseWithScreen
