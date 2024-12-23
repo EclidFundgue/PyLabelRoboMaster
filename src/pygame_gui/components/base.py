@@ -253,10 +253,13 @@ class Base:
 
         for ch in self._children:
             ch.kill()
-        self._parent = None
         self._children = None
         self._keyboard_events = None
         self._keyboard_events_once = None
 
         self.alive = False
         self.active = False
+
+        if self._parent is not None:
+            self._parent.removeDeadChildren()
+            self._parent = None
