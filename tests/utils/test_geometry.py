@@ -1,9 +1,10 @@
 import unittest
 
-from src.utils.geometry import __zero, __positive, __len, __sub, __dot, __constrain, __get_radian, in_polygon
+from src.utils.geometry import (__constrain, __dot, __get_radian, __len,
+                                __positive, __sub, __zero, in_polygon)
+
 
 class TestGeometryFunctions(unittest.TestCase):
-
     def test__zero(self):
         self.assertTrue(__zero(1e-7), "Expected True for very small values")
         self.assertTrue(__zero(-1e-7), "Expected True for very small negative values")
