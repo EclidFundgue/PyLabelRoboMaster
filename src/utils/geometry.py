@@ -54,6 +54,9 @@ def in_polygon(
     Test if point in polygon.
     Return `None` if point in a line of this polygon.
     '''
+    if len(polygon) < 3:
+        return None
+
     res = 0.0
     for i in range(len(polygon)):
         p1 = polygon[i]
