@@ -1,8 +1,9 @@
-import unittest
 import os
 import tempfile
+import unittest
 
-from src.utils.lbformat import line2ixy, ixy2line, line2ibxy, ibxy2line, xy2box, loadLabel, saveLabel
+from src.utils.lbformat import (ibxy2line, ixy2line, line2ibxy, line2ixy,
+                                loadLabel, saveLabel, xy2box)
 
 
 class TestLabelIOFunctions(unittest.TestCase):
