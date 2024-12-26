@@ -6,7 +6,7 @@ from .pages.menu import MainMenu
 
 class Main(ui.Main):
     def __init__(self):
-        super().__init__((1280, 800), caption='PyLabelRoboMaster', icon='./resources/icon.png')
+        super().__init__((1280, 800), caption='PyLabelRoboMaster')
 
         page_incidies = {
             'main_menu': 0,
