@@ -162,43 +162,45 @@ class Labels(CanvasComponent):
         self.addKeyCtrlEvent(pygame.K_z, self.undo)
         self.addKeyCtrlEvent(pygame.K_y, self.redo)
 
-        def _setSelectedTypeID(n: int) -> Callable[[], None]:
-            def func():
-                # update self
-                curr_color_id = self.curr_class_id // 8
-                self.curr_class_id = curr_color_id * 8 + n
-                # update labels
-                if len(self.selected_labels) == 0:
-                    return
-                for label in self.selected_labels:
-                    label.setTypeID(n)
-                self._snapshot()
-                self.redraw()
-            return func
-        self.addKeyDownEvent(pygame.K_0, _setSelectedTypeID(0))
-        self.addKeyDownEvent(pygame.K_1, _setSelectedTypeID(1))
-        self.addKeyDownEvent(pygame.K_2, _setSelectedTypeID(2))
-        self.addKeyDownEvent(pygame.K_3, _setSelectedTypeID(3))
-        self.addKeyDownEvent(pygame.K_4, _setSelectedTypeID(4))
-        self.addKeyDownEvent(pygame.K_5, _setSelectedTypeID(5))
-        self.addKeyDownEvent(pygame.K_6, _setSelectedTypeID(6))
-        self.addKeyDownEvent(pygame.K_7, _setSelectedTypeID(7))
+        self.addKeyDownEvent(pygame.K_0, self._setSelectedTypeIDCallback(0))
+        self.addKeyDownEvent(pygame.K_1, self._setSelectedTypeIDCallback(1))
+        self.addKeyDownEvent(pygame.K_2, self._setSelectedTypeIDCallback(2))
+        self.addKeyDownEvent(pygame.K_3, self._setSelectedTypeIDCallback(3))
+        self.addKeyDownEvent(pygame.K_4, self._setSelectedTypeIDCallback(4))
+        self.addKeyDownEvent(pygame.K_5, self._setSelectedTypeIDCallback(5))
+        self.addKeyDownEvent(pygame.K_6, self._setSelectedTypeIDCallback(6))
+        self.addKeyDownEvent(pygame.K_7, self._setSelectedTypeIDCallback(7))
 
-        def _setSelectedColorID(n: int) -> Callable[[], None]:
-            def func():
-                # update self
-                curr_type_id = self.curr_class_id % 8
-                self.curr_class_id = n * 8 + curr_type_id
-                # update labels
-                if len(self.selected_labels) == 0:
-                    return
-                for label in self.selected_labels:
-                    label.setColorID(n)
-                self._snapshot()
-                self.redraw()
-            return func
-        self.addKeyDownEvent(pygame.K_b, _setSelectedColorID(0))
-        self.addKeyDownEvent(pygame.K_r, _setSelectedColorID(1))
+        self.addKeyDownEvent(pygame.K_b, self._setSelectedColorIDCallback(0))
+        self.addKeyDownEvent(pygame.K_r, self._setSelectedColorIDCallback(1))
+
+    def _setSelectedTypeIDCallback(self, n: int) -> Callable[[], None]:
+        def func():
+            # update self
+            curr_color_id = self.curr_class_id // 8
+            self.curr_class_id = curr_color_id * 8 + n
+            # update labels
+            if len(self.selected_labels) == 0:
+                return
+            for label in self.selected_labels:
+                label.setTypeID(n)
+            self._snapshot()
+            self.redraw()
+        return func
+
+    def _setSelectedColorIDCallback(self, n: int) -> Callable[[], None]:
+        def func():
+            # update self
+            curr_type_id = self.curr_class_id % 8
+            self.curr_class_id = n * 8 + curr_type_id
+            # update labels
+            if len(self.selected_labels) == 0:
+                return
+            for label in self.selected_labels:
+                label.setColorID(n)
+            self._snapshot()
+            self.redraw()
+        return func
 
     def _snapshot(self) -> None:
         snapshot = {
@@ -215,10 +217,7 @@ class Labels(CanvasComponent):
         self.snapshot_index += 1
 
     def _loadSnapshot(self, snapshot: dict) -> None:
-        if self.adding_label is not None:
-            self.adding_label.kill()
-            self.adding_label = None
-            self.adding_point = None
+        self._tryCancelAdd() # load snapshot will terminate add process
 
         for label in self.labels:
             label.kill()
@@ -241,6 +240,37 @@ class Labels(CanvasComponent):
             label_obj = Label(points, label_dict['cls_id'])
             label_obj.icon = icon
             self.labels.append(label_obj)
+
+    def _getLabelsIO(self, orig_img_size: Tuple[int, int]) -> List[fmt.LabelIO]:
+        ret = []
+        for label in self.labels:
+            points = [p.getCenter() for p in label.points]
+            points = [(
+                (x + self._x) / orig_img_size[0],
+                (y + self._y) / orig_img_size[1]
+            ) for x, y in points]
+            ret.append(fmt.ArmorLabelIO(label.cls_id, points))
+        return ret
+
+    def _addLabelsIO(self,
+        labels_io: List[fmt.LabelIO],
+        orig_img_size: Tuple[int, int]
+    ) -> None:
+        for label_io in labels_io:
+            kpts = []
+            for x, y in label_io.kpts:
+                cx = int(x * orig_img_size[0] - self._x)
+                cy = int(y * orig_img_size[1] - self._y)
+                p = _createKeypoint(cx, cy)
+                p.on_click = self._getKeypointOnClickFunction(p)
+                kpts.append(p)
+                self.addChild(p)
+
+            label = Label(kpts, label_io.id)
+            label.icon = _createArmorIcon(kpts[2], label_io.id)
+
+            self.addChild(label.icon)
+            self.labels.append(label)
 
     def _getKeypointOnClickFunction(self, kpt: Keypoint) -> Callable[[], None]:
         def func():
@@ -278,14 +308,18 @@ class Labels(CanvasComponent):
         self.adding_label = Label([self.adding_point])
         self.addChild(self.adding_point)
 
-    def cancelAdd(self) -> None:
+    def _tryCancelAdd(self) -> bool:
+        '''Inner function, return if successfully cancelled.'''
         if self.adding_label is None:
-            return
-
+            return False
         self.adding_label.kill()
         self.adding_point = None
         self.adding_label = None
-        self.redraw()
+        return True
+
+    def cancelAdd(self) -> None:
+        if self._tryCancelAdd():
+            self.redraw()
 
     def deleteSelectedLabels(self) -> None:
         if len(self.selected_labels) == 0:
@@ -316,11 +350,7 @@ class Labels(CanvasComponent):
         labels = imgproc.relabel(cv_img, io_labels)
 
         # clear current labels
-        if self.adding_label is not None:
-            self.adding_label.kill()
-            self.adding_label = None
-            self.adding_point = None
-
+        self._tryCancelAdd()
         for label in self.labels:
             label.kill()
         self.labels = []
@@ -349,41 +379,18 @@ class Labels(CanvasComponent):
             return
 
         cv_img = imgproc.surface2mat(img)
-        io_labels = []
-        for label in self.selected_labels:
-            points = [p.getCenter() for p in label.points]
-            io_labels.append(fmt.ArmorLabelIO(label.cls_id, points))
-        # labels = imgproc.correctLabels(cv_img, io_labels)
-        labels = io_labels
+        labels_io = self._getLabelsIO(img.get_size())
+        corrected_labels = imgproc.correctLabels(cv_img, labels_io)
 
         # clear selected labels
-        if self.adding_label is not None:
-            self.adding_label.kill()
-            self.adding_label = None
-            self.adding_point = None
-
+        self._tryCancelAdd()
         for label in self.selected_labels:
             label.kill()
         self.labels = list(filter(lambda lb: lb.alive, self.labels))
         self.selected_labels = []
 
         # add corrected labels
-        for label_io in labels:
-            points = [Keypoint() for _ in range(len(label_io.kpts))]
-            for p, p_center in zip(points, label_io.kpts):
-                p_center = (p_center[0], p_center[1] + 2)
-                p.on_click = self._getKeypointOnClickFunction(p)
-                p.setCenter(*p_center)
-                self.addChild(p)
-
-            icon = ArmorIcon(label_io.id)
-            icon.setPos(points[2])
-            self.addChild(icon)
-
-            label_obj = Label(points, label_io.id)
-            label_obj.icon = icon
-            self.labels.append(label_obj)
-
+        self._addLabelsIO(corrected_labels, img.get_size())
         self._snapshot()
         self.redraw()
 
@@ -415,33 +422,12 @@ class Labels(CanvasComponent):
 
     def load(self, path: str, orig_img_size: Tuple[int, int]) -> None:
         labels_io = fmt.loadLabel(path)
-        for label_io in labels_io:
-            keypoints = []
-            for x, y in label_io.kpts:
-                cx = int(x * orig_img_size[0] - self._x)
-                cy = int(y * orig_img_size[1] - self._y)
-                kpt = _createKeypoint(cx, cy)
-                kpt.on_click = self._getKeypointOnClickFunction(kpt)
-                keypoints.append(kpt)
-                self.addChild(kpt)
-            label = Label(keypoints, label_io.id)
-            label.icon = _createArmorIcon(keypoints[2], label_io.id)
-            self.addChild(label.icon)
-            self.labels.append(label)
-
+        self._addLabelsIO(labels_io, orig_img_size)
         self._snapshot()
         self.redraw()
 
     def saveToPath(self, path: str, orig_img_size: Tuple[int, int]) -> None:
-        io_labels = []
-        for label in self.labels:
-            points = [p.getCenter() for p in label.points]
-            points = [
-                ((x+self._x)/orig_img_size[0],
-                 (y+self._y)/orig_img_size[1]) for x, y in points
-            ]
-            io_labels.append(fmt.ArmorLabelIO(label.cls_id, points))
-        fmt.saveLabel(path, io_labels)
+        fmt.saveLabel(path, self._getLabelsIO(orig_img_size))
 
     def _handleAddingPointMovement(self, x: int, y: int) -> None:
         self.adding_point.setCenter(x / self.scale, y / self.scale)
@@ -473,37 +459,35 @@ class Labels(CanvasComponent):
         else:
             self._handleLabelsActive(x, y)
 
-    def _handleLabelSelection(self, x: int, y: int) -> None:
-        clicked_labels: List[Label] = []
+    def _oneLabelSelection(self, clicked_labels: List[Label]) -> None:
+        for label in self.selected_labels:
+            label.setSelected(False)
+        for label in clicked_labels:
+            label.setSelected(True)
+            self.on_select(label)
+        self.selected_labels = clicked_labels
 
-        for label in self.labels:
-            if label.inHover(x, y):
-                clicked_labels.append(label)
-
-        if len(clicked_labels) > 0:
-            for label in clicked_labels:
-                self.on_select(label)
-
-        if not self.key_ctrl_pressed:
-            for label in self.selected_labels:
-                label.setSelected(False)
-            for label in clicked_labels:
+    def _multipleLabelSelection(self, clicked_labels: List[Label]) -> None:
+        for label in clicked_labels:
+            if not label.selected:
                 label.setSelected(True)
-            self.selected_labels = clicked_labels
-        else:
-            for label in clicked_labels:
-                if not label.selected:
-                    label.setSelected(True)
-                    self.selected_labels.append(label)
-                else:
-                    label.setSelected(False)
-                    self.selected_labels.remove(label)
+                self.on_select(label)
+                self.selected_labels.append(label)
+            else:
+                label.setSelected(False)
+                self.selected_labels.remove(label)
 
-        self.redraw()
+    def _handleLabelSelection(self, clicked_labels: List[Label]) -> None:
+        if not self.key_ctrl_pressed:
+            self._oneLabelSelection(clicked_labels)
+        else:
+            self._multipleLabelSelection(clicked_labels)
 
     def onLeftClick(self, x, y):
         if self.adding_point is None:
-            self._handleLabelSelection(x, y)
+            clicked_labels = list(filter(lambda label: label.inHover(x, y), self.labels))
+            self._handleLabelSelection(clicked_labels)
+            self.redraw()
 
     def onLeftDrag(self, vx: int, vy: int) -> None:
         if vx == 0 and vy == 0:
