@@ -269,6 +269,9 @@ class ArmorPage(StackedPage):
         toolbar_scroll_navigator.addChild(toolbar_scroll_navigator_filename)
         toolbar.addChild(toolbar_scroll_files)
 
+        # ----- keyboard events -----
+        self.addKeyDownEvent(pygame.K_c, self.label_controller.correct)
+
     def onHide(self):
         self.navigator_button_back.resetState()
 
