@@ -4,7 +4,7 @@ from typing import Tuple, Union
 import pygame
 from pygame import Surface
 
-from . import components, logger, utils
+from . import components, logger
 
 
 def win32MovePygameWindow(position: Tuple[int, int]) -> None:
@@ -40,10 +40,10 @@ class Main:
             resolution = (screen_info.current_w, screen_info.current_h)
             position = ((resolution[0] - size[0]) // 2, (resolution[1] - size[1]) // 2)
 
+        self._setIcon(icon)
         pygame.display.set_mode(size)
         pygame.display.set_caption(caption)
         self._setPosition(position)
-        self._setIcon(icon)
 
         self.fps: int = fps
         self.root: components.Root = components.Root()
@@ -57,7 +57,7 @@ class Main:
         if icon is None:
             icon = generateDefaultIcon()
         elif isinstance(icon, str):
-            icon = utils.loadImage(icon)
+            icon = pygame.image.load(icon)
 
         if isinstance(icon, Surface):
             pygame.display.set_icon(icon)
