@@ -3,9 +3,9 @@ from typing import Callable, List, Tuple
 import pygame
 
 from ... import pygame_gui as ui
+from ...pygame_gui.components.canvas import CanvasComponent
 from ...utils import geometry, imgproc
 from ...utils import lbformat as fmt
-from .canvas import CanvasComponent
 from .icon import ArmorIcon
 from .keypoint import Keypoint
 

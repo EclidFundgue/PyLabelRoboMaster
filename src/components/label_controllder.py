@@ -1,8 +1,8 @@
 from typing import Callable
 
 from .. import pygame_gui as ui
+from ..pygame_gui.components.canvas import Canvas
 from ..utils import imgproc
-from .canvas.canvas import Canvas
 from .canvas.image import Image
 from .canvas.labels import Label, Labels
 
