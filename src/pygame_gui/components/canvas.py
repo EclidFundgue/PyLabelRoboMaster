@@ -31,15 +31,23 @@ class CanvasComponent(Base):
         self.view_x = view_x
         self.view_y = view_y
 
+        # To ensure there are no gaps in the tiling, we need to guarantee:
+        # self.x + self.w = next_component.x = int(xr)
+
+        xl = self._x * scale - view_x
+        yt = self._y * scale - view_y
+        xr = xl + self._w * scale
+        yb = yt + self._h * scale
+
+        self.x = int(xl)
+        self.y = int(yt)
+
         if self.fix_size:
             self.w = self._w
             self.h = self._h
         else:
-            self.w = int(self._w * scale)
-            self.h = int(self._h * scale)
-
-        self.x = int(self._x * scale - view_x)
-        self.y = int(self._y * scale - view_y)
+            self.w = int(xr) - self.x
+            self.h = int(yb) - self.y
 
         for ch in self._children:
             ch.setCanvasView(scale, 0, 0)
