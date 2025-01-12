@@ -124,7 +124,8 @@ class LabelController:
 
     def save(self):
         if self.labels is not None:
-            self.labels.saveToPath(self.label_path, self.image.getRect()[:2])
+            orig_size = self.image.orig_image.get_size()
+            self.labels.saveToPath(self.label_path, orig_size)
 
     def switchPreprocess(self, state: bool) -> None:
         if self.image is not None:
