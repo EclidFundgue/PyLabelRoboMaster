@@ -33,6 +33,7 @@ class ScrollView(ui.components.RectContainer):
         on_command: Callable[[int, FileLine], None] = None
     ):
         super().__init__(w, h, x, y)
+        self.interactive_when_active = True
 
         self.folder = folder
 

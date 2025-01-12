@@ -225,6 +225,8 @@ class LinesBox(ui.components.RectContainer):
         self._constrainRelativeByIndex(self.selected_idx)
 
     def selectPrev(self) -> None:
+        if len(self.lines) == 0:
+            return
         if self.selected_idx == -1:
             self._selectByIndex(len(self.lines) - 1)
         else:
@@ -234,6 +236,8 @@ class LinesBox(ui.components.RectContainer):
         self._constrainRelativeByIndex(self.selected_idx)
 
     def selectNext(self) -> None:
+        if len(self.lines) == 0:
+            return
         if self.selected_idx == -1:
             self._selectByIndex(0)
         else:

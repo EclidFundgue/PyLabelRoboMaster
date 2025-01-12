@@ -204,7 +204,7 @@ class StackedScrollView(ui.components.RectContainer):
         curr_page = self.pages[self.header.current_page]
         curr_page.selectLine(line)
 
-    def getSelectedLine(self) -> FileLine:
+    def getSelectedLine(self) -> Union[FileLine, None]:
         curr_page = self.pages[self.header.current_page]
         return curr_page.getSelectedLine()
 
