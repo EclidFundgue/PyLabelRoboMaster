@@ -1,10 +1,12 @@
 import math
 from typing import List, Tuple
 
-from ... import pygame_gui as ui
+from .. import logger, timer
+from .base import Base
+from .containers import RectContainer
 
 
-class CanvasComponent(ui.components.Base):
+class CanvasComponent(Base):
     '''Methods:
     * setCanvasView(scale, view_x, view_y) -> None
     '''
@@ -29,34 +31,42 @@ class CanvasComponent(ui.components.Base):
         self.view_x = view_x
         self.view_y = view_y
 
+        # To ensure there are no gaps in the tiling, we need to guarantee:
+        # self.x + self.w = next_component.x = int(xr)
+
+        xl = self._x * scale - view_x
+        yt = self._y * scale - view_y
+        xr = xl + self._w * scale
+        yb = yt + self._h * scale
+
+        self.x = int(xl)
+        self.y = int(yt)
+
         if self.fix_size:
             self.w = self._w
             self.h = self._h
         else:
-            self.w = int(self._w * scale)
-            self.h = int(self._h * scale)
-
-        self.x = int(self._x * scale - view_x)
-        self.y = int(self._y * scale - view_y)
+            self.w = int(xr) - self.x
+            self.h = int(yb) - self.y
 
         for ch in self._children:
             ch.setCanvasView(scale, 0, 0)
 
     def addChild(self, child: 'CanvasComponent') -> None:
         if not isinstance(child, CanvasComponent):
-            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
+            logger.error("Child must be CanvasComponent.", ValueError, self)
             return
         child.setCanvasView(self.scale, 0, 0)
         child.redraw()
         super().addChild(child)
 
-class Canvas(ui.components.RectContainer):
+class Canvas(RectContainer):
     def __init__(self, w: int, h: int, x: int, y: int):
         super().__init__(w, h, x, y)
         self._children: List[CanvasComponent]
         self.interactive_when_active = True
 
-        self.smooth_timer = ui.timer.ProgressTimer(0.1, ui.timer.INTERP_POLYN1)
+        self.smooth_timer = timer.ProgressTimer(0.1, timer.INTERP_POLYN1)
 
         self.scale_before = 1.0
         self.scale_dst = 1.0
@@ -110,7 +120,7 @@ class Canvas(ui.components.RectContainer):
 
     def addChild(self, child: CanvasComponent) -> None:
         if not isinstance(child, CanvasComponent):
-            ui.logger.error("Child must be CanvasComponent.", ValueError, self)
+            logger.error("Child must be CanvasComponent.", ValueError, self)
             return
         child.setCanvasView(self.scale_dst, *self.view_dst)
         super().addChild(child)

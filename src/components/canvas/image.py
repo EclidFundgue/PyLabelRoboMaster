@@ -4,8 +4,8 @@ import cv2
 import pygame
 
 from ... import pygame_gui as ui
+from ...pygame_gui.components.canvas import CanvasComponent
 from ...utils import imgproc
-from .canvas import CanvasComponent
 
 
 class Image(CanvasComponent):

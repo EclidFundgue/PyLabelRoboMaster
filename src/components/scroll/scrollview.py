@@ -20,6 +20,7 @@ class ScrollView(ui.components.RectContainer):
     * select(line: str) -> None
     * selectPrev() -> None
     * selectNext() -> None
+    * selectLine(line) -> None
     * getSelectedLine() -> FileLine | None
     * getFileNumber() -> int
     * getSelectedIndex() -> int
@@ -32,6 +33,7 @@ class ScrollView(ui.components.RectContainer):
         on_command: Callable[[int, FileLine], None] = None
     ):
         super().__init__(w, h, x, y)
+        self.interactive_when_active = True
 
         self.folder = folder
 
@@ -82,6 +84,9 @@ class ScrollView(ui.components.RectContainer):
 
     def selectNext(self) -> None:
         self.lines.selectNext()
+    
+    def selectLine(self, line: Union[int, str]) -> None:
+        self.lines.select(line)
 
     def getSelectedLine(self) -> Union[FileLine, None]:
         return self.lines.getSelectedLine()

@@ -81,12 +81,15 @@ def _updateRecurse(
     interactive = (obj.active or not obj.interactive_when_active) and interactive
     if interactive:
         _interact(obj, x, y, mouse, keyboard)
-
     # Object may be killed during interation.
     if not obj.alive:
         return
 
     obj.update(x, y, mouse.wheel)
+    # Object may also be killed when updating.
+    if not obj.alive:
+        return
+
     for ch in obj._children:
         _updateRecurse(ch, parent_x + obj.x, parent_y + obj.y, mouse, keyboard, interactive)
 

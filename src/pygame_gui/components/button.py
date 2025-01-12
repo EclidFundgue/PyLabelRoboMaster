@@ -129,7 +129,7 @@ class TextButton(_Button):
     def __init__(self,
             w: int, h: int, x: int, y: int,
             text: str,
-            font: pygame.font.Font,
+            font: pygame.font.Font = None,
             on_press: Callable = None,
             continue_press = -1,
             cursor_change: bool = False):

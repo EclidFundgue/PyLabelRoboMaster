@@ -3,7 +3,7 @@ from typing import Callable, Tuple
 import pygame
 
 from ... import pygame_gui as ui
-from .canvas import CanvasComponent
+from ...pygame_gui.components.canvas import CanvasComponent
 
 
 class Keypoint(CanvasComponent):

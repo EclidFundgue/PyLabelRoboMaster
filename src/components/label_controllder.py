@@ -1,8 +1,8 @@
 from typing import Callable
 
 from .. import pygame_gui as ui
+from ..pygame_gui.components.canvas import Canvas
 from ..utils import imgproc
-from .canvas.canvas import Canvas
 from .canvas.image import Image
 from .canvas.labels import Label, Labels
 
@@ -124,7 +124,8 @@ class LabelController:
 
     def save(self):
         if self.labels is not None:
-            self.labels.saveToPath(self.label_path, self.image.getRect()[:2])
+            orig_size = self.image.orig_image.get_size()
+            self.labels.saveToPath(self.label_path, orig_size)
 
     def switchPreprocess(self, state: bool) -> None:
         if self.image is not None:

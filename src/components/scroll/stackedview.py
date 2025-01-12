@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Union
 
 from ... import pygame_gui as ui
 from .line import DesertedFileLine, ImageFileLine
@@ -132,6 +132,9 @@ class StackedScrollView(ui.components.RectContainer):
     * deleteLine(page: int, line: FileLine) -> None
     * selectPrev() -> None
     * selectNext() -> None
+    * selectLine(line) -> None
+    * getSelectedLine() -> FileLine
+    * getSelectedIndex(self) -> int
     * getCurrentPageFileNumber() -> int
     * reloadByGlobalVar() -> None
     '''
@@ -197,14 +200,20 @@ class StackedScrollView(ui.components.RectContainer):
         curr_page = self.pages[self.header.current_page]
         curr_page.selectNext()
 
+    def selectLine(self, line: Union[int, str]):
+        curr_page = self.pages[self.header.current_page]
+        curr_page.selectLine(line)
+
+    def getSelectedLine(self) -> Union[FileLine, None]:
+        curr_page = self.pages[self.header.current_page]
+        return curr_page.getSelectedLine()
+
+    def getSelectedIndex(self) -> int:
+        curr_page = self.pages[self.header.current_page]
+        return curr_page.getSelectedIndex()
+
     def getCurrentPageFileNumber(self) -> int:
         return self.pages[self.header.current_page].getFileNumber()
-
-    def reloadByGlobalVar(self) -> None:
-        # var = VarArmorLabels()
-        # if var.selected_image is not None:
-        #     self.pages[0].select(var.selected_image)
-        pass
 
     def kill(self) -> None:
         self.header = None

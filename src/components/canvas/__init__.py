@@ -3,4 +3,4 @@ __all__ = [
     "CanvasComponent",
 ]
 
-from .canvas import Canvas, CanvasComponent
+from ...pygame_gui.components.canvas import Canvas, CanvasComponent
