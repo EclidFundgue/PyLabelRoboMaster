@@ -22,8 +22,7 @@ class ConfigManager:
             'load_network': False,
             'last_images_folder': None,
             'last_labels_folder': None,
-            'last_image_file': None,
-            'last_image_index': None
+            'last_image_file': None
         }
 
         with open(path, 'w') as f:

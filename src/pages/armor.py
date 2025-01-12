@@ -10,6 +10,7 @@ from ..components.scroll import stackedview
 from ..components.stacked_page import StackedPage
 from ..components.switch import Switch
 from ..utils import imgproc
+from ..utils.config import ConfigManager
 
 
 class ArmorPage(StackedPage):
@@ -21,12 +22,15 @@ class ArmorPage(StackedPage):
         self.icon_class_id: int = -1
         self.auto_labeling = False
 
-        self.image_folder = './resources/test_dataset/images'
-        self.label_folder = './resources/test_dataset/labels'
-        self.deserted_folder = './resources/test_dataset/images/deserted'
+        self.images_folder = './resources/test_dataset/images'
+        self.labels_folder = './resources/test_dataset/labels'
+        self.deserted_folder = os.path.join(self.images_folder, 'deserted')
         self.selected_image: str = None
-        self.selected_label: str = None
         self.selected_deserted: str = None
+        self.selected_label: str = None
+
+        self.config_manager = ConfigManager('./user_data.json')
+        self._loadPathByConfigManager()
 
         # ----- initialize basic constants -----
         color_theme = ui.color.LightColorTheme()
@@ -195,7 +199,7 @@ class ArmorPage(StackedPage):
             y=toolbar_h-scroll_h-20,
             line_w=scroll_w-30,
             line_h=30,
-            image_folder=self.image_folder,
+            image_folder=self.images_folder,
             deserted_folder=self.deserted_folder,
             on_page_changed=self._toolbarScroll_onPageChange,
             on_select=self._toolbarScroll_onSelect,
@@ -238,11 +242,13 @@ class ArmorPage(StackedPage):
         toolbar_scroll_navigator_index.setAlignment(ui.constants.ALIGN_LEFT)
         toolbar_scroll_navigator_filename.setAlignment(ui.constants.ALIGN_LEFT)
 
-        self.label_controller.reload(
-            './resources/test_dataset/images/01.jpg',
-            './resources/test_dataset/labels/01.txt',
-            False
-        )
+        if self.selected_image is not None:
+            self.label_controller.reload(
+                os.path.join(self.images_folder, self.selected_image),
+                self.selected_label,
+                False
+            )
+            self.toolbar_scroll_files.selectLine(self.selected_image)
 
         # ----- manage component hierarchy -----
         self.addChild(canvas)
@@ -271,6 +277,27 @@ class ArmorPage(StackedPage):
 
         # ----- keyboard events -----
         self.addKeyDownEvent(pygame.K_c, self.label_controller.correct)
+    
+    def _loadPathByConfigManager(self) -> None:
+        images_folder = self.config_manager['last_images_folder']
+        labels_folder = self.config_manager['last_labels_folder']
+        image_file = self.config_manager['last_image_file']
+
+        # load folder
+        if images_folder is None or not os.path.exists(images_folder):
+            return
+        if labels_folder is None or not os.path.exists(labels_folder):
+            return
+        self.images_folder: str = images_folder
+        self.labels_folder: str = labels_folder
+        self.deserted_folder: str = os.path.join(images_folder, 'deserted')
+
+        # load current file
+        if image_file is None:
+            return
+        if os.path.exists(os.path.join(images_folder, image_file)):
+            self.selected_image = image_file
+            self.selected_label = imgproc.getLabelPath(image_file, labels_folder)
 
     def onHide(self):
         self.navigator_button_back.resetState()
@@ -298,14 +325,16 @@ class ArmorPage(StackedPage):
 
     def _toolbarScroll_onSelect(self, index: int, line: stackedview.FileLine) -> None:
         if self.scroll_page == 0:
-            image_path = os.path.join(self.image_folder, line.filename)
-            label_path = imgproc.getLabelPath(line.filename, self.label_folder)
+            image_path = os.path.join(self.images_folder, line.filename)
+            self.selected_label = imgproc.getLabelPath(line.filename, self.labels_folder)
+            self.selected_image = line.filename
         else:
             image_path = os.path.join(self.deserted_folder, line.filename)
-            label_path = None
+            self.selected_label = None
+            self.selected_deserted = line.filename
 
         self.label_controller.save()
-        self.label_controller.reload(image_path, label_path, self.auto_labeling)
+        self.label_controller.reload(image_path, self.selected_label, self.auto_labeling)
         self.toolbar_scroll_navigator_index.setText(f'{index+1}/{self.toolbar_scroll_files.getCurrentPageFileNumber()}')
         self.toolbar_scroll_navigator_filename.setText(line.filename)
         self.label_controller.canvas.redraw()
@@ -314,7 +343,7 @@ class ArmorPage(StackedPage):
         if self.selected_image == line.filename:
             self.selected_image = None
         os.rename(
-            os.path.join(self.image_folder, line.filename),
+            os.path.join(self.images_folder, line.filename),
             os.path.join(self.deserted_folder, line.filename)
         )
         self.toolbar_scroll_files.deleteLine(0, line)
@@ -325,7 +354,13 @@ class ArmorPage(StackedPage):
             self.selected_deserted = None
         os.rename(
             os.path.join(self.deserted_folder, line.filename),
-            os.path.join(self.image_folder, line.filename)
+            os.path.join(self.images_folder, line.filename)
         )
         self.toolbar_scroll_files.deleteLine(1, line)
         self.toolbar_scroll_files.addLine(0, line)
+
+    def kill(self):
+        self.config_manager['last_images_folder'] = self.images_folder
+        self.config_manager['last_labels_folder'] = self.labels_folder
+        self.config_manager['last_image_file'] = self.selected_image
+        super().kill()

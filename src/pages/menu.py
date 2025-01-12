@@ -4,8 +4,7 @@ from .. import pygame_gui as ui
 from ..components.clock import Clock
 from ..components.stacked_page import StackedPage
 from ..components.switch import NTextSwitch
-
-# from ..resources_loader import ConfigLoader
+from ..utils.config import ConfigManager
 
 
 class MainMenu(StackedPage):
@@ -15,6 +14,7 @@ class MainMenu(StackedPage):
         self.page_incidies: dict[str, StackedPage] = page_incidies
 
         # initialize basic variables
+        self.config_manager = ConfigManager('./user_data.json')
         color_theme = ui.color.LightColorTheme()
         font = pygame.font.SysFont('microsoftyaheibold', 40)
         font_small = pygame.font.SysFont('microsoftyaheibold', 30)
@@ -68,15 +68,15 @@ class MainMenu(StackedPage):
             on_press=self._setPageToArmor,
             cursor_change=True
         )
-        button_buff = ui.components.TextButton(
-            w=button_w,
-            h=button_h,
-            x=button_padx,
-            y=button_pady + 70,
-            text='Buff',
-            font=font,
-            cursor_change=True
-        )
+        # button_buff = ui.components.TextButton(
+        #     w=button_w,
+        #     h=button_h,
+        #     x=button_padx,
+        #     y=button_pady + 70,
+        #     text='Buff',
+        #     font=font,
+        #     cursor_change=True
+        # )
 
         # set component styles
         self.setBackgroundColor(color_theme.Surface)
@@ -93,25 +93,12 @@ class MainMenu(StackedPage):
         self.addChild(clock)
         self.addChild(self.settings_container)
         self.addChild(self.button_armor)
-        self.addChild(button_buff)
+        # self.addChild(button_buff)
         self.settings_container.addChild(settings_label)
         self.settings_container.addChild(load_network_switch)
 
     def _onLoadNetworkSwitch(self, state: int) -> None:
-        # loader = ConfigLoader()
-        # if state == 1:
-        #     loader['load_network'] = True
-        # else:
-        #     loader['load_network'] = False
-        print('network state:', state)
-
-    def _onLabelTypeSwitch(self, state: int) -> None:
-        # loader = ConfigLoader()
-        # if state == 0:
-        #     loader['mode'] = 'armor'
-        # elif state == 1:
-        #     loader['mode'] = 'buff'
-        pass
+        self.config_manager['load_network'] = bool(state)
 
     def _setPageToArmor(self) -> None:
         self.setPage(self.page_incidies['armor_page'], redraw=True)

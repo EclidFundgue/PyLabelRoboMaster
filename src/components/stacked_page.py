@@ -49,6 +49,7 @@ class StackedPageView(ui.components.RectContainer):
             self.pages[self.current_page_index].onHide()
             self.removeChild(self.pages[self.current_page_index])
         self.current_page_index = page_index
+        self.pages[self.current_page_index].onShow()
         self.addChild(self.pages[self.current_page_index])
 
     def _setPageByPage(self, page: StackedPage) -> None:
