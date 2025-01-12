@@ -249,6 +249,12 @@ class ArmorPage(StackedPage):
                 False
             )
             self.toolbar_scroll_files.selectLine(self.selected_image)
+            self.toolbar_scroll_navigator_index.setText(
+                f'{self.toolbar_scroll_files.getSelectedIndex()+1}/'
+                f'{self.toolbar_scroll_files.getCurrentPageFileNumber()}'
+            )
+            line = self.toolbar_scroll_files.getSelectedLine()
+            self.toolbar_scroll_navigator_filename.setText(line.filename)
 
         # ----- manage component hierarchy -----
         self.addChild(canvas)
@@ -309,16 +315,38 @@ class ArmorPage(StackedPage):
         self.auto_labeling = state
 
     def _toolbar_onPrev(self) -> None:
-        # if self.scroll_page == 0:
-        #     image_path = os.path.join(self.image_folder, self.toolbar_scroll_files.getCurrentPageFileNumber())
-        #     label_path = imgproc.getLabelPath(line.filename, self.label_folder)
-        # else:
-        #     image_path = os.path.join(self.deserted_folder, line.filename)
-        #     label_path = None\
-        pass
+        self.toolbar_scroll_files.selectPrev()
+        line = self.toolbar_scroll_files.getSelectedLine()
+        self.selected_image = line.filename
+        self.selected_label = imgproc.getLabelPath(line.filename, self.labels_folder)
+
+        image_path = os.path.join(self.images_folder, self.selected_image)
+
+        self.label_controller.save()
+        self.label_controller.reload(image_path, self.selected_label, self.auto_labeling)
+        self.toolbar_scroll_navigator_index.setText(
+            f'{self.toolbar_scroll_files.getSelectedIndex()+1}/'
+            f'{self.toolbar_scroll_files.getCurrentPageFileNumber()}'
+        )
+        self.toolbar_scroll_navigator_filename.setText(line.filename)
+        self.label_controller.canvas.redraw()
 
     def _toolbar_onNext(self) -> None:
-        print('next')
+        self.toolbar_scroll_files.selectNext()
+        line = self.toolbar_scroll_files.getSelectedLine()
+        self.selected_image = line.filename
+        self.selected_label = imgproc.getLabelPath(line.filename, self.labels_folder)
+
+        image_path = os.path.join(self.images_folder, self.selected_image)
+
+        self.label_controller.save()
+        self.label_controller.reload(image_path, self.selected_label, self.auto_labeling)
+        self.toolbar_scroll_navigator_index.setText(
+            f'{self.toolbar_scroll_files.getSelectedIndex()+1}/'
+            f'{self.toolbar_scroll_files.getCurrentPageFileNumber()}'
+        )
+        self.toolbar_scroll_navigator_filename.setText(line.filename)
+        self.label_controller.canvas.redraw()
 
     def _toolbarScroll_onPageChange(self, page_index: int) -> None:
         self.scroll_page = page_index
