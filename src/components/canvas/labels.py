@@ -44,7 +44,7 @@ class Label:
         closed: bool
     ) -> None:
         if self.selected:
-            width = 2
+            width = 3
             color = self.line_color1
         elif self.active:
             width = 1
