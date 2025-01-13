@@ -68,15 +68,16 @@ class MainMenu(StackedPage):
             on_press=self._setPageToArmor,
             cursor_change=True
         )
-        # button_buff = ui.components.TextButton(
-        #     w=button_w,
-        #     h=button_h,
-        #     x=button_padx,
-        #     y=button_pady + 70,
-        #     text='Buff',
-        #     font=font,
-        #     cursor_change=True
-        # )
+        self.button_armor25 = ui.components.TextButton(
+            w=button_w,
+            h=button_h,
+            x=button_padx,
+            y=button_pady+button_h+20,
+            text='Armor2025',
+            font=font,
+            on_press=self._setPageToArmor25,
+            cursor_change=True
+        )
 
         # set component styles
         self.setBackgroundColor(color_theme.Surface)
@@ -93,7 +94,7 @@ class MainMenu(StackedPage):
         self.addChild(clock)
         self.addChild(self.settings_container)
         self.addChild(self.button_armor)
-        # self.addChild(button_buff)
+        self.addChild(self.button_armor25)
         self.settings_container.addChild(settings_label)
         self.settings_container.addChild(load_network_switch)
 
@@ -103,5 +104,9 @@ class MainMenu(StackedPage):
     def _setPageToArmor(self) -> None:
         self.setPage(self.page_incidies['armor_page'], redraw=True)
 
+    def _setPageToArmor25(self) -> None:
+        self.setPage(self.page_incidies['armor_page25'], redraw=True)
+
     def onHide(self):
         self.button_armor.resetState()
+        self.button_armor25.resetState()
