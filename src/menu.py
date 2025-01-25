@@ -1,10 +1,10 @@
 import pygame
 
-from .. import pygame_gui as ui
-from ..components.clock import Clock
-from ..components.stacked_page import StackedPage
-from ..components.switch import NTextSwitch
-from ..utils.config import ConfigManager
+from . import pygame_gui as ui
+from .components.clock import Clock
+from .components.stacked_page import StackedPage
+from .components.switch import NTextSwitch
+from .utils.config import ConfigManager
 
 
 class MainMenu(StackedPage):
@@ -63,7 +63,7 @@ class MainMenu(StackedPage):
             h=button_h,
             x=button_padx,
             y=button_pady,
-            text='Armor',
+            text='Armor2024',
             font=font,
             on_press=self._setPageToArmor,
             cursor_change=True
@@ -102,7 +102,7 @@ class MainMenu(StackedPage):
         self.config_manager['load_network'] = bool(state)
 
     def _setPageToArmor(self) -> None:
-        self.setPage(self.page_incidies['armor_page'], redraw=True)
+        self.setPage(self.page_incidies['armor_page24'], redraw=True)
 
     def _setPageToArmor25(self) -> None:
         self.setPage(self.page_incidies['armor_page25'], redraw=True)

@@ -2,26 +2,28 @@ from typing import Callable, Tuple
 
 import pygame
 
-from ... import pygame_gui as ui
-from ...pygame_gui.components.canvas import CanvasComponent
+from .. import pygame_gui as ui
 
 
-class Keypoint(CanvasComponent):
-    '''
-    Its movement is not controlled itself to avoid
-    dragging multiple keypoints at the same time.
+class Keypoint(ui.components.CanvasComponent):
+    '''Its movement is not controlled by itself. We need
+    to avoid dragging multiple keypoints at the same time.
+
+    Keypoint(center, on_click)
 
     Methods:
     * setCenter(x, y) -> None
     * getCenter() -> Tuple[int, int]
     * move(vx, vy) -> None
     '''
-    def __init__(self, on_click: Callable[[], None] = None):
-        w = 24
-        h = 24
-        super().__init__(w, h, 0, 0, fix_size=True)
+    def __init__(self,
+        center: Tuple[int, int] = (0, 0),
+        on_click: Callable[['Keypoint'], None] = None
+    ):
+        super().__init__(24, 24, 0, 0, fix_size=True)
         self.interactive_when_active = True
 
+        self.setCenter(*center)
         self.on_click = ui.utils.getCallable(on_click)
 
     def setCenter(self, x: int, y: int) -> None:
@@ -43,7 +45,7 @@ class Keypoint(CanvasComponent):
         self.y = int(self._y * scale - self.h // 2 - view_y)
 
     def onLeftClick(self, x: int, y: int) -> None:
-        self.on_click()
+        self.on_click(self)
 
     def kill(self) -> None:
         self.on_click = None

@@ -3,20 +3,13 @@ import os
 import pygame
 
 from ... import pygame_gui as ui
-from ...pygame_gui.components.canvas import CanvasComponent
-from .keypoint import Keypoint
+from ...label import Icon
 
 
-class ArmorIcon(CanvasComponent):
-    '''Methods:
-    * setClassId(cls_id) -> None
-    * setPos(point) -> None
+class ArmorIcon(Icon):
     '''
-
-    STATE_NORMAL = 0
-    STATE_ACTIVE = 1
-    STATE_SELECTED = 2
-
+    ArmorIcon(cls_id)
+    '''
     IMG_CLASSES = None # 8 classes
     IMG_LIGHTS = None # blue, red
     BACKGROUND_COLORS = None # normal, active, selected
@@ -47,17 +40,7 @@ class ArmorIcon(CanvasComponent):
                 ui.color.light(color_theme.OnPrimaryContainer, 11)
             ]
 
-        super().__init__(*self.IMG_CLASSES[0].get_size(), 0, 0, fix_size=True)
-        self.cls_id = cls_id
-        self.label_state = self.STATE_NORMAL
-
-    def setClassId(self, cls_id: int) -> None:
-        self.cls_id = cls_id
-
-    def setPos(self, point: Keypoint):
-        self._x = point._x
-        self._y = point._y
-        self.setCanvasView(self.scale, self.view_x, self.view_y)
+        super().__init__(*self.IMG_CLASSES[0].get_size(), cls_id)
 
     def setCanvasView(self, scale, view_x, view_y):
         super().setCanvasView(scale, view_x, view_y)

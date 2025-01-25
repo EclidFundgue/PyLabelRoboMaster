@@ -43,8 +43,8 @@ def xy2box(xs: List[float], ys: List[float]) -> List[float]:
     return [x, y, w, h]
 
 class LabelIO:
-    def __init__(self, _id: int, kpts: List[Tuple[float, float]]):
-        self.id = _id
+    def __init__(self, cls_id: int, kpts: List[Tuple[float, float]]):
+        self.cls_id = cls_id
         self.kpts = kpts
 
 class ArmorLabelIO(LabelIO):
@@ -97,7 +97,7 @@ def saveLabel(path: str, labels: List[LabelIO]) -> None:
 
     lines = []
     for lb in labels:
-        idx = lb.id
+        idx = lb.cls_id
         xs = [p[0] for p in lb.kpts]
         ys = [p[1] for p in lb.kpts]
         bbox = xy2box(xs, ys)

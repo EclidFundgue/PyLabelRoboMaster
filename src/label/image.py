@@ -1,27 +1,25 @@
-from typing import Callable, Tuple
+from typing import Tuple
 
-import cv2
 import pygame
 
-from ... import pygame_gui as ui
-from ...pygame_gui.components.canvas import CanvasComponent
-from ...utils import imgproc
+from .. import pygame_gui as ui
+from ..utils import imgproc
 
 
-class Image(CanvasComponent):
+class Image(ui.components.CanvasComponent):
     '''Methods:
-    * enableProc() -> None
-    * disableProc() -> None
-    * switchProc() -> None
+    * getOrigSize() -> Tuple[int, int]
+    * turnLight(state) -> None
     '''
-    def __init__(self, path: str, preproc_func: Callable[[cv2.Mat], cv2.Mat]):
+    def __init__(self, path: str):
         self.orig_image = ui.utils.loadImage(path)
         super().__init__(*self.orig_image.get_size(), 0, 0)
 
         self.path = path
-        self.preproc_func = preproc_func
         self.proc_image = imgproc.mat2surface(
-            self.preproc_func(imgproc.surface2mat(self.orig_image))
+            imgproc.gammaTransformation(
+                imgproc.surface2mat(self.orig_image), 0.5
+            )
         )
         self.cut_surface = self.orig_image
         self.blit_offset = (0, 0)
@@ -58,6 +56,14 @@ class Image(CanvasComponent):
             self.y + y * self.scale if self.y < 0 else 0
         )
 
+    def getOrigSize(self) -> Tuple[int, int]:
+        return (self._w, self._h)
+
+    def turnLight(self, state: bool) -> None:
+        self.enable_proc = state
+        self.need_update_cut_surface = True
+
+    # Deprecated
     def enableProc(self) -> None:
         self.enable_proc = True
         self.need_update_cut_surface = True

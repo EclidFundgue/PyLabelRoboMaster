@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 import pygame
 
+from .. import pygame_gui as ui
 from . import lbformat as fmt
 
 # Binary threshold value
@@ -43,6 +44,9 @@ def getLabelPath(img_file: str, label_folder) -> str:
 
 def getImageFiles(img_folder: str) -> Iterable[str]:
     ''' Get all image files in the folder. '''
+    if not os.path.exists(img_folder):
+        os.makedirs(img_folder)
+        ui.logger.warning(f'Folder {img_folder} does not exist.')
     return (f for f in os.listdir(img_folder) if os.path.splitext(f)[1].lower() in __image_exts)
 
 def getPairedPath(img_folder: str, label_folder: str) -> List[Tuple[str, Union[str, None]]]:
@@ -176,5 +180,5 @@ def correctLabels(img: cv2.Mat, labels: List[fmt.ArmorLabelIO]) -> List[fmt.Armo
     res = []
     for lb in labels:
         kpts = _correctLabelByPoints(img, lb.kpts)
-        res.append(fmt.ArmorLabelIO(lb.id, kpts))
+        res.append(fmt.ArmorLabelIO(lb.cls_id, kpts))
     return res

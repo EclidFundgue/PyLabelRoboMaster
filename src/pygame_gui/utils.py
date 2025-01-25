@@ -23,7 +23,7 @@ def clipRect(
 def __emtpyFunc(*args, **kwargs):
     pass
 
-def getCallable(func: Callable = None) -> Callable:
+def getCallable(func: Union[Callable, None] = None) -> Callable:
     '''Returns the function itself or an empty function if None is given. '''
     if func is None:
         return __emtpyFunc

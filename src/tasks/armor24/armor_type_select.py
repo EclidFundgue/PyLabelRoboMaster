@@ -3,7 +3,7 @@ from typing import Callable, Union
 
 import pygame
 
-from .. import pygame_gui as ui
+from ... import pygame_gui as ui
 
 
 class ColorButton(ui.components.Base):
