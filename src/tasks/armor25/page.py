@@ -4,18 +4,19 @@ from tkinter import filedialog
 
 import pygame
 
-from .. import pygame_gui as ui
-from ..components.armor_type_select25 import ArmorIconsSelect25
-from ..components.canvas import Canvas
-from ..components.label_controllder25 import Label25, LabelController25
-from ..components.scroll import stackedview
-from ..components.stacked_page import StackedPage
-from ..components.switch import Switch
-from ..utils import imgproc
-from ..utils.config import ConfigManager
+from ... import pygame_gui as ui
+from ...components.scroll import stackedview
+from ...components.stacked_page import StackedPage
+from ...components.switch import Switch
+from ...label import LabelController, Labels
+from ...label.controller import LabelController
+from ...utils import imgproc
+from ...utils.config import ConfigManager
+from .armor_type_select import ArmorIconsSelect
+from .icon import ArmorIcon
 
 
-class ArmorPage25(StackedPage):
+class ArmorPage(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incides: dict):
         super().__init__(w, h, x, y)
 
@@ -63,15 +64,27 @@ class ArmorPage25(StackedPage):
             x=0,
             y=navigator_h
         )
-        canvas_canvas = Canvas(
+        canvas_canvas = ui.components.Canvas(
             w=canvas_w,
             h=h-navigator_h,
             x=0,
             y=0
         )
-        self.label_controller = LabelController25(
+        def labels_getter(w, h, x, y, on_select) -> Labels:
+            def get_icon(kpt, cls_id) -> ArmorIcon:
+                icon = ArmorIcon(cls_id)
+                icon.setPosToKeypoint(kpt)
+                return icon
+            return Labels(
+                w, h, x, y,
+                num_keypoints=4,
+                icon_getter=get_icon,
+                on_select=on_select
+            )
+        self.label_controller = LabelController(
             canvas_canvas,
-            on_label_selected=self._canvas_onLabelSelected
+            labels_getter,
+            on_selected=self._canvas_onLabelSelected
         )
         navigator = ui.components.RectContainer(
             w=w,
@@ -134,7 +147,7 @@ class ArmorPage25(StackedPage):
             *toolbar_buttons['rect_delete'],
             './resources/buttons/delete.png',
             './resources/buttons/delete_pressed.png',
-            on_press=self.label_controller.deleteSelected,
+            on_press=self.label_controller.delete,
             cursor_change=True
         )
         toolbar_button_search = ui.components.IconButton(
@@ -162,7 +175,7 @@ class ArmorPage25(StackedPage):
             *toolbar_buttons['rect_preproc'],
             './resources/switchs/eye_open.png',
             './resources/switchs/eye_close.png',
-            on_turn=self.label_controller.switchPreprocess,
+            on_turn=self.label_controller.turnLight,
         )
         toolbar_switch_auto = Switch(
             *toolbar_buttons['rect_auto'],
@@ -170,10 +183,10 @@ class ArmorPage25(StackedPage):
             './resources/switchs/auto_off.png',
             on_turn=self._toolbar_onSwitchAuto,
         )
-        toolbar_icon_selection = ArmorIconsSelect25(
+        toolbar_icon_selection = ArmorIconsSelect(
             x=20,
             y=toolbar_h-scroll_h-220,
-            on_select=self.label_controller.setSelectedClass
+            on_select=self.label_controller.setClass
         )
         toolbar_scroll_navigator = ui.components.RectContainer(
             w=scroll_w,
@@ -268,6 +281,9 @@ class ArmorPage25(StackedPage):
             line = self.toolbar_scroll_files.getSelectedLine()
             self.toolbar_scroll_navigator_filename.setText(line.filename)
 
+        self.addKeyCtrlEvent(pygame.K_z, self.label_controller.undo)
+        self.addKeyCtrlEvent(pygame.K_y, self.label_controller.redo)
+
         # ----- manage component hierarchy -----
         self.addChild(canvas)
         canvas.addChild(canvas_canvas)
@@ -321,8 +337,8 @@ class ArmorPage25(StackedPage):
     def onHide(self) -> None:
         self.navigator_button_back.resetState()
 
-    def _canvas_onLabelSelected(self, label: Label25) -> None:
-        self.toolbar_icon_selection.setType(label.cls_id)
+    def _canvas_onLabelSelected(self, cls_id) -> None:
+        self.toolbar_icon_selection.setType(cls_id)
 
     def _navigator_onOpenDir(self) -> None:
         root = tk.Tk()
