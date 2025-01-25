@@ -46,17 +46,17 @@ class TestLabelIOFunctions(unittest.TestCase):
 
         labels = loadLabel(f.name)
         self.assertEqual(len(labels), 2)
-        self.assertEqual(labels[0].id, 1)
+        self.assertEqual(labels[0].cls_id, 1)
         self.assertEqual(labels[0].kpts, [(5.0, 6.0), (7.0, 8.0)])
-        self.assertEqual(labels[1].id, 2)
+        self.assertEqual(labels[1].cls_id, 2)
         self.assertEqual(labels[1].kpts, [(13.0, 14.0), (15.0, 16.0)])
 
         os.unlink(f.name)
 
     def test_saveLabel(self):
         labels = [
-            type('LabelIO', (object,), {'id': 1, 'kpts': [(5.0, 6.0), (7.0, 8.0)]})(),
-            type('LabelIO', (object,), {'id': 2, 'kpts': [(13.0, 14.0), (15.0, 16.0)]})()
+            type('LabelIO', (object,), {'cls_id': 1, 'kpts': [(5.0, 6.0), (7.0, 8.0)]})(),
+            type('LabelIO', (object,), {'cls_id': 2, 'kpts': [(13.0, 14.0), (15.0, 16.0)]})()
         ]
 
         with tempfile.NamedTemporaryFile(mode='w+', delete=False) as f:
