@@ -7,9 +7,7 @@ import pygame
 from ... import pygame_gui as ui
 from ...components.scroll import stackedview
 from ...components.stacked_page import StackedPage
-from ...components.switch import Switch
 from ...label import LabelController, Labels
-from ...label.controller import LabelController
 from ...utils import imgproc
 from ...utils.config import ConfigManager
 from .. import share
@@ -45,31 +43,15 @@ class ArmorPage(StackedPage):
         scroll_h = int(toolbar_h * 0.4)
         scroll_w = w - canvas_w - 40
 
-        toolbar_buttons = {
-            'rect_add': (32, 32, 20, 20), # (0, 0)
-            'rect_delete': (32, 32, 70, 20), # (0, 1)
-            'rect_save': (32, 32, 120, 20), # (0, 2)
-            'rect_search': (32, 32, 20, 70), # (1, 0)
-            'rect_correct': (32, 32, 70, 70), # (1, 1)
-            'rect_preproc': (32, 32, 20, 120), # (2, 0)
-            'rect_auto': (86, 32, 70, 120), # (2, 1)
-        }
-
         img_arrow = ui.utils.loadImage('./resources/buttons/arrow.png')
         img_arrow_pressed = ui.utils.loadImage('./resources/buttons/arrow_pressed.png')
 
         # ----- create components -----
-        canvas = ui.components.RectContainer(
+        canvas = ui.components.Canvas(
             w=canvas_w,
             h=h-navigator_h,
             x=0,
             y=navigator_h
-        )
-        canvas_canvas = ui.components.Canvas(
-            w=canvas_w,
-            h=h-navigator_h,
-            x=0,
-            y=0
         )
         def labels_getter(w, h, x, y, on_select) -> Labels:
             def get_icon(kpt, cls_id) -> ArmorIcon:
@@ -83,7 +65,7 @@ class ArmorPage(StackedPage):
                 on_select=on_select
             )
         self.label_controller = LabelController(
-            canvas_canvas,
+            canvas,
             labels_getter,
             on_selected=self._canvas_onLabelSelected
         )
@@ -214,8 +196,6 @@ class ArmorPage(StackedPage):
 
         # ----- manage component hierarchy -----
         self.addChild(canvas)
-        canvas.addChild(canvas_canvas)
-
         self.addChild(navigator)
 
         self.addChild(toolbar)
