@@ -12,6 +12,7 @@ from ...label import LabelController, Labels
 from ...label.controller import LabelController
 from ...utils import imgproc
 from ...utils.config import ConfigManager
+from .. import share
 from .armor_type_select import ArmorIconsSelect
 from .icon import ArmorIcon
 
@@ -86,49 +87,15 @@ class ArmorPage(StackedPage):
             labels_getter,
             on_selected=self._canvas_onLabelSelected
         )
-        navigator = ui.components.RectContainer(
+        navigator = share.Navigator(
             w=w,
             h=navigator_h,
             x=0,
-            y=0
-        )
-        navigator_button_undo = ui.components.IconButton(
-            w=32,
-            h=32,
-            x=20,
             y=0,
-            image='./resources/buttons/undo.png',
-            pressed_image='./resources/buttons/undo_pressed.png',
-            on_press=self.label_controller.undo,
-            cursor_change=True
-        )
-        navigator_button_redo = ui.components.IconButton(
-            w=32,
-            h=32,
-            x=80,
-            y=0,
-            image='./resources/buttons/bush_gemer.png',
-            pressed_image='./resources/buttons/bush_gemer_pressed.png',
-            on_press=self.label_controller.redo,
-            cursor_change=True
-        )
-        navigator_button_open = ui.components.TextButton(
-            w=80,
-            h=navigator_h-10,
-            x=140,
-            y=5,
-            text='open',
-            on_press=self._navigator_onOpenDir,
-            cursor_change=True
-        )
-        navigator_button_back = ui.components.CloseButton(
-            w=int(navigator_h*1.5),
-            h=navigator_h,
-            x=w - int(navigator_h*1.5),
-            y=0,
-            color=ui.color.dark(color_theme.Surface,3),
-            cross_color=color_theme.OnSurface,
-            on_press=lambda: self.setPage(page_incides['main_menu'],True)
+            on_back=lambda: self.setPage(page_incides['main_menu'],True),
+            on_undo=self.label_controller.undo,
+            on_redo=self.label_controller.redo,
+            on_open=self._navigator_onOpenDir
         )
         toolbar = ui.components.RectContainer(
             w=w-canvas_w,
@@ -246,7 +213,7 @@ class ArmorPage(StackedPage):
         )
 
         # ----- configure components -----
-        self.navigator_button_back = navigator_button_back
+        self.navigator = navigator
         self.toolbar = toolbar
         self.toolbar_icon_selection = toolbar_icon_selection
         self.toolbar_scroll_navigator_index = toolbar_scroll_navigator_index
@@ -256,8 +223,6 @@ class ArmorPage(StackedPage):
         canvas.setBackgroundColor(color_theme.Surface)
 
         navigator.setBackgroundColor(ui.color.dark(color_theme.Surface, 3))
-        navigator.alignVerticalCenter(navigator_button_undo)
-        navigator.alignVerticalCenter(navigator_button_redo)
 
         toolbar.setBackgroundColor(ui.color.dark(color_theme.Surface, 2))
         toolbar_scroll_navigator.alignVerticalCenter(toolbar_scroll_navigator_prev)
@@ -289,10 +254,6 @@ class ArmorPage(StackedPage):
         canvas.addChild(canvas_canvas)
 
         self.addChild(navigator)
-        navigator.addChild(navigator_button_undo)
-        navigator.addChild(navigator_button_redo)
-        navigator.addChild(navigator_button_open)
-        navigator.addChild(navigator_button_back)
 
         self.addChild(toolbar)
         toolbar.addChild(toolbar_button_add)
@@ -335,7 +296,7 @@ class ArmorPage(StackedPage):
             self.selected_label = imgproc.getLabelPath(image_file, labels_folder)
 
     def onHide(self) -> None:
-        self.navigator_button_back.resetState()
+        self.navigator.resetState()
 
     def _canvas_onLabelSelected(self, cls_id) -> None:
         self.toolbar_icon_selection.setType(cls_id)
