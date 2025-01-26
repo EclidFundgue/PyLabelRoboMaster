@@ -5,12 +5,13 @@ from tkinter import filedialog
 import pygame
 
 from ... import pygame_gui as ui
+from ...components.navigator import Navigator
 from ...components.scroll import stackedview
 from ...components.stacked_page import StackedPage
+from ...components.toolbar import ToolbarButtons
 from ...label import LabelController, Labels
 from ...utils import imgproc
 from ...utils.config import ConfigManager
-from .. import share
 from .armor_type_select import ArmorIconsSelect
 from .icon import ArmorIcon
 
@@ -69,7 +70,7 @@ class ArmorPage(StackedPage):
             labels_getter,
             on_selected=self._canvas_onLabelSelected
         )
-        navigator = share.Navigator(
+        navigator = Navigator(
             w=w,
             h=navigator_h,
             x=0,
@@ -85,7 +86,7 @@ class ArmorPage(StackedPage):
             x=canvas_w,
             y=navigator_h
         )
-        toolbar_buttons = share.ToolbarButtons(
+        toolbar_buttons = ToolbarButtons(
             w, h, x, y,
             on_add=self.label_controller.startAdd,
             on_delete=self.label_controller.delete,

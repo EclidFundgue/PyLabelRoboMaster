@@ -1,7 +1,7 @@
 from typing import Callable
 
-from ... import pygame_gui as ui
-from ...components.switch import Switch
+from .. import pygame_gui as ui
+from .switch import Switch
 
 
 class ToolbarButtons(ui.components.RectContainer):

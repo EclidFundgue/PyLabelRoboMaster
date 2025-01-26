@@ -1,6 +1,6 @@
 from typing import Callable
 
-from ... import pygame_gui as ui
+from .. import pygame_gui as ui
 
 
 class Navigator(ui.components.RectContainer):
