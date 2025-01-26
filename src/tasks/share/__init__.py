@@ -1,5 +1,7 @@
 __all__ = [
-    'Navigator'
+    'Navigator',
+    'ToolbarButtons'
 ]
 
 from .navigator import Navigator
+from .toolbar import ToolbarButtons

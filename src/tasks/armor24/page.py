@@ -103,52 +103,15 @@ class ArmorPage(StackedPage):
             x=canvas_w,
             y=navigator_h
         )
-        toolbar_button_add = ui.components.IconButton(
-            *toolbar_buttons['rect_add'],
-            './resources/buttons/add.png',
-            './resources/buttons/add_pressed.png',
-            on_press=self.label_controller.startAdd,
-            cursor_change=True
-        )
-        toolbar_button_delete = ui.components.IconButton(
-            *toolbar_buttons['rect_delete'],
-            './resources/buttons/delete.png',
-            './resources/buttons/delete_pressed.png',
-            on_press=self.label_controller.delete,
-            cursor_change=True
-        )
-        toolbar_button_search = ui.components.IconButton(
-            *toolbar_buttons['rect_search'],
-            './resources/buttons/search.png',
-            './resources/buttons/search_pressed.png',
-            on_press=self.label_controller.relable,
-            cursor_change=True
-        )
-        toolbar_button_save = ui.components.IconButton(
-            *toolbar_buttons['rect_save'],
-            './resources/buttons/save.png',
-            './resources/buttons/save_pressed.png',
-            on_press=self.label_controller.save,
-            cursor_change=True
-        )
-        toolbar_button_correct = ui.components.IconButton(
-            *toolbar_buttons['rect_correct'],
-            './resources/buttons/correct.png',
-            './resources/buttons/correct.png',
-            on_press=self.label_controller.correct,
-            cursor_change=True
-        )
-        toolbar_switch_preproc = Switch(
-            *toolbar_buttons['rect_preproc'],
-            './resources/switchs/eye_open.png',
-            './resources/switchs/eye_close.png',
-            on_turn=self.label_controller.turnLight,
-        )
-        toolbar_switch_auto = Switch(
-            *toolbar_buttons['rect_auto'],
-            './resources/switchs/auto_on.png',
-            './resources/switchs/auto_off.png',
-            on_turn=self._toolbar_onSwitchAuto,
+        toolbar_buttons = share.ToolbarButtons(
+            w, h, x, y,
+            on_add=self.label_controller.startAdd,
+            on_delete=self.label_controller.delete,
+            on_save=self.label_controller.save,
+            on_search=self.label_controller.relable,
+            on_correct=self.label_controller.correct,
+            turn_light=self.label_controller.turnLight,
+            turn_auto=self._toolbar_onSwitchAuto
         )
         toolbar_icon_selection = ArmorIconsSelect(
             x=20,
@@ -256,13 +219,7 @@ class ArmorPage(StackedPage):
         self.addChild(navigator)
 
         self.addChild(toolbar)
-        toolbar.addChild(toolbar_button_add)
-        toolbar.addChild(toolbar_button_delete)
-        toolbar.addChild(toolbar_button_search)
-        toolbar.addChild(toolbar_button_save)
-        toolbar.addChild(toolbar_button_correct)
-        toolbar.addChild(toolbar_switch_preproc)
-        toolbar.addChild(toolbar_switch_auto)
+        toolbar.addChild(toolbar_buttons)
         toolbar.addChild(toolbar_icon_selection)
         toolbar.addChild(toolbar_scroll_navigator)
         toolbar_scroll_navigator.addChild(toolbar_scroll_navigator_prev)
