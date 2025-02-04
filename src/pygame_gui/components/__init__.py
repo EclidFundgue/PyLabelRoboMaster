@@ -8,6 +8,7 @@ __all__ = [
     'RectContainer',
     'Root',
     'RoundedRectContainer',
+    'Selectable',
     'TextButton',
 ]
 
@@ -17,3 +18,4 @@ from .canvas import Canvas, CanvasComponent
 from .containers import RectContainer, RoundedRectContainer
 from .label import Label
 from .root import Root
+from .selectable import Selectable
