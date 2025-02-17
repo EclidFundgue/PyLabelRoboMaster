@@ -1,10 +1,12 @@
 import os
 import threading
-from typing import Callable, Tuple, Union
+from typing import Tuple, TypeVar, Union
 
 import pygame
 
 from . import logger
+
+T = TypeVar('T')
 
 
 def clipRect(
@@ -23,7 +25,7 @@ def clipRect(
 def __emtpyFunc(*args, **kwargs):
     pass
 
-def getCallable(func: Union[Callable, None] = None) -> Callable:
+def getCallable(func: Union[T, None] = None) -> T:
     '''Returns the function itself or an empty function if None is given. '''
     if func is None:
         return __emtpyFunc
