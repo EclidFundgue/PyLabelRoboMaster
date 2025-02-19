@@ -14,11 +14,9 @@ class ListBox(RectContainer):
     ListBox(
         w, h, x, y,
         lines,
-        on_relative_change,
-        on_select,
+        on_relative_change
     )
     * on_relative_change(r) -> None
-    * on_select(idx, line) -> None
 
     Method:
     * setRelative(r, smooth) -> None
@@ -31,8 +29,6 @@ class ListBox(RectContainer):
 
     * add(line) -> None
     * delete(line) -> None
-    * index(line) -> int
-    * sort() -> None
     '''
 
     MOUSE_SCROLL_SPEED = 100
@@ -40,13 +36,11 @@ class ListBox(RectContainer):
     def __init__(self,
         w: int, h: int, x: int, y: int,
         lines: List[Selectable] = None,
-        on_relative_change: Callable[[float], None] = None,
-        on_select: Callable[[int, Selectable], None] = None
+        on_relative_change: Callable[[float], None] = None
     ):
         super().__init__(w, h, x, y)
         self.lines = lines if lines is not None else []
         self.on_relative_change = utils.getCallable(on_relative_change)
-        self.on_select = utils.getCallable(on_select)
 
         self.heights: List[int]
         self.total_height: int
@@ -115,13 +109,13 @@ class ListBox(RectContainer):
             return
 
         self.relative.setValue(r, use_smooth=smooth)
-        self.current_relative_value = self.relative.getCurrentValue()
+        self.current_r_value = self.relative.getCurrentValue()
+        self._updateRelativeView(self.current_r_value)
         if smooth:
-            self._updateRelativeView(self.current_relative_value)
-            self.on_relative_change(self.current_relative_value)
+            self.on_relative_change(self.current_r_value)
 
     def getRelative(self) -> float:
-        return self.current_relative_value
+        return self.current_r_value
 
     def _selectByIndex(self, idx: int) -> None:
         if idx < 0 or idx >= len(self.lines):
@@ -173,7 +167,7 @@ class ListBox(RectContainer):
         else:
             logger.warning(f"Invalid line type: {type(line)}", self)
 
-        self._constrainRelativeByIndex(self.selected_idx)
+        self._constrainRelativeByIndex(self.selected_idx, True)
 
     def selectPrev(self) -> None:
         if len(self.lines) == 0:
@@ -184,7 +178,7 @@ class ListBox(RectContainer):
             self._selectByIndex(
                 (self.selected_idx + len(self.lines) - 1) % len(self.lines)
             )
-        self._constrainRelativeByIndex(self.selected_idx)
+        self._constrainRelativeByIndex(self.selected_idx, True)
 
     def selectNext(self) -> None:
         if len(self.lines) == 0:
@@ -193,11 +187,10 @@ class ListBox(RectContainer):
             self._selectByIndex(0)
         else:
             self._selectByIndex((self.selected_idx + 1) % len(self.lines))
-        self._constrainRelativeByIndex(self.selected_idx)
+        self._constrainRelativeByIndex(self.selected_idx, True)
 
     def getSelected(self) -> Union[Selectable, None]:
         return self.selected_line
-
 
     def add(self, line: Selectable) -> None:
         self.lines.append(line)
@@ -206,7 +199,7 @@ class ListBox(RectContainer):
         self.removeDeadChildren()
         self.heights = self._updateLinesHeights(self.lines)
         self.total_height = max(1, sum(self.heights)) # avoid zero division
-        self._updateRelativeView(self.current_relative_value)
+        self._updateRelativeView(self.current_r_value)
 
         # update selected line index
         if self.selected_line is not None:
@@ -229,7 +222,7 @@ class ListBox(RectContainer):
         # update box
         self.removeDeadChildren()
         self._updateLinesHeights(self.lines)
-        self._updateRelativeView(self.current_relative_value)
+        self._updateRelativeView(self.current_r_value)
 
         # update selected line index
         if self.selected_line is not None:
@@ -249,23 +242,6 @@ class ListBox(RectContainer):
         else:
             logger.warning(f"Invalid line type: {type(line)}", self)
 
-    def onLeftClick(self, x, y):
-        selected_line = None
-        for line in self._children:
-            if line.active:
-                selected_line = line
-                break
-
-        for i, line in enumerate(self._children):
-            line: Selectable
-            if line is not selected_line and line.selected:
-                line.unselect()
-            elif line is selected_line and not line.selected:
-                line.select()
-                self.on_select(i, line)
-
-        self.redraw()
-
     def update(self, x: int, y: int, wheel: int) -> None:
         if abs(self.current_r_value - self.relative.getEndValue()) * self.total_height > 1:
             self.current_r_value = self.relative.getCurrentValue()
@@ -283,6 +259,5 @@ class ListBox(RectContainer):
             l.kill()
         self.lines = None
         self.on_relative_change = None
-        self.on_select = None
         self.selected_line = None
         super().kill()
