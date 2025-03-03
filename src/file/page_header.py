@@ -25,20 +25,20 @@ class PageHeaderBlock(ui.components.Selectable):
         self.bg_color1 = ui.color.dark(self.bg_color0, 5) # hover
         self.bg_color2 = color_theme.OnPrimaryContainer # selected
 
-        self.text_object = ui.components.Label(
+        self.text_obj = ui.components.Label(
             w, h, 0, 0,
             text=text,
             color=self.text_color0
         )
-        self.addChild(self.text_object)
+        self.addChild(self.text_obj)
 
     def select(self):
         self.selected = True
-        self.text_object.setColor(self.text_color1)
+        self.text_obj.setColor(self.text_color1)
 
     def unselect(self):
         self.selected = False
-        self.text_object.setColor(self.text_color0)
+        self.text_obj.setColor(self.text_color0)
 
     def onMouseEnter(self):
         self.redraw()
@@ -55,7 +55,7 @@ class PageHeaderBlock(ui.components.Selectable):
             surface.fill(self.bg_color0)
 
     def kill(self):
-        self.text_object = None
+        self.text_obj = None
         super().kill()
 
 class PageHeader(ui.components.Base):

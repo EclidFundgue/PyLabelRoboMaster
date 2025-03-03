@@ -219,7 +219,9 @@ class SelectionBox(ui.components.RectContainer):
         self._updataNavigator()
 
     def kill(self) -> None:
-        self.on_selected = None
+        self.on_selected = None 
+        self.navigator = None
+        self.header = None
         self.image_box = None
         self.deserted_box = None
         self.file_box = None
