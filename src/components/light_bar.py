@@ -71,9 +71,6 @@ class LightBar(ui.components.Base):
 
     LightBar(w, h, x, y, on_change)
     * on_change(light) -> None
-
-    Methods:
-    * setLight(light) -> None
     '''
     def __init__(self,
         w: int, h: int, x: int, y: int,
@@ -103,9 +100,6 @@ class LightBar(ui.components.Base):
 
         self.addChild(self.button)
         self.addChild(self.text_obj)
-
-    def setLight(self, light: float) -> None:
-        self.light = light
 
     def onLeftPress(self, x: int, y: int):
         if self.button.pressed:
