@@ -26,6 +26,7 @@ class ListBox(RectContainer):
     * selectPrev() -> None
     * selectNext() -> None
     * getSelected() -> Selectable | None
+    * getSelectedIndex() -> int
 
     * add(line) -> None
     * delete(line) -> None
@@ -53,6 +54,9 @@ class ListBox(RectContainer):
         self.current_r_value = self.relative.getCurrentValue()
 
         self._updateRelativeView(self.current_r_value)
+
+    def __len__(self) -> int:
+        return len(self.lines)
 
     def _updateLinesHeights(self, lines: List[Selectable]) -> None:
         self.total_height = 0
@@ -191,6 +195,9 @@ class ListBox(RectContainer):
 
     def getSelected(self) -> Union[Selectable, None]:
         return self.selected_line
+
+    def getSelectedIndex(self) -> int:
+        return self.selected_idx
 
     def add(self, line: Selectable) -> None:
         self.lines.append(line)

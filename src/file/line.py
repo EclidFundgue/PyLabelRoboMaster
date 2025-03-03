@@ -121,6 +121,7 @@ class FileLine(ui.components.Selectable):
 
     def kill(self) -> None:
         self.text_object = None
+        self.command_button = None
         self.on_selected = None
         return super().kill()
 

@@ -14,7 +14,7 @@ class StackedPage(ui.components.RectContainer):
     * onShow() -> None
     * onHide() -> None
     '''
-    def __init__(self, w: int, h: int, x: int, y: int):
+    def __init__(self, w: int, h: int, x: int = 0, y: int = 0):
         super().__init__(w, h, x, y)
 
         # this will be set by the StackedPageView when it's added.
@@ -34,10 +34,13 @@ class StackedPageView(ui.components.RectContainer):
     * setPage(page: int | StackedPage) -> None
     * addPage(page: StackedPage) -> None
     '''
-    def __init__(self, w: int, h: int, x: int, y: int):
+    def __init__(self,
+        w: int, h: int, x: int, y: int,
+        pages: List[StackedPage] = None
+    ):
         super().__init__(w, h, x, y)
 
-        self.pages: List[StackedPage] = []
+        self.pages: List[StackedPage] = [] if pages is None else pages
         self.current_page_index = -1
 
     def _setPageByIndex(self, page_index: int) -> None:
