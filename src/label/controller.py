@@ -26,7 +26,7 @@ class LabelController:
     * delete() -> None
     * relabel() -> None
     * correct() -> None
-    * turnLight(state) -> None
+    * setLight(gamma) -> None
     * save() -> None
 
     ---------- class & selection ----------
@@ -50,6 +50,7 @@ class LabelController:
 
         self.image: Image = None
         self.labels: Labels = None
+        self.image_gamma: float = 0.0
 
         self.image_path: str = None
         self.label_path: str = None
@@ -75,14 +76,13 @@ class LabelController:
         if self.labels is not None:
             self.labels.correctSelectedLabels(self.image.orig_image)
 
-    def turnLight(self, state: bool) -> None:
+    def setLight(self, gamma: bool) -> None:
+        self.image_gamma = gamma
+
         if self.image is None:
             return
 
-        if state:
-            self.image.enableProc()
-        else:
-            self.image.disableProc()
+        self.image.setLight(gamma)
         self.image.redraw()
 
     def save(self) -> None:
@@ -107,9 +107,7 @@ class LabelController:
 
     # ---------- other ----------
     def _loadImage(self, path: str = None):
-        light = False
         if self.image is not None:
-            light = self.image.enable_proc
             self.image.kill()
             self.image = None
             self.image_path = None
@@ -119,8 +117,7 @@ class LabelController:
 
         self.image_path = path
         self.image = Image(path)
-        if light:
-            self.image.enableProc()
+        self.image.setLight(self.image_gamma)
 
         self.canvas.addChild(self.image)
 

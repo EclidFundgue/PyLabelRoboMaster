@@ -77,6 +77,17 @@ class ArmorPage(StackedPage):
             x=canvas_w,
             y=navigator_h
         )
+        def light_to_gamma(light: float) -> float:
+            '''Light ranges from -1 to 1'''
+            if light < 0:
+                return -light + 1.0
+            if light > 0:
+                return -light * 0.9 + 1.0
+            return 1.0
+        def on_light_change(light) -> None:
+            self.label_controller.setLight(
+                light_to_gamma(light)
+            )
         toolbar_buttons = ToolbarButtons(
             w=w-canvas_w-50,
             h=h-navigator_h,
@@ -87,8 +98,7 @@ class ArmorPage(StackedPage):
             on_save=self.label_controller.save,
             on_search=self.label_controller.relable,
             on_correct=self.label_controller.correct,
-            # turn_light=self.label_controller.turnLight,
-            # turn_auto=self._toolbar_onSwitchAuto
+            on_light_change=on_light_change
         )
         toolbar_icon_selection = ArmorIconsSelect(
             x=20,
