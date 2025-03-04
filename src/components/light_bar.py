@@ -1,4 +1,3 @@
-import math
 from typing import Callable
 
 import pygame
@@ -84,8 +83,12 @@ class LightBar(ui.components.Base):
         color_theme = ui.color.LightColorTheme()
         self.color0 = color_theme.PrimaryContainer
         self.color1 = ui.color.light(color_theme.OnPrimaryContainer, 4)
+        self.light_icon = ui.utils.loadImage(
+            'resources/icons/sun.png', h, h,
+            smooth_scale=True
+        )
 
-        btn_w = int(h * 0.8)
+        btn_w = int(h * 0.7)
         self.btn_left = h
         self.btn_right = w - h - 20 - btn_w
         self.button = _SlideButton(
@@ -118,30 +121,6 @@ class LightBar(ui.components.Base):
                 self.text_obj.setText(str(self.light))
             self.redraw()
 
-    def _drawSun(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        r0 = self.h / 4
-        r1 = self.h / 3
-        center_x = self.h // 2
-        center_y = self.h // 2
-        pygame.draw.circle(
-            surface,
-            (0, 0, 0),
-            (center_x + x_start, center_y + y_start),
-            r0,
-            2
-        )
-        for i in range(8):
-            rad = math.radians(360 // 8 * i)
-            x = math.cos(rad) * r1
-            y = math.sin(rad) * r1
-            pygame.draw.circle(
-                surface,
-                (0, 0, 0),
-                (center_x + x + x_start,
-                 center_y + y + x_start),
-                1
-            )
-
     def _drawProcess(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         start_x = self.h + 10
         mid_x = self.button.x + self.button.w // 2
@@ -151,18 +130,18 @@ class LightBar(ui.components.Base):
             self.color1,
             (start_x + x_start, self.h // 2 + y_start),
             (mid_x + x_start, self.h // 2 + y_start),
-            10
+            5
         )
         pygame.draw.line(
             surface,
             self.color0,
             (mid_x + x_start, self.h // 2 + y_start),
             (end_x + x_start, self.h // 2 + y_start),
-            10
+            5
         )
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int):
-        self._drawSun(surface, x_start, y_start)
+        surface.blit(self.light_icon, (x_start, y_start))
         self._drawProcess(surface, x_start, y_start)
 
     def kill(self) -> None:

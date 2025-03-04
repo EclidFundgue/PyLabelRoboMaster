@@ -25,40 +25,35 @@ class Navigator(ui.components.RectContainer):
     ):
         super().__init__(w, h, x, y)
 
-        img_arrow = ui.utils.loadImage('./resources/buttons/arrow.png')
-        img_arrow_pressed = ui.utils.loadImage('./resources/buttons/arrow_pressed.png')
-
         button_prev = ui.components.IconButton(
-            w=16,
-            h=16,
+            w=24,
+            h=24,
             x=0,
             y=0,
-            image=img_arrow,
-            pressed_image=img_arrow_pressed,
+            icon='./resources/icons/arrow_left.png',
             on_press=on_prev,
             cursor_change=True
         )
         button_next = ui.components.IconButton(
-            w=16,
-            h=16,
-            x=w-16,
+            w=24,
+            h=24,
+            x=w-30,
             y=0,
-            image=pygame.transform.flip(img_arrow, True, False),
-            pressed_image=pygame.transform.flip(img_arrow_pressed, True, False),
+            icon='./resources/icons/arrow_right.png',
             on_press=on_next,
             cursor_change=True
         )
         self.filename_obj = ui.components.Label(
             w=w-32-70-10,
-            h=16,
-            x=16+10,
+            h=24,
+            x=24+10,
             y=0,
             text=''
         )
         self.index_obj = ui.components.Label(
             w=70,
-            h=16,
-            x=w-16-70,
+            h=24,
+            x=w-24-70,
             y=0,
             text=f'-/-'
         )

@@ -95,6 +95,7 @@ class Base:
     * getRect() -> Tuple[int, int, int, int]
     * isHovered(x, y) -> bool
     * update(x, y, wheel) -> None
+    * onResize(w, h, x, y) -> None
 
     5. ----- Draw -----
     * redraw() -> None
@@ -230,6 +231,21 @@ class Base:
     
     def update(self, x: int, y: int, wheel: int) -> None:
         ''' Needs to be implemented by child class. '''
+
+    def onResize(self, w: int, h: int, x: int, y: int) -> None:
+        w_ratio = w / self.w
+        h_ratio = h / self.h
+        for ch in self._children:
+            ch.onResize(
+                int(ch.w * w_ratio),
+                int(ch.h * h_ratio),
+                int(ch.x * w_ratio),
+                int(ch.y * h_ratio)
+            )
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
 
     # ---------- Draw ---------- #
     def _submitDrawStack(self, redraw_stack: List['Base']) -> None:

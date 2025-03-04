@@ -36,7 +36,8 @@ def getCallable(func: Union[T, None] = None) -> T:
 def loadImage(
     img: Union[str, pygame.Surface],
     w: int = None,
-    h: int = None
+    h: int = None,
+    smooth_scale = False
 ) -> pygame.Surface:
     ''' Load a image and resize to (w, h). '''
     if isinstance(img, str):
@@ -56,6 +57,8 @@ def loadImage(
     img_w, img_h = ret_img.get_size()
     if w == img_w and h == img_h:
         return ret_img
+    elif smooth_scale:
+        return pygame.transform.smoothscale(ret_img, (w, h))
     else:
         return pygame.transform.scale(ret_img, (w, h))
 

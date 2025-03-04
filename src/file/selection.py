@@ -101,7 +101,7 @@ class SelectionBox(ui.components.RectContainer):
         w: int, h: int, x: int, y: int,
         image_folder: str,
         deserted_folder: str,
-        on_selected: Callable[[str, str, bool], None] = None
+        on_selected: Callable[[str, Union[str, None], bool], None] = None
     ):
         super().__init__(w, h, x, y)
         self.image_folder = image_folder
@@ -112,28 +112,23 @@ class SelectionBox(ui.components.RectContainer):
         header_w = w - 35
         header_h = 30
 
+        def on_prev():
+            self.selectPrev()
+            self._onSelectNotify()
+        def on_next():
+            self.selectNext()
+            self._onSelectNotify()
         self.navigator = Navigator(
             w=w,
-            h=16,
+            h=30,
             x=0,
             y=0,
-            on_prev=self.selectPrev,
-            on_next=self.selectNext
+            on_prev=on_prev,
+            on_next=on_next
         )
         def on_page_change(page: int) -> None:
             self.file_box.setPage(page)
-            if page == 0: # image
-                self.on_selected(
-                    self.image_folder,
-                    self.image_box.getSelected(),
-                    False
-                )
-            elif page == 1: # deserted
-                self.on_selected(
-                    self.deserted_folder,
-                    self.deserted_box.getSelected(),
-                    True
-                )
+            self._onSelectNotify()
             self._updataNavigator()
         self.header = PageHeader(header_w, header_h, 0, navigator_h, on_page_change)
 
@@ -183,6 +178,21 @@ class SelectionBox(ui.components.RectContainer):
         self.addChild(self.file_box)
 
         self._updataNavigator()
+    
+    def _onSelectNotify(self) -> None:
+        page = self.file_box.current_page_index
+        if page == 0: # image
+            self.on_selected(
+                self.image_folder,
+                self.image_box.getSelected(),
+                False
+            )
+        elif page == 1: # deserted
+            self.on_selected(
+                self.deserted_folder,
+                self.deserted_box.getSelected(),
+                True
+            )
 
     def setPage(self, page: Union[int, StackedPage]) -> None:
         self.file_box.setPage(page)

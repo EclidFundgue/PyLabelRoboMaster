@@ -76,6 +76,21 @@ class StackedPageView(ui.components.RectContainer):
         self.pages.append(page)
         page._StackedPageView_set = self.setPage
 
+    def onResize(self, w, h, x, y):
+        w_ratio = w / self.w
+        h_ratio = h / self.h
+        for page in self.pages:
+            page.onResize(
+                int(page.w * w_ratio),
+                int(page.h * h_ratio),
+                int(page.x * w_ratio),
+                int(page.y * h_ratio)
+            )
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
+
     def kill(self) -> None:
         if self.current_page_index >= 0:
             self.pages[self.current_page_index].onHide()
