@@ -147,7 +147,12 @@ class Base:
     def onMouseLeave(self) -> None: ...
 
     # ---------- Keyboard Events ---------- #
-    def _addEvent(self, event: KeyboardEvent, once: bool) -> None:
+    def _addEvent(self, key: int, func: Callable,
+                  _type: int, target: str, once: bool) -> None:
+        if target is None:
+            target = str(id(self))
+        event = KeyboardEvent(key, func, _type, target)
+
         # Use copy to avoid modifying original list during iteration.
         if once:
             events = self._keyboard_events_once[:]
@@ -158,30 +163,31 @@ class Base:
             events.append(event)
             self._keyboard_events = events
 
-    def addKeyDownEvent(self, key: int, func: Callable, target = None, once = False) -> None:
-        if target is None:
-            target = str(id(self))
-        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.DOWN, target), once)
+    def addKeyDownEvent(self, key: int, func: Callable,
+                        target = None, once = False) -> None:
+        self._addEvent(key, func, KeyboardEvent.DOWN, target, once)
 
-    def addKeyPressEvent(self, key: int, func: Callable, target = None, once = False) -> None:
-        if target is None:
-            target = str(id(self))
-        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.PRESSED, target), once)
+    def addKeyPressEvent(self, key: int, func: Callable,
+                         target = None, once = False) -> None:
+        self._addEvent(key, func, KeyboardEvent.PRESSED, target, once)
 
-    def addKeyUpEvent(self, key: int, func: Callable, target = None, once = False) -> None:
-        if target is None:
-            target = str(id(self))
-        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.UP, target), once)
+    def addKeyUpEvent(self, key: int, func: Callable,
+                      target = None, once = False) -> None:
+        self._addEvent(key, func, KeyboardEvent.UP, target, once)
 
-    def addKeyCtrlEvent(self, key: int, func: Callable, target = None, once = False) -> None:
-        if target is None:
-            target = str(id(self))
-        self._addEvent(KeyboardEvent(key, func, KeyboardEvent.CTRL, target), once)
+    def addKeyCtrlEvent(self, key: int, func: Callable,
+                        target = None, once = False) -> None:
+        self._addEvent(key, func, KeyboardEvent.CTRL, target, once)
 
     def removeEvents(self, target: str = None) -> None:
         if target is None:
             target = str(id(self))
-        self._keyboard_events = list(filter(lambda e: e.target != target, self._keyboard_events))
+        self._keyboard_events = list(
+            filter(
+                lambda e: e.target != target,
+                self._keyboard_events
+            )
+        )
 
     # ---------- Child Management ---------- #
     def removeDeadChildren(self) -> None:

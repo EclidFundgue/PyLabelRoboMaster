@@ -45,7 +45,7 @@ class Label(Base):
 
         self.text_surface = self.font.render(self.text, True, self.color)
 
-        self.setAlignment(self.align_x, self.align_y, False)
+        self.setAlignment(self.align_x, self.align_y)
 
     def _reloadSurface(self) -> None:
         self.text_surface = self.font.render(self.text, True, self.color)
@@ -63,7 +63,7 @@ class Label(Base):
         self.color = color
         self._reloadSurface()
 
-    def setAlignment(self, align_x: int = None, align_y: int = None, with_redraw: bool = True) -> None:
+    def setAlignment(self, align_x: int = None, align_y: int = None) -> None:
         if align_x is not None:
             self.align_x = align_x
             if align_x == constants.ALIGN_LEFT:
@@ -85,6 +85,10 @@ class Label(Base):
                 self.pady = self.h - self.text_surface.get_height()
             else:
                 logger.error(f"Invalid align_y: {align_y}", ValueError, self)
+
+    def onResize(self, w: int, h: int, x: int, y: int) -> None:
+        super().onResize(w, h, x, y)
+        self.setAlignment(self.align_x, self.align_y)
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         surface.blit(self.text_surface, (self.padx + x_start, self.pady + y_start))

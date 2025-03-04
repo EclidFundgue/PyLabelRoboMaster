@@ -28,7 +28,7 @@ class Clock(ui.components.Base):
             self.s0, self.s1,
         ]
         for text in texts:
-            text.setAlignment(ui.constants.ALIGN_CENTER, ui.constants.ALIGN_CENTER, False)
+            text.setAlignment(ui.constants.ALIGN_CENTER, ui.constants.ALIGN_CENTER)
             self.addChild(text)
 
         self.time_seconds: int = 0
