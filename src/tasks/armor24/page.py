@@ -96,7 +96,7 @@ class ArmorPage(StackedPage):
             on_add=self.label_controller.startAdd,
             on_delete=self.label_controller.delete,
             on_save=self.label_controller.save,
-            on_search=self.label_controller.relable,
+            # on_search=self.label_controller.relable,
             on_correct=self.label_controller.correct,
             on_light_change=on_light_change
         )
