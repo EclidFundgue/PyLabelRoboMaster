@@ -9,22 +9,18 @@ from ..utils import imgproc
 class Image(ui.components.CanvasComponent):
     '''Methods:
     * getOrigSize() -> Tuple[int, int]
-    * turnLight(state) -> None
+    * setLight(gamma) -> None
     '''
     def __init__(self, path: str):
         self.orig_image = ui.utils.loadImage(path)
         super().__init__(*self.orig_image.get_size(), 0, 0)
 
         self.path = path
-        self.proc_image = imgproc.mat2surface(
-            imgproc.gammaTransformation(
-                imgproc.surface2mat(self.orig_image), 0.5
-            )
-        )
+        self.image = self.orig_image
         self.cut_surface = self.orig_image
         self.blit_offset = (0, 0)
 
-        self.enable_proc = False
+        self.gamma = 0.0
         self.need_update_cut_surface = True
 
         # image layer is behind other components
@@ -59,21 +55,15 @@ class Image(ui.components.CanvasComponent):
     def getOrigSize(self) -> Tuple[int, int]:
         return (self._w, self._h)
 
-    def turnLight(self, state: bool) -> None:
-        self.enable_proc = state
-        self.need_update_cut_surface = True
-
-    # Deprecated
-    def enableProc(self) -> None:
-        self.enable_proc = True
-        self.need_update_cut_surface = True
-
-    def disableProc(self) -> None:
-        self.enable_proc = False
-        self.need_update_cut_surface = True
-
-    def switchProc(self) -> None:
-        self.enable_proc = not self.enable_proc
+    def setLight(self, gamma: float) -> None:
+        if abs(gamma) < 1e-5:
+            self.image = self.orig_image
+        else:
+            self.image = imgproc.mat2surface(
+                imgproc.gammaTransformation(
+                    imgproc.surface2mat(self.orig_image), gamma
+                )
+            )
         self.need_update_cut_surface = True
 
     def setCanvasView(self, scale: float, view_x: float, view_y: float) -> None:
@@ -85,12 +75,11 @@ class Image(ui.components.CanvasComponent):
             surface.blit(self.cut_surface, self.blit_offset)
             return
 
-        image = self.proc_image if self.enable_proc else self.orig_image
         rect = self._getCutRect(surface)
-        rect = ui.utils.clipRect(rect, image)
+        rect = ui.utils.clipRect(rect, self.image)
         self.blit_offset = self._getBlitOffset(rect)
         self.cut_surface = pygame.transform.scale(
-            image.subsurface(rect),
+            self.image.subsurface(rect),
             (int(rect[2] * self.scale),
              int(rect[3] * self.scale))
         )
