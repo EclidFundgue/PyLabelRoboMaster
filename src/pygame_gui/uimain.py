@@ -7,13 +7,6 @@ from pygame import Surface
 from . import components, logger
 
 
-def win32MovePygameWindow(position: Tuple[int, int]) -> None:
-    from ctypes import windll
-    hwnd = pygame.display.get_wm_info()['window']
-    x, y = position
-    w, h = pygame.display.get_surface().get_size()
-    windll.user32.MoveWindow(hwnd, x, y, w, h, False)
-
 def generateDefaultIcon() -> Surface:
     '''It's a mysterious ritual to summon icon.'''
     data = (
@@ -40,27 +33,16 @@ class Main:
         size: Tuple[int, int],
         caption: str = 'default',
         fps: int = 60,
-        position: Tuple[int, int] = None,
         icon: Union[str, Surface] = None
     ):
         pygame.init()
-        if position is None:
-            screen_info = pygame.display.Info()
-            resolution = (screen_info.current_w, screen_info.current_h)
-            position = ((resolution[0] - size[0]) // 2, (resolution[1] - size[1]) // 2)
-
         self._setIcon(icon)
-        pygame.display.set_mode(size)
+        pygame.display.set_mode(size, pygame.RESIZABLE)
         pygame.display.set_caption(caption)
-        self._setPosition(position)
 
         self.fps: int = fps
         self.root: components.Root = components.Root()
         self.clock = pygame.time.Clock()
-
-    def _setPosition(self, position: Tuple[int, int]) -> None:
-        if sys.platform == 'win32':
-            win32MovePygameWindow(position)
 
     def _setIcon(self, icon: Union[str, Surface] = None) -> None:
         if icon is None:

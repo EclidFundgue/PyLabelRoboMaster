@@ -2,7 +2,9 @@ from typing import Callable, Tuple
 
 import pygame
 
-from ... import pygame_gui as ui
+from .. import color, utils
+from .base import Base
+from .containers import RectContainer
 
 
 def _generateDefaultButton(
@@ -16,7 +18,7 @@ def _generateDefaultButton(
     pygame.draw.rect(img, inner_color, pygame.Rect(pad, pad, w - 2 * pad, h - 2 * pad))
     return img
 
-class _ScrollButton(ui.components.Base):
+class _ScrollButton(Base):
     '''
     Inner class of ScrollBar. Generate default scroll button image
     by input size.
@@ -24,10 +26,10 @@ class _ScrollButton(ui.components.Base):
     ScrollButton(w, x, y)
     '''
     def __init__(self, w: int, x: int, y: int):
-        h = w * 3
+        h = w * 2.7
         super().__init__(w, h, x, y)
 
-        color_theme = ui.color.LightColorTheme()
+        color_theme = color.LightColorTheme()
         self.image = _generateDefaultButton(
             w, h,
             color_theme.Secondary,
@@ -35,8 +37,8 @@ class _ScrollButton(ui.components.Base):
         )
         self.active_image = _generateDefaultButton(
             w, h,
-            ui.color.light(color_theme.Secondary, 5),
-            ui.color.light(color_theme.OnSecondary, 5)
+            color.light(color_theme.Secondary, 5),
+            color.light(color_theme.OnSecondary, 5)
         )
         self.pressed = False
 
@@ -52,7 +54,7 @@ class _ScrollButton(ui.components.Base):
         else:
             surface.blit(self.image, (x_start, y_start))
 
-class ScrollBar(ui.components.RectContainer):
+class ScrollBar(RectContainer):
     '''
     Verticle scroll bar, usually in right side of scroll box.
 
@@ -66,13 +68,13 @@ class ScrollBar(ui.components.RectContainer):
     def __init__(self, w: int, h: int, x: int, y: int, on_drag: Callable[[float], None] = None):
         super().__init__(w, h, x, y)
 
-        self.on_drag: Callable[[float], None] = ui.utils.getCallable(on_drag)
+        self.on_drag: Callable[[float], None] = utils.getCallable(on_drag)
         self.padding = 200
 
-        self.rail = ui.components.RectContainer(w, h, 0, 0)
+        self.rail = RectContainer(w, h, 0, 0)
         self.button = _ScrollButton(w, 0, 0)
 
-        color_theme = ui.color.LightColorTheme()
+        color_theme = color.LightColorTheme()
         self.rail.setBackgroundColor(color_theme.Surface)
 
         self.addChild(self.rail)

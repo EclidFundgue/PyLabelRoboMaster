@@ -117,6 +117,7 @@ class Root(Base):
         self.mouse.update(*pygame.mouse.get_pos())
         self.keyboard.update()
 
+        resize_flag = False
         for event in events:
             if event.type == pygame.MOUSEWHEEL:
                 self.mouse.wheel = event.y
@@ -130,9 +131,17 @@ class Root(Base):
                 self.keyboard.is_down = True
             elif event.type == pygame.KEYUP:
                 self.keyboard.is_up = True
+            elif event.type == pygame.VIDEORESIZE:
+                resize_flag = True
+                new_size = event.size
 
         for ch in self._children:
             _updateRecurse(ch, 0, 0, self.mouse, self.keyboard)
+            if resize_flag:
+                ch.onResize(*new_size, 0, 0)
+        
+        if resize_flag:
+            self.redraw()
 
     def redraw(self):
         self.redraw_tree.clear()

@@ -74,6 +74,7 @@ class _Button(Base):
     def onMouseEnter(self):
         if self.cursor_change:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        self.redraw()
 
     def onMouseLeave(self):
         if self.pressed:
@@ -89,8 +90,7 @@ class IconButton(_Button):
 
     IconButton(
         w, h, x, y,
-        image,
-        pressed_image,
+        icon,
         on_press,
         continue_press,
         cursor_change
@@ -98,8 +98,7 @@ class IconButton(_Button):
     '''
     def __init__(self,
             w: int, h: int, x: int, y: int,
-            image: Union[str, pygame.Surface],
-            pressed_image: Union[str, pygame.Surface] = None,
+            icon: Union[str, pygame.Surface],
             on_press: Callable = None,
             continue_press = -1,
             cursor_change: bool = False):
@@ -110,16 +109,41 @@ class IconButton(_Button):
             cursor_change
         )
 
-        self.image = utils.loadImage(image, w, h)
-        if pressed_image is None:
-            pressed_image = image
-        self.pressed_image = utils.loadImage(pressed_image, w, h)
+        self.normal_icon = utils.loadImage(
+            icon,
+            int(w * 0.9),
+            int(h * 0.9),
+            smooth_scale=True
+        )
+        self.hover_icon = utils.loadImage(
+            icon, w, h, smooth_scale=True
+        )
+        self.pressed_icon = utils.loadImage(
+            icon,
+            int(w * 0.75),
+            int(h * 0.75),
+            smooth_scale=True
+        )
+
+    def onMouseLeave(self) -> None:
+        super().onMouseLeave()
+        self.redraw()
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if self.pressed:
-            surface.blit(self.pressed_image, (0, 0))
+            image = self.pressed_icon
+        elif self.active:
+            image = self.hover_icon
         else:
-            surface.blit(self.image, (0, 0))
+            image = self.normal_icon
+        w, h = image.get_size()
+        x_offset = (self.w - w) // 2
+        y_offset = (self.h - h) // 2
+        surface.blit(
+            image,
+            (x_start + x_offset,
+             y_start + y_offset)
+        )
 
 class TextButton(_Button):
     '''Methods:
@@ -243,7 +267,6 @@ class CloseButton(_Button):
 
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         surface.fill(self.current_color)
-
         cx = self.w // 2 + x_start
         cy = self.h // 2 + y_start
         r = min(self.w, self.h) // 6

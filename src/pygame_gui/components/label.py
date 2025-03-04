@@ -1,5 +1,4 @@
 import pygame
-from pygame import Surface
 
 from .. import constants, logger
 from .base import Base

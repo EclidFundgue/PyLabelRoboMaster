@@ -1,10 +1,12 @@
 import os
 import threading
-from typing import Callable, Tuple, Union
+from typing import Tuple, TypeVar, Union
 
 import pygame
 
 from . import logger
+
+T = TypeVar('T')
 
 
 def clipRect(
@@ -23,7 +25,7 @@ def clipRect(
 def __emtpyFunc(*args, **kwargs):
     pass
 
-def getCallable(func: Union[Callable, None] = None) -> Callable:
+def getCallable(func: Union[T, None] = None) -> T:
     '''Returns the function itself or an empty function if None is given. '''
     if func is None:
         return __emtpyFunc
@@ -34,7 +36,8 @@ def getCallable(func: Union[Callable, None] = None) -> Callable:
 def loadImage(
     img: Union[str, pygame.Surface],
     w: int = None,
-    h: int = None
+    h: int = None,
+    smooth_scale = False
 ) -> pygame.Surface:
     ''' Load a image and resize to (w, h). '''
     if isinstance(img, str):
@@ -54,6 +57,8 @@ def loadImage(
     img_w, img_h = ret_img.get_size()
     if w == img_w and h == img_h:
         return ret_img
+    elif smooth_scale:
+        return pygame.transform.smoothscale(ret_img, (w, h))
     else:
         return pygame.transform.scale(ret_img, (w, h))
 

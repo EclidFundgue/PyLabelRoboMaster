@@ -124,3 +124,9 @@ class Canvas(RectContainer):
             return
         child.setCanvasView(self.scale_dst, *self.view_dst)
         super().addChild(child)
+    
+    def onResize(self, w: int, h: int, x: int, y: int):
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
