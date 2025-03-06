@@ -121,6 +121,38 @@ class LightBar(ui.components.Base):
                 self.text_obj.setText(str(self.light))
             self.redraw()
 
+    def onResize(self, w, h, x, y):
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
+
+        # button
+        btn_w = int(h * 0.7)
+        self.btn_left = h
+        self.btn_right = w - h - 20 - btn_w
+        self.button.kill()
+        self.button = _SlideButton(
+            w=btn_w,
+            x=(self.btn_left + self.btn_right) // 2,
+            y=(h - btn_w) // 2
+        )
+        self.addChild(self.button)
+
+        # text
+        self.text_obj.kill()
+        self.text_obj = ui.components.Label(
+            h+10, h, w-h-10, 0, str(self.light),
+            font=pygame.font.SysFont('simsun', 20)
+        )
+        self.addChild(self.text_obj)
+
+        # icons
+        self.light_icon = ui.utils.loadImage(
+            'resources/icons/sun.png', h, h,
+            smooth_scale=True
+        )
+
     def _drawProcess(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         start_x = self.h + 10
         mid_x = self.button.x + self.button.w // 2
