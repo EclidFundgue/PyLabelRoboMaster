@@ -70,6 +70,10 @@ class Image(ui.components.CanvasComponent):
         super().setCanvasView(scale, view_x, view_y)
         self.need_update_cut_surface = True
 
+    def onResize(self, w, h, x, y):
+        super().onResize(w, h, x, y)
+        self.need_update_cut_surface = True
+
     def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
         if not self.need_update_cut_surface:
             surface.blit(self.cut_surface, self.blit_offset)

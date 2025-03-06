@@ -14,7 +14,7 @@ from ...label import LabelController, Labels
 from ...utils import imgproc
 from ...utils.config import ConfigManager
 from .armor_type_select import ArmorIconsSelect
-from .icon import ArmorIcon
+from .icon import getIcon
 
 
 class ArmorPage(StackedPage):
@@ -46,14 +46,10 @@ class ArmorPage(StackedPage):
             y=navigator_h
         )
         def labels_getter(w, h, x, y, on_select) -> Labels:
-            def get_icon(kpt, cls_id) -> ArmorIcon:
-                icon = ArmorIcon(cls_id)
-                icon.setPosToKeypoint(kpt)
-                return icon
             return Labels(
                 w, h, x, y,
                 num_keypoints=4,
-                icon_getter=get_icon,
+                icon_getter=getIcon,
                 on_select=on_select
             )
         self.label_controller = LabelController(
@@ -96,7 +92,7 @@ class ArmorPage(StackedPage):
             on_add=self.label_controller.startAdd,
             on_delete=self.label_controller.delete,
             on_save=self.label_controller.save,
-            on_search=self.label_controller.relable,
+            # on_search=self.label_controller.relable,
             on_correct=self.label_controller.correct,
             on_light_change=on_light_change
         )

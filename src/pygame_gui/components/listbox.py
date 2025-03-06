@@ -261,6 +261,13 @@ class ListBox(RectContainer):
             self.setRelative(self.relative.getEndValue()+dr, True)
             self.redraw()
 
+    def onResize(self, w, h, x, y):
+        self.w = w
+        self.h = h
+        self.x = x
+        self.y = y
+        self._updateRelativeView(self.current_r_value)
+
     def kill(self) -> None:
         for l in self.lines:
             l.kill()

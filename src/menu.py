@@ -84,8 +84,7 @@ class MainMenu(StackedPage):
         self.settings_container.setBackgroundColor(color_theme.SurfaceVariant)
         settings_label.setAlignment(
             align_x=ui.constants.ALIGN_CENTER,
-            align_y=ui.constants.ALIGN_CENTER,
-            with_redraw=False
+            align_y=ui.constants.ALIGN_CENTER
         )
         self.settings_container.alignHorizontalCenter(settings_label)
         self.settings_container.alignHorizontalCenter(load_network_switch)

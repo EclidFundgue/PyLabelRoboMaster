@@ -51,3 +51,8 @@ class ArmorIcon(Icon):
         surface.fill(self.BACKGROUND_COLORS[self.label_state])
         surface.blit(self.IMG_LIGHTS[self.cls_id // 8], (x_start, y_start))
         surface.blit(self.IMG_CLASSES[self.cls_id % 8], (x_start, y_start))
+
+def getIcon(kpt, cls_id) -> ArmorIcon:
+    icon = ArmorIcon(cls_id)
+    icon.setPosToKeypoint(kpt)
+    return icon

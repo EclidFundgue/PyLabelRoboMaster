@@ -176,16 +176,16 @@ class ImageFileLine(FileLine):
         on_selected: Callable[[FileLine], None] = None,
         on_delete: Callable[[FileLine], None] = None
     ):
-        btn_w = 16
-        btn_h = 16
+        btn_w = int(h * 0.6)
+        btn_h = int(h * 0.6)
 
         if ImageFileLine.DELETE_BUTTON_IMG is None or \
             ImageFileLine.DELETE_BUTTON_IMG2 is None:
             ImageFileLine.DELETE_BUTTON_IMG = ui.utils.loadImage(
-                './resources/buttons/delete.png', btn_w, btn_h
+                './resources/icons/delete.png', btn_w, btn_h
             )
             ImageFileLine.DELETE_BUTTON_IMG2 = ui.utils.loadImage(
-                './resources/buttons/delete_confirmed.png', btn_w, btn_h
+                './resources/icons/delete_confirm.png', btn_w, btn_h
             )
 
         on_delete = ui.utils.getCallable(on_delete)
@@ -229,16 +229,16 @@ class DesertedFileLine(FileLine):
         on_selected: Callable[[FileLine], None] = None,
         on_restore: Callable[[FileLine], None] = None,
     ):
-        btn_w = 16
-        btn_h = 16
+        btn_w = int(h * 0.6)
+        btn_h = int(h * 0.6)
 
         if DesertedFileLine.RESTORE_BUTTON_IMG is None or \
             DesertedFileLine.RESTORE_BUTTON_IMG2 is None:
             DesertedFileLine.RESTORE_BUTTON_IMG = ui.utils.loadImage(
-                './resources/buttons/undo.png', btn_w, btn_h
+                './resources/icons/undo.png', btn_w, btn_h
             )
             DesertedFileLine.RESTORE_BUTTON_IMG2 = ui.utils.loadImage(
-                './resources/buttons/undo_confirmed.png', btn_w, btn_h
+                './resources/icons/undo_confirm.png', btn_w, btn_h
             )
 
         def on_command():
