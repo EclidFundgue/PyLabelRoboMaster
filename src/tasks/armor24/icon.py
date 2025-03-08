@@ -16,22 +16,23 @@ class ArmorIcon(Icon):
 
     def __init__(self, cls_id: int):
         prefix = './resources/armor_icons'
+
         if ArmorIcon.IMG_CLASSES is None:
-            ArmorIcon.IMG_CLASSES = [
-                ui.utils.loadImage(os.path.join(prefix, 'sentry.png')),
-                ui.utils.loadImage(os.path.join(prefix, '1.png')),
-                ui.utils.loadImage(os.path.join(prefix, '2.png')),
-                ui.utils.loadImage(os.path.join(prefix, '3.png')),
-                ui.utils.loadImage(os.path.join(prefix, '4.png')),
-                ui.utils.loadImage(os.path.join(prefix, '5.png')),
-                ui.utils.loadImage(os.path.join(prefix, 'outpost.png')),
-                ui.utils.loadImage(os.path.join(prefix, 'base.png')),
+            filenames = [
+                'sentry.png', '1.png', '2.png', '3.png',
+                '4.png', '5.png', 'outpost.png', 'base1.png'
             ]
+            ArmorIcon.IMG_CLASSES = [
+                ui.utils.loadImage(os.path.join(prefix, filename), 32, 32)
+                for filename in filenames
+            ]
+
         if ArmorIcon.IMG_LIGHTS is None:
             ArmorIcon.IMG_LIGHTS = [
-                ui.utils.loadImage(os.path.join(prefix, 'bg_blue.png')),
-                ui.utils.loadImage(os.path.join(prefix, 'bg_red.png')),
+                ui.utils.loadImage(os.path.join(prefix, 'bg_blue.png'),32, 32),
+                ui.utils.loadImage(os.path.join(prefix, 'bg_red.png'), 32, 32),
             ]
+
         if ArmorIcon.BACKGROUND_COLORS is None:
             color_theme = ui.color.LightColorTheme()
             ArmorIcon.BACKGROUND_COLORS = [

@@ -1,309 +1,228 @@
 import os
-from typing import Callable, Union
+from typing import Callable, Tuple, Union
 
 import pygame
 
 from ... import pygame_gui as ui
 
 
-class ColorButton(ui.components.Base):
+class ColorButton(ui.components.TextButton):
     '''
     Button to select armor color.
 
-    ColorButton(x, y, img, img_hover, img_select, on_click)
+    ColorButton(w, h, x, y, text, color, on_click)
     '''
     def __init__(self,
         w: int, h: int, x: int, y: int,
-        img: Union[str, pygame.Surface],
-        img_hover: Union[str, pygame.Surface],
-        img_select: Union[str, pygame.Surface],
+        text: str,
+        color: Tuple[int, int, int],
         on_click: Callable[[], None] = None
     ):
-        super().__init__(w, h, x, y)
-        self.selected = False
+        super().__init__(
+            w, h, x, y,
+            text=text,
+            font=pygame.font.SysFont('simsun bold', 24),
+            on_press=on_click,
+            cursor_change = True
+        )
+        self.color = color
+        self.color2 = ui.color.light(self.color, 3) # hovered
+        self.color3 = ui.color.light(self.color, 8) # pressed
 
-        self.image = ui.utils.loadImage(img, w, h)
-        self.image_hover = ui.utils.loadImage(img_hover, w, h)
-        self.image_select = ui.utils.loadImage(img_select, w, h)
+        self.text_color = (0, 0, 0)
+        self.text_color2 = (0, 0, 0) # pressed
+        self.label.setColor(self.text_color)
+
+class TypeButton(ui.components.Selectable):
+    '''
+    TypeButton(w, h, x, y, icon, on_click)
+    * on_click(type_id) -> None
+
+    Methods:
+    * setColor(color_id) -> None
+    '''
+    def __init__(self,
+        w: int, h: int, x: int, y: int,
+        icon: Union[str, pygame.Surface],
+        type_id: int = 0,
+        on_click: Callable[[int], None] = None
+    ):
+        super().__init__(w, h, x, y)
+        self.icon = ui.utils.loadImage(icon)
+        self.type_id = type_id
         self.on_click = ui.utils.getCallable(on_click)
 
-    def onLeftClick(self, x: int, y: int):
-        if not self.active:
-            return
-        self.on_click()
-
-    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        if self.selected:
-            surface.blit(self.image_select, (x_start, y_start))
-        elif self.active:
-            surface.blit(self.image_hover, (x_start, y_start))
-        else:
-            surface.blit(self.image, (x_start, y_start))
-
-class ArmorTypeButton(ui.components.Base):
-    '''
-    Button to select armor type.
-
-    ArmorTypeButton(x, y, img, type_idx)
-
-    Theme -> Message:
-    * _THEME_TYPE_CLICK -> index: int
-    '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            img: Union[str, pygame.Surface],
-            img_frame: Union[str, pygame.Surface],
-            img_blue: Union[str, pygame.Surface],
-            img_red: Union[str, pygame.Surface],
-            on_click: Callable[[], None] = None):
-        super().__init__(w, h, x, y)
-
-        self.img = ui.utils.loadImage(img, w, h)
-        self.img_frame = ui.utils.loadImage(img_frame, w, h)
-        self.color_backgrounds = [
-            ui.utils.loadImage(img_blue, w, h),
-            ui.utils.loadImage(img_red, w, h)
-        ]
-        self.on_click = ui.utils.getCallable(on_click)
-
-        self.color_idx = -1
-        self.selected = False
-
-    def onLeftClick(self, x: int, y: int):
-        if not self.active:
-            return
-        self.on_click()
-
-    def setColor(self, color_idx: int):
-        # 0: blue, 1: red
-        self.color_idx = color_idx
-
-    def draw(self, surface: pygame.Surface, x_start: int, y_start: int) -> None:
-        if self.color_idx != -1:
-            surface.blit(self.color_backgrounds[self.color_idx], (x_start, y_start))
-
-        surface.blit(self.img, (x_start, y_start))
-
-        if self.selected:
-            surface.blit(self.img_frame, (x_start, y_start))
-
-class ColorSelectBox(ui.components.RectContainer):
-    '''
-    Click to select armor color.
-
-    ColorSelectBox(w, h, x, y, btn_w, btn_h, btn_padding, on_select)
-
-    Methods:
-    * setColor(idx) -> None
-    '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            btn_w: int, btn_h: int,
-            btn_padding: int,
-            on_select: Callable[[int], None] = None):
-        super().__init__(w, h, x, y)
-
-        self.on_select = ui.utils.getCallable(on_select)
-
-        def on_click_blue():
-            self.setColor(0)
-            self.on_select(0)
-        def on_click_red():
-            self.setColor(1)
-            self.on_select(1)
-        self.buttons = [
-            ColorButton( # blue
-                btn_w, btn_h, 0, 0,
-                './resources/armor_icons/B.png',
-                './resources/armor_icons/B_hover.png',
-                './resources/armor_icons/B_selected.png',
-                on_click_blue
-            ),
-            ColorButton( # red
-                btn_w, btn_h, btn_w + btn_padding, 0,
-                './resources/armor_icons/R.png',
-                './resources/armor_icons/R_hover.png',
-                './resources/armor_icons/R_selected.png',
-                on_click_red
-            )
-        ]
-
-        for btn in self.buttons:
-            self.addChild(btn)
-
-    def setColor(self, color_idx: int):
-        for i, btn in enumerate(self.buttons):
-            btn.selected = (color_idx == i)
-
-    def kill(self) -> None:
-        self.buttons = []
-        self.on_select = None
-        super().kill()
-
-class ArmorTypeSelectBox(ui.components.RectContainer):
-    '''
-    Click to select armor type.
-
-    ArmorTypeSelectBox(on_select)
-
-    Methods:
-    * setColor(idx) -> None
-    * setSelect(idx) -> None
-    '''
-    def __init__(self,
-            w: int, h: int, x: int, y: int,
-            icon_w: int, icon_h: int,
-            icon_padx: int, icon_pady: int,
-            on_select: Callable[[int], None] = None):
-        super().__init__(w, h, x, y)
-
-        self.on_select = ui.utils.getCallable(on_select)
-
-        prefix = './resources/armor_icons'
-        type_icons = [
-            ui.utils.loadImage(os.path.join(prefix, 'sentry.png')),
-            ui.utils.loadImage(os.path.join(prefix, '1.png')),
-            ui.utils.loadImage(os.path.join(prefix, '2.png')),
-            ui.utils.loadImage(os.path.join(prefix, '3.png')),
-            ui.utils.loadImage(os.path.join(prefix, '4.png')),
-            ui.utils.loadImage(os.path.join(prefix, '5.png')),
-            ui.utils.loadImage(os.path.join(prefix, 'outpost.png')),
-            ui.utils.loadImage(os.path.join(prefix, 'base.png')),
-        ]
-        self.buttons = [
-            ArmorTypeButton(
-                icon_w, icon_h,
-                (icon_w + icon_padx) * (i % 4),
-                (icon_h + icon_pady) * (i // 4),
-                icon,
-                ui.utils.loadImage(os.path.join(prefix, 'select_frame.png')),
-                ui.utils.loadImage(os.path.join(prefix, 'bg_blue.png')),
-                ui.utils.loadImage(os.path.join(prefix, 'bg_red.png')),
-            ) for i, icon in enumerate(type_icons)
-        ]
-
-        def get_on_click(i):
-            def on_click():
-                self.setSelect(i)
-                self.on_select(i)
-            return on_click
-
-        for i, btn in enumerate(self.buttons):
-            self.addChild(btn)
-            btn.on_click = get_on_click(i)
-
-    def setColor(self, color_idx: int):
-        for btn in self.buttons:
-            btn.setColor(color_idx)
-
-    def setSelect(self, type_idx: int):
-        for i, btn in enumerate(self.buttons):
-            btn.selected = (type_idx == i)
-
-    def kill(self) -> None:
-        self.buttons = []
-        self.on_select = None
-        super().kill()
-
-class ArmorIconsSelect(ui.components.RectContainer):
-    '''
-    Manage armor types on labels.
-
-    ArmorIconsSelect(x, y, on_select)
-
-    Methods:
-    * setColorType(idx) -> None
-    * setArmorType(idx) -> None
-    * setType(idx) -> None
-    * getType() -> int
-    '''
-    def __init__(self, x: int, y: int, on_select: Callable[[int], None] = None):
-        color_pad = 17
-        color_size = 27
-        type_pad = 12
-        type_size = 32
-        pad = 18
-
-        color_w = type_size * 2 + type_pad
-        color_x = type_size + type_pad + 3
-        type_w = type_size * 4 + type_pad * 3
-        type_h = type_size * 2 + type_pad
-        type_y = color_size + 16 + pad
-
-        w = type_size * 4 + type_pad * 3 + 2 * pad
-        h = color_size + 16 + type_size * 2 + type_pad + 2 * pad
-        super().__init__(w, h, x, y)
-
-        self.on_select = ui.utils.getCallable(on_select)
-
-        def on_color_select(idx: int):
-            self.setColorType(idx)
-            self.on_select(self.getType())
-            self.redraw()
-        def on_type_select(idx: int):
-            self.setArmorType(idx)
-            self.on_select(self.getType())
-            self.redraw()
-        self.color_box = ColorSelectBox(
-            w = color_w,
-            h = color_size,
-            x = color_x + pad,
-            y = 8,
-            btn_w=color_size,
-            btn_h=color_size,
-            btn_padding=color_pad,
-            on_select=on_color_select
-        )
-        self.type_box = ArmorTypeSelectBox(
-            w = type_w,
-            h = type_h,
-            x = pad,
-            y = type_y,
-            icon_w=type_size,
-            icon_h=type_size,
-            icon_padx=type_pad,
-            icon_pady=type_pad,
-            on_select=on_type_select
-        )
-        color_box_bg = ui.components.RectContainer(w, color_size + 16, 0, 0)
-        type_box_bg = ui.components.RectContainer(w, type_h + 2 * pad, 0, type_y - pad)
-
-        color_box_bg.layer = -1
-        type_box_bg.layer = -1
         color_theme = ui.color.LightColorTheme()
-        color_box_bg.setBackgroundColor(color_theme.OnPrimaryContainer)
-        type_box_bg.setBackgroundColor(color_theme.PrimaryContainer)
+        self.bg_color_blue = (169, 230, 255) # selected
+        self.bg_color_red = (255, 158, 158) # selected
+        self.bg_color_gray = (190, 190, 190) # normal
+        self.bg_color_lightgray = (255, 255, 255) # hover
 
-        self.addChild(self.color_box)
-        self.addChild(self.type_box)
-        self.addChild(color_box_bg)
-        self.addChild(type_box_bg)
+        self.color_id = 0
 
-        self.color_idx = -1
-        self.type_idx = -1
+    def setColor(self, color_id: int) -> None:
+        self.color_id = color_id
 
-    def setColorType(self, idx: int) -> None:
-        self.color_idx = idx
-        self.color_box.setColor(self.color_idx)
-        self.type_box.setColor(self.color_idx)
+    def onLeftClick(self, x: int, y: int):
+        if not self.active:
+            return
+        self.on_click(self.type_id)
+        self.redraw()
+
+    def onMouseEnter(self):
+        self.redraw()
     
-    def setArmorType(self, idx: int) -> None:
-        self.type_idx = idx
-        self.type_box.setSelect(self.type_idx)
+    def onMouseLeave(self):
+        self.redraw()
 
-    def setType(self, idx: int) -> None:
-        self.setColorType(idx // 8)
-        self.setArmorType(idx % 8)
+    def draw(self, surface: pygame.Surface, x_start: int, y_start: int):
+        if self.selected:
+            if self.color_id == 0:
+                bg_color = self.bg_color_blue
+            else:
+                bg_color = self.bg_color_red
+        elif self.active:
+            bg_color = self.bg_color_lightgray
+        else:
+            bg_color = self.bg_color_gray
 
-    def getType(self) -> int:
-        if self.color_idx == -1:
-            return -1
-        if self.type_idx == -1:
-            return -1
-        return self.color_idx * 8 + self.type_idx
+        ui.utils.drawRoundedRect(
+            surface,
+            bg_color,
+            (x_start, y_start, self.w, self.h),
+            self.w // 4
+        )
 
-    def kill(self) -> None:
-        self.color_box = None
-        self.type_box = None
-        self.on_select = None
-        super().kill()
+        icon_w, icon_h = self.icon.get_size()
+        x = x_start + (self.w - icon_w) // 2
+        y = y_start + (self.h - icon_h) // 2
+        surface.blit(self.icon, (x, y))
+
+class ArmorClassSelection(ui.components.RectContainer):
+    '''
+    ArmorClassSelection(w, h, x, y, on_select)
+    * on_select(cls_id) -> None
+
+    Methods:
+    * setClass(cls_id) -> None
+    '''
+    def __init__(self,
+        w: int, h: int, x: int, y: int,
+        on_select: Callable[[int], None] = None
+    ):
+        super().__init__(w, h, x, y)
+        self.on_select = ui.utils.getCallable(on_select)
+
+        self.cls_id = 0
+
+        # Initialize variables
+        color_bar_h = h // 4
+        color_button_y = 8
+        color_button_h = color_bar_h - 2 * color_button_y
+        type_button_size = min(
+            w // (7 + 4 * 3),
+            h // (4 + 2 * 3)
+        ) * 3
+        type_pixel_w = (w - 4 * type_button_size) // 7
+        type_pixel_h = (h - color_bar_h - 2 * type_button_size) // 4
+
+        # Create objects
+        color_bar = ui.components.RectContainer(
+            w, color_bar_h, 0, 0
+        )
+
+        def _set_color_blue():
+            _type_id = self.cls_id % 8
+            self.cls_id = _type_id
+            self.on_select(self.cls_id)
+            for i in range(8):
+                self.type_buttons[i].setColor(0)
+            self.redraw()
+        def _set_color_red():
+            _type_id = self.cls_id % 8
+            self.cls_id = _type_id + 8
+            self.on_select(self.cls_id)
+            for i in range(8):
+                self.type_buttons[i].setColor(1)
+            self.redraw()
+        btn_blue = ColorButton(
+            w=w*2//7,
+            h=color_button_h,
+            x=w//7,
+            y=color_button_y,
+            text='Blue',
+            color = (169, 230, 255),
+            on_click=_set_color_blue
+        )
+        btn_red = ColorButton(
+            w=w*2//7,
+            h=color_button_h,
+            x=w*4//7,
+            y=color_button_y,
+            text='Red',
+            color = (255, 158, 158),
+            on_click=_set_color_red
+        )
+
+        type_bar = ui.components.RectContainer(
+            w, h-color_bar_h, 0, color_bar_h
+        )
+        prefix = './resources/armor_icons'
+        def _load_image(image: Union[str, pygame.Surface]) -> pygame.Surface:
+            return ui.utils.loadImage(
+                img=os.path.join(prefix, image),
+                w=type_button_size-10,
+                h=type_button_size-10,
+                smooth_scale=True
+            )
+        type_icons = [
+            _load_image('sentry.png'),
+            _load_image('1.png'),
+            _load_image('2.png'),
+            _load_image('3.png'),
+            _load_image('4.png'),
+            _load_image('5.png'),
+            _load_image('outpost.png'),
+            _load_image('base1.png'),
+        ]
+        def on_type_button_click(type_id: int) -> None:
+            for i in range(8):
+                if i == type_id:
+                    self.type_buttons[i].select()
+                else:
+                    self.type_buttons[i].unselect()
+            color_id = self.cls_id // 8
+            self.cls_id = color_id * 8 + type_id
+            self.on_select(self.cls_id)
+        self.type_buttons = [
+            TypeButton(
+                w=type_button_size,
+                h=type_button_size,
+                x=2 * type_pixel_w + (i % 4) * (type_button_size + type_pixel_w),
+                y=type_pixel_h + (i // 4) * (type_button_size + type_pixel_h),
+                icon=type_icons[i],
+                type_id=i,
+                on_click=on_type_button_click
+            ) for i in range(8)
+        ]
+
+        # Configure objects
+
+        # Manage Success
+        self.addChild(color_bar)
+        color_bar.addChild(btn_blue)
+        color_bar.addChild(btn_red)
+        self.addChild(type_bar)
+        for button in self.type_buttons:
+            type_bar.addChild(button)
+
+    def setClass(self, cls_id: int) -> None:
+        color_id = cls_id // 8
+        type_id = cls_id % 8
+        for i in range(8):
+            self.type_buttons[i].setColor(color_id)
+            if i == type_id:
+                self.type_buttons[i].select()
+            else:
+                self.type_buttons[i].unselect()
+        self.cls_id = cls_id

@@ -13,7 +13,7 @@ from ...file import SelectionBox
 from ...label import LabelController, Labels
 from ...utils import imgproc
 from ...utils.config import ConfigManager
-from .armor_type_select import ArmorIconsSelect
+from .armor_type_select import ArmorClassSelection
 from .icon import getIcon
 
 
@@ -55,7 +55,7 @@ class ArmorPage(StackedPage):
         self.label_controller = LabelController(
             canvas,
             labels_getter,
-            # on_selected=self._canvas_onLabelSelected
+            on_selected=self._canvas_onLabelSelected
         )
         navigator = Navigator(
             w=w,
@@ -96,8 +96,10 @@ class ArmorPage(StackedPage):
             on_correct=self.label_controller.correct,
             on_light_change=on_light_change
         )
-        toolbar_icon_selection = ArmorIconsSelect(
-            x=20,
+        toolbar_icon_selection = ArmorClassSelection(
+            w=scroll_w,
+            h=scroll_h * 0.7,
+            x=0,
             y=toolbar_h-scroll_h-220,
             on_select=self.label_controller.setClass
         )
@@ -157,8 +159,9 @@ class ArmorPage(StackedPage):
     def onHide(self) -> None:
         self.navigator.resetState()
 
-    def _canvas_onLabelSelected(self, cls_id) -> None:
-        self.toolbar_icon_selection.setType(cls_id)
+    def _canvas_onLabelSelected(self, cls_id: int) -> None:
+        self.toolbar_icon_selection.setClass(cls_id)
+        self.toolbar_icon_selection.redraw()
 
     def _toolbar_onFileSelection(self,
         folder: str,
