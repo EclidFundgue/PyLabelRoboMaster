@@ -16,6 +16,7 @@ class _StackedFileBox(StackedPage):
     * getSelected() -> str | None
     * getSelectedIndex() -> int
     * reload() -> None
+    * select(file_idx) -> None
     * selectPrev() -> None
     * selectNext() -> None
     '''
@@ -39,6 +40,9 @@ class _StackedFileBox(StackedPage):
 
     def reload(self) -> None:
         self.box.reload()
+
+    def select(self, file_idx: int) -> None:
+        self.box.select(file_idx)
 
     def selectPrev(self) -> None:
         self.box.selectPrev()
@@ -93,7 +97,9 @@ class SelectionBox(ui.components.RectContainer):
     * on_selected(folder, filename, is_deserted) -> None
 
     Methods:
+    * getSelected() -> str | None
     * setPage(page) -> None
+    * select(file_idx) -> None
     * selectPrev() -> None
     * selectNext() -> None
     '''
@@ -194,10 +200,19 @@ class SelectionBox(ui.components.RectContainer):
                 True
             )
 
+    def getSelected(self) -> Union[str, None]:
+        box = self._getCurrentBox()
+        return box.getSelected()
+
+    def getSelectedIndex(self) -> int:
+        box = self._getCurrentBox()
+        idx = box.getSelectedIndex()
+        return idx
+
     def setPage(self, page: Union[int, StackedPage]) -> None:
         self.file_box.setPage(page)
 
-    def _getCurrentBox(self) -> FileBox:
+    def _getCurrentBox(self) -> _StackedFileBox:
         page_idx = self.file_box.current_page_index
         if page_idx == 0:
             return self.image_box
@@ -217,6 +232,11 @@ class SelectionBox(ui.components.RectContainer):
         )
 
         self.navigator.redraw()
+
+    def select(self, file_idx: int) -> None:
+        box = self._getCurrentBox()
+        box.select(file_idx)
+        self._updataNavigator()
 
     def selectPrev(self) -> None:
         box = self._getCurrentBox()

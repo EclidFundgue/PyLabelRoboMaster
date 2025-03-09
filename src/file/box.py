@@ -21,6 +21,7 @@ class FileBox(ui.components.RectContainer):
     * getSelected() -> FileLine | None
     * getSelectedIndex() -> int
     * reload(lines) -> None
+    * select(file_idx) -> None
     * selectPrev() -> None
     * selectNext() -> None
     '''
@@ -89,6 +90,9 @@ class FileBox(ui.components.RectContainer):
         )
 
         self.addChild(self.listbox)
+
+    def select(self, file_idx: int) -> None:
+        self.listbox.select(file_idx)
 
     def selectPrev(self) -> None:
         self.listbox.selectPrev()
