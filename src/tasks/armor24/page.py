@@ -1,6 +1,4 @@
 import os
-import tkinter as tk
-from tkinter import filedialog
 from typing import Union
 
 import pygame
@@ -12,7 +10,7 @@ from ...components.toolbar import ToolbarButtons
 from ...file import SelectionBox
 from ...label import LabelController, Labels
 from ...utils import imgproc
-from ...utils.config import ConfigManager
+from ...utils.config import ConfigManager, openDir
 from .armor_type_select import ArmorClassSelection
 from .icon import getIcon
 
@@ -65,7 +63,7 @@ class ArmorPage(StackedPage):
             on_back=lambda: self.setPage(page_incides['main_menu'],True),
             on_undo=self.label_controller.undo,
             on_redo=self.label_controller.redo,
-            # on_open=self._navigator_onOpenDir
+            on_open=self._navigator_onOpenDir
         )
         toolbar = ui.components.RectContainer(
             w=320,
@@ -122,6 +120,7 @@ class ArmorPage(StackedPage):
         self.toolbar = toolbar
         self.navigator = navigator
         self.toolbar_icon_selection = toolbar_icon_selection
+        self.toolbar_scroll_files = toolbar_scroll_files
 
         # ----- manage component hierarchy -----
         self.addChild(canvas)
@@ -182,6 +181,34 @@ class ArmorPage(StackedPage):
 
         self.label_controller.canvas.redraw()
 
+    def _navigator_onOpenDir(self) -> None:
+        _images, _labels, _deserted = openDir()
+        self.images_folder = _images
+        self.labels_folder = _labels
+        self.deserted_folder = _deserted
+
+        navigator_h = 50
+        canvas_w = self.w - 320
+        toolbar_h = self.h - navigator_h
+        scroll_h = int(toolbar_h * 0.4)
+        scroll_w = self.w - canvas_w - 40
+
+        toolbar_scroll_files = SelectionBox(
+            w=scroll_w,
+            h=scroll_h,
+            x=20,
+            y=toolbar_h-scroll_h-20,
+            image_folder=self.images_folder,
+            deserted_folder=self.deserted_folder,
+            on_selected=self._toolbar_onFileSelection
+        )
+
+        self.toolbar_scroll_files.kill()
+        self.toolbar_scroll_files = toolbar_scroll_files
+        self.toolbar.addChild(toolbar_scroll_files)
+
+        self.label_controller.reload(None, None, False)
+        self.redraw()
 
     #     self._loadPathByConfigManager()
 
@@ -225,43 +252,6 @@ class ArmorPage(StackedPage):
     #     if os.path.exists(os.path.join(images_folder, image_file)):
     #         self.selected_image = image_file
     #         self.selected_label = imgproc.getLabelPath(image_file, labels_folder)
-
-    # def _navigator_onOpenDir(self) -> None:
-    #     root = tk.Tk()
-    #     root.withdraw()
-
-    #     self.images_folder = filedialog.askdirectory(title='Images')
-    #     self.labels_folder = filedialog.askdirectory(title='Labels')
-    #     self.deserted_folder = os.path.join(self.images_folder, 'deserted')
-    #     if not os.path.exists(self.deserted_folder):
-    #         os.makedirs(self.deserted_folder)
-
-    #     toolbar_scroll_files = stackedview.StackedScrollView(
-    #         w=self.toolbar_scroll_files.w,
-    #         h=self.toolbar_scroll_files.h,
-    #         x=self.toolbar_scroll_files.x,
-    #         y=self.toolbar_scroll_files.y,
-    #         line_w=self.toolbar_scroll_files.w-30,
-    #         line_h=30,
-    #         image_folder=self.images_folder,
-    #         deserted_folder=self.deserted_folder,
-    #         on_page_changed=self._toolbarScroll_onPageChange,
-    #         on_select=self._toolbarScroll_onSelect,
-    #         on_desert=self._toolbarScroll_onDesert,
-    #         on_restore=self._toolbarScroll_onRestore,
-    #     )
-    #     self.toolbar_scroll_files.kill()
-    #     self.toolbar_scroll_files = toolbar_scroll_files
-    #     self.toolbar.addChild(toolbar_scroll_files)
-
-    #     self.label_controller.reload(None, None, False)
-
-    #     self.toolbar_scroll_navigator_index.setText(
-    #         f'{self.toolbar_scroll_files.getSelectedIndex()+1}/'
-    #         f'{self.toolbar_scroll_files.getCurrentPageFileNumber()}'
-    #     )
-    #     self.toolbar_scroll_navigator_filename.setText('')
-    #     self.redraw()
 
     # def kill(self):
     #     self.config_manager['last_images_folder'] = self.images_folder

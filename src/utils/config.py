@@ -1,6 +1,8 @@
 import json
 import os
-from typing import Any
+import tkinter as tk
+from tkinter import filedialog
+from typing import Any, Tuple
 
 
 class ConfigManager:
@@ -35,3 +37,14 @@ class ConfigManager:
 
     def __getitem__(self, key: str) -> Any:
         return self.data[key]
+
+def openDir() -> Tuple[str, str, str]:
+    root = tk.Tk()
+    root.withdraw()
+
+    images_folder = filedialog.askdirectory(title='Images')
+    labels_folder = filedialog.askdirectory(title='Labels')
+    deserted_folder = os.path.join(images_folder, 'deserted')
+    if not os.path.exists(deserted_folder):
+        os.makedirs(deserted_folder)
+    return images_folder, labels_folder, deserted_folder
