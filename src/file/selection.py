@@ -98,6 +98,8 @@ class SelectionBox(ui.components.RectContainer):
 
     Methods:
     * getSelected() -> str | None
+    * getCurrentFolder() -> str
+    * getSelectedIndex() -> int
     * setPage(page) -> None
     * select(file_idx) -> None
     * selectPrev() -> None
@@ -203,6 +205,12 @@ class SelectionBox(ui.components.RectContainer):
     def getSelected(self) -> Union[str, None]:
         box = self._getCurrentBox()
         return box.getSelected()
+
+    def getCurrentFolder(self) -> str:
+        if self.file_box.current_page_index == 0:
+            return self.image_folder
+        else:
+            return self.deserted_folder
 
     def getSelectedIndex(self) -> int:
         box = self._getCurrentBox()

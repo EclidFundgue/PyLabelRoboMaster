@@ -134,23 +134,73 @@ class ArmorPage(StackedPage):
         toolbar.addChild(toolbar_scroll_files)
 
         # ----- keyboard events -----
+        self.addKeyDownEvent(pygame.K_a, self.label_controller.startAdd)
         self.addKeyDownEvent(pygame.K_c, self.label_controller.correct)
+        self.addKeyDownEvent(pygame.K_d, self.label_controller.delete)
+        self.addKeyDownEvent(pygame.K_DELETE, self.label_controller.delete)
         self.addKeyCtrlEvent(pygame.K_z, self.label_controller.undo)
         self.addKeyCtrlEvent(pygame.K_y, self.label_controller.redo)
+        self.addKeyDownEvent(pygame.K_ESCAPE, self.label_controller.cancelAdd)
+        self.addKeyDownEvent(pygame.K_ESCAPE, self.label_controller.unselectAll)
+        self.addKeyCtrlEvent(pygame.K_a, self.label_controller.selectAll)
+
+        def on_prev() -> None:
+            self.toolbar_scroll_files.selectPrev()
+            folder = self.toolbar_scroll_files.getCurrentFolder()
+            filename = self.toolbar_scroll_files.getSelected()
+            if filename is not None:
+                self.label_controller.reload(
+                    os.path.join(folder, filename),
+                    imgproc.getLabelPath(filename, self.labels_folder),
+                    False
+                )
+                self.redraw()
+        self.addKeyDownEvent(pygame.K_q, on_prev)
+
+        def on_next() -> None:
+            self.toolbar_scroll_files.selectNext()
+            folder = self.toolbar_scroll_files.getCurrentFolder()
+            filename = self.toolbar_scroll_files.getSelected()
+            if filename is not None:
+                self.label_controller.reload(
+                    os.path.join(folder, filename),
+                    imgproc.getLabelPath(filename, self.labels_folder),
+                    False
+                )
+                self.redraw()
+        self.addKeyDownEvent(pygame.K_e, on_next)
+
+        def on_type_set(type_id: int) -> None:
+            cls_id = self.toolbar_icon_selection.getClass()
+            color_id = cls_id // 8
+            cls_id = color_id * 8 + type_id
+            self.toolbar_icon_selection.setClass(cls_id)
+            self.label_controller.setClass(cls_id)
+        self.addKeyDownEvent(pygame.K_0, lambda : on_type_set(0))
+        self.addKeyDownEvent(pygame.K_1, lambda : on_type_set(1))
+        self.addKeyDownEvent(pygame.K_2, lambda : on_type_set(2))
+        self.addKeyDownEvent(pygame.K_3, lambda : on_type_set(3))
+        self.addKeyDownEvent(pygame.K_4, lambda : on_type_set(4))
+        self.addKeyDownEvent(pygame.K_5, lambda : on_type_set(5))
+        self.addKeyDownEvent(pygame.K_6, lambda : on_type_set(6))
+        self.addKeyDownEvent(pygame.K_7, lambda : on_type_set(7))
+
+        def on_color_set(color_id: int) -> None:
+            cls_id = self.toolbar_icon_selection.getClass()
+            type_id = cls_id % 8
+            cls_id = color_id * 8 + type_id
+            self.toolbar_icon_selection.setClass(cls_id)
+            self.label_controller.setClass(cls_id)
+        self.addKeyDownEvent(pygame.K_b, lambda : on_color_set(0))
+        self.addKeyDownEvent(pygame.K_r, lambda : on_color_set(1))
 
     def onResize(self, w: int, h: int, x: int, y: int):
         navigator_h = 50
         canvas_w = w - 320
 
-        self.navigator.onResize(
-            w, navigator_h, 0, 0
-        )
-        self.toolbar.onResize(
-            320, h-navigator_h, canvas_w, navigator_h
-        )
-        self.canvas.onResize(
-            canvas_w, h-navigator_h, 0, navigator_h
-        )
+        self.navigator.onResize(w, navigator_h, 0, 0)
+        self.toolbar.onResize(320, h-navigator_h, canvas_w, navigator_h)
+        self.canvas.onResize(canvas_w, h-navigator_h, 0, navigator_h)
 
         self.w = w
         self.h = h
