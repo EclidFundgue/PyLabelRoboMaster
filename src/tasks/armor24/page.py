@@ -227,9 +227,8 @@ class ArmorPage(StackedPage):
             return
 
         image_path = os.path.join(folder, filename)
-        if not is_deserted:
-            label_path = imgproc.getLabelPath(filename, self.labels_folder)
-            self.label_controller.reload(image_path, label_path, False)
+        label_path = imgproc.getLabelPath(filename, self.labels_folder)
+        self.label_controller.reload(image_path, label_path, False)
 
         self.label_controller.canvas.redraw()
 
