@@ -122,6 +122,8 @@ class ArmorPage(StackedPage):
         self.toolbar_icon_selection = toolbar_icon_selection
         self.toolbar_scroll_files = toolbar_scroll_files
 
+        self._loadPathByConfigManager()
+
         # ----- manage component hierarchy -----
         self.addChild(canvas)
         self.addChild(navigator)
@@ -181,12 +183,7 @@ class ArmorPage(StackedPage):
 
         self.label_controller.canvas.redraw()
 
-    def _navigator_onOpenDir(self) -> None:
-        _images, _labels, _deserted = openDir()
-        self.images_folder = _images
-        self.labels_folder = _labels
-        self.deserted_folder = _deserted
-
+    def _reloadSelectionBox(self, selected_idx: int = None) -> None:
         navigator_h = 50
         canvas_w = self.w - 320
         toolbar_h = self.h - navigator_h
@@ -202,59 +199,55 @@ class ArmorPage(StackedPage):
             deserted_folder=self.deserted_folder,
             on_selected=self._toolbar_onFileSelection
         )
+        toolbar_scroll_files.select(selected_idx)
 
         self.toolbar_scroll_files.kill()
         self.toolbar_scroll_files = toolbar_scroll_files
         self.toolbar.addChild(toolbar_scroll_files)
 
-        self.label_controller.reload(None, None, False)
+        if selected_idx is None:
+            self.label_controller.reload(None, None, False)
+            return
+
+        image_filename = self.toolbar_scroll_files.getSelected()
+        if image_filename is None:
+            return
+
+        image_path = os.path.join(self.images_folder, image_filename)
+        label_path = imgproc.getLabelPath(image_filename, self.labels_folder)
+        self.label_controller.reload(image_path, label_path, False)
+
+    def _navigator_onOpenDir(self) -> None:
+        _images, _labels, _deserted = openDir()
+        self.images_folder = _images
+        self.labels_folder = _labels
+        self.deserted_folder = _deserted
+
+        self._reloadSelectionBox()
         self.redraw()
 
-    #     self._loadPathByConfigManager()
+    def _loadPathByConfigManager(self) -> None:
+        images_folder = self.config_manager['last_images_folder']
+        labels_folder = self.config_manager['last_labels_folder']
+        image_index = self.config_manager['last_image_index']
 
-    #     self.toolbar = toolbar
-    #     self.toolbar_icon_selection = toolbar_icon_selection
-    #     self.toolbar_scroll_navigator_index = toolbar_scroll_navigator_index
-    #     self.toolbar_scroll_navigator_filename = toolbar_scroll_navigator_filename
-    #     self.toolbar_scroll_files = toolbar_scroll_files
+        # load folder
+        if images_folder is None or not os.path.exists(images_folder):
+            return
+        if labels_folder is None or not os.path.exists(labels_folder):
+            return
+        self.images_folder: str = images_folder
+        self.labels_folder: str = labels_folder
+        self.deserted_folder: str = os.path.join(images_folder, 'deserted')
 
-    #     if self.selected_image is not None:
-    #         self.label_controller.reload(
-    #             os.path.join(self.images_folder, self.selected_image),
-    #             self.selected_label,
-    #             False
-    #         )
-    #         self.toolbar_scroll_files.selectLine(self.selected_image)
-    #         self.toolbar_scroll_navigator_index.setText(
-    #             f'{self.toolbar_scroll_files.getSelectedIndex()+1}/'
-    #             f'{self.toolbar_scroll_files.getCurrentPageFileNumber()}'
-    #         )
-    #         line = self.toolbar_scroll_files.getSelectedLine()
-    #         self.toolbar_scroll_navigator_filename.setText(line.filename
-    
-    # def _loadPathByConfigManager(self) -> None:
-    #     images_folder = self.config_manager['last_images_folder']
-    #     labels_folder = self.config_manager['last_labels_folder']
-    #     image_file = self.config_manager['last_image_file']
+        self._reloadSelectionBox(image_index)
+        self.redraw()
 
-    #     # load folder
-    #     if images_folder is None or not os.path.exists(images_folder):
-    #         return
-    #     if labels_folder is None or not os.path.exists(labels_folder):
-    #         return
-    #     self.images_folder: str = images_folder
-    #     self.labels_folder: str = labels_folder
-    #     self.deserted_folder: str = os.path.join(images_folder, 'deserted')
-
-    #     # load current file
-    #     if image_file is None:
-    #         return
-    #     if os.path.exists(os.path.join(images_folder, image_file)):
-    #         self.selected_image = image_file
-    #         self.selected_label = imgproc.getLabelPath(image_file, labels_folder)
-
-    # def kill(self):
-    #     self.config_manager['last_images_folder'] = self.images_folder
-    #     self.config_manager['last_labels_folder'] = self.labels_folder
-    #     self.config_manager['last_image_file'] = self.selected_image
-    #     super().kill()
+    def kill(self):
+        selected_idx = self.toolbar_scroll_files.getSelectedIndex()
+        if selected_idx == -1:
+            selected_idx = None
+        self.config_manager['last_images_folder'] = self.images_folder
+        self.config_manager['last_labels_folder'] = self.labels_folder
+        self.config_manager['last_image_index'] = selected_idx
+        super().kill()
