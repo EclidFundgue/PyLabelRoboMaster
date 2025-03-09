@@ -93,12 +93,12 @@ def sortedPoints(pts: List[Tuple]) -> List[Tuple]:
 
     return [pl[0], pl[1], pr[0], pr[1]]
 
-def surface2mat(surf: pygame.Surface) -> cv2.Mat:
+def surface2mat(surf: pygame.Surface) -> np.ndarray:
     np_img = pygame.surfarray.array3d(surf)
     np_img = np_img.transpose(1, 0, 2) # [column, row, channel] -> [row, column, channel]
     return cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
 
-def mat2surface(mat: cv2.Mat) -> pygame.Surface:
+def mat2surface(mat: np.ndarray) -> pygame.Surface:
     cv_rgb = cv2.cvtColor(mat, cv2.COLOR_BGR2RGB)
     return pygame.image.fromstring(
         cv_rgb.data.tobytes(), mat.shape[1::-1], 'RGB'
@@ -112,7 +112,7 @@ def _getGammaTable(gamma: float):
     table = np.round(table).astype(np.uint8)
     return table
 
-def gammaTransformation(img: cv2.Mat, gamma: float) -> cv2.Mat:
+def gammaTransformation(img: np.ndarray, gamma: float) -> np.ndarray:
     ''' Use gamma transformation to make image lighter or darker. '''
     hsv_img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
@@ -122,7 +122,7 @@ def gammaTransformation(img: cv2.Mat, gamma: float) -> cv2.Mat:
     return cv2.cvtColor(hsv_img, cv2.COLOR_HSV2RGB)
 
 
-def _getCnts(img: cv2.Mat) -> List[Tuple[int, int]]:
+def _getCnts(img: np.ndarray) -> List[Tuple[int, int]]:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, _THRESH, 255, cv2.THRESH_BINARY)
     cnts, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
@@ -158,7 +158,7 @@ def _verifyPoint(
     else:
         return list(light_p2)
 
-def _correctLabelByPoints(img: cv2.Mat, points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+def _correctLabelByPoints(img: np.ndarray, points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
     cnts = _getCnts(img)
     # Do not correct if no contour found
     if not cnts:
@@ -173,10 +173,10 @@ def _correctLabelByPoints(img: cv2.Mat, points: List[Tuple[float, float]]) -> Li
 
     return verified_points
 
-def relabel(img: cv2.Mat, original_labels: List[fmt.ArmorLabelIO]) -> List[fmt.ArmorLabelIO]:
+def relabel(img: np.ndarray, original_labels: List[fmt.ArmorLabelIO]) -> List[fmt.ArmorLabelIO]:
     return original_labels
 
-def correctLabels(img: cv2.Mat, labels: List[fmt.ArmorLabelIO]) -> List[fmt.ArmorLabelIO]:
+def correctLabels(img: np.ndarray, labels: List[fmt.ArmorLabelIO]) -> List[fmt.ArmorLabelIO]:
     res = []
     for lb in labels:
         kpts = _correctLabelByPoints(img, lb.kpts)
