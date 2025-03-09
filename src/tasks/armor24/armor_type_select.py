@@ -103,6 +103,7 @@ class ArmorClassSelection(ui.components.RectContainer):
     * on_select(cls_id) -> None
 
     Methods:
+    * getClass() -> int
     * setClass(cls_id) -> None
     '''
     def __init__(self,
@@ -228,6 +229,9 @@ class ArmorClassSelection(ui.components.RectContainer):
         self.addChild(type_bar)
         for button in self.type_buttons:
             type_bar.addChild(button)
+
+    def getClass(self) -> int:
+        return self.cls_id
 
     def setClass(self, cls_id: int) -> None:
         color_id = cls_id // 8
