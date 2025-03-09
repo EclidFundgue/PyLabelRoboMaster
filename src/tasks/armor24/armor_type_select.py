@@ -52,7 +52,6 @@ class TypeButton(ui.components.Selectable):
         self.type_id = type_id
         self.on_click = ui.utils.getCallable(on_click)
 
-        color_theme = ui.color.LightColorTheme()
         self.bg_color_blue = (169, 230, 255) # selected
         self.bg_color_red = (255, 158, 158) # selected
         self.bg_color_gray = (190, 190, 190) # normal
@@ -90,7 +89,7 @@ class TypeButton(ui.components.Selectable):
             surface,
             bg_color,
             (x_start, y_start, self.w, self.h),
-            self.w // 4
+            self.h // 4
         )
 
         icon_w, icon_h = self.icon.get_size()
@@ -119,18 +118,22 @@ class ArmorClassSelection(ui.components.RectContainer):
         color_bar_h = h // 4
         color_button_y = 8
         color_button_h = color_bar_h - 2 * color_button_y
-        type_button_size = min(
-            w // (7 + 4 * 3),
-            h // (4 + 2 * 3)
-        ) * 3
-        type_pixel_w = (w - 4 * type_button_size) // 7
-        type_pixel_h = (h - color_bar_h - 2 * type_button_size) // 4
+        type_button_size = min(w // 17, h // 14) * 3
+        type_width = [
+            type_button_size,
+            1.79 * type_button_size,
+            type_button_size,
+            type_button_size,
+            type_button_size,
+            type_button_size,
+            type_button_size,
+            1.79 * type_button_size,
+        ]
 
         # Create objects
         color_bar = ui.components.RectContainer(
             w, color_bar_h, 0, 0
         )
-
         def _set_color_blue():
             _type_id = self.cls_id % 8
             self.cls_id = _type_id
@@ -168,22 +171,32 @@ class ArmorClassSelection(ui.components.RectContainer):
             w, h-color_bar_h, 0, color_bar_h
         )
         prefix = './resources/armor_icons'
-        def _load_image(image: Union[str, pygame.Surface]) -> pygame.Surface:
-            return ui.utils.loadImage(
+        type_image_path = [
+            'sentry.png', '1.png',
+            '2.png', '3.png',
+            '4.png', '5.png',
+            'outpost.png', 'base1.png'
+        ]
+        type_icons = [
+            ui.utils.loadImage(
                 img=os.path.join(prefix, image),
-                w=type_button_size-10,
+                w=width-10,
                 h=type_button_size-10,
                 smooth_scale=True
-            )
-        type_icons = [
-            _load_image('sentry.png'),
-            _load_image('1.png'),
-            _load_image('2.png'),
-            _load_image('3.png'),
-            _load_image('4.png'),
-            _load_image('5.png'),
-            _load_image('outpost.png'),
-            _load_image('base1.png'),
+            ) for image, width in zip(type_image_path, type_width)
+        ]
+        pw1 = (w - 3 * type_button_size) // 6 # pixel witdh on line 1, 2
+        pw2 = (w - 3.57 * type_button_size) // 5 # pixel witdh on line 3
+        ph = (h - color_bar_h - 3 * type_button_size) // 5
+        type_pos = [
+            (2*pw1, ph), # sentry(small)
+            (2*pw2, 3*ph + 2*type_button_size), # 1(big)
+            (3*pw1 + type_button_size, ph), # 2(small)
+            (4*pw1 + 2*type_button_size, ph), # 3(small)
+            (2*pw1, 2*ph + type_button_size), # 4(small)
+            (3*pw1 + type_button_size, 2*ph + type_button_size), # 5(small)
+            (4*pw1 + 2*type_button_size, 2*ph + type_button_size), # outpost(small)
+            (3*pw2 + 1.79*type_button_size, 3*ph + 2*type_button_size), # base(big)
         ]
         def on_type_button_click(type_id: int) -> None:
             for i in range(8):
@@ -196,10 +209,10 @@ class ArmorClassSelection(ui.components.RectContainer):
             self.on_select(self.cls_id)
         self.type_buttons = [
             TypeButton(
-                w=type_button_size,
+                w=type_width[i],
                 h=type_button_size,
-                x=2 * type_pixel_w + (i % 4) * (type_button_size + type_pixel_w),
-                y=type_pixel_h + (i // 4) * (type_button_size + type_pixel_h),
+                x=type_pos[i][0],
+                y=type_pos[i][1],
                 icon=type_icons[i],
                 type_id=i,
                 on_click=on_type_button_click
