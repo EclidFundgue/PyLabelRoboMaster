@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Hashable
 
 import pygame
 
@@ -148,7 +148,7 @@ class Base:
 
     # ---------- Keyboard Events ---------- #
     def _addEvent(self, key: int, func: Callable,
-                  _type: int, target: str, once: bool) -> None:
+                  _type: int, target: Hashable, once: bool) -> None:
         if target is None:
             target = str(id(self))
         event = KeyboardEvent(key, func, _type, target)
@@ -164,22 +164,22 @@ class Base:
             self._keyboard_events = events
 
     def addKeyDownEvent(self, key: int, func: Callable,
-                        target = None, once = False) -> None:
+                        target: Hashable = None, once = False) -> None:
         self._addEvent(key, func, KeyboardEvent.DOWN, target, once)
 
     def addKeyPressEvent(self, key: int, func: Callable,
-                         target = None, once = False) -> None:
+                         target: Hashable = None, once = False) -> None:
         self._addEvent(key, func, KeyboardEvent.PRESSED, target, once)
 
     def addKeyUpEvent(self, key: int, func: Callable,
-                      target = None, once = False) -> None:
+                      target: Hashable = None, once = False) -> None:
         self._addEvent(key, func, KeyboardEvent.UP, target, once)
 
     def addKeyCtrlEvent(self, key: int, func: Callable,
-                        target = None, once = False) -> None:
+                        target: Hashable = None, once = False) -> None:
         self._addEvent(key, func, KeyboardEvent.CTRL, target, once)
 
-    def removeEvents(self, target: str = None) -> None:
+    def removeEvents(self, target: Hashable = None) -> None:
         if target is None:
             target = str(id(self))
         self._keyboard_events = list(
@@ -228,7 +228,7 @@ class Base:
         self._children.sort(key=lambda x: x.layer)
 
     # ---------- Update ---------- #
-    def getRect(self) -> Tuple[int]:
+    def getRect(self) -> Tuple[int, int, int, int]:
         ''' (w, h, x, y) '''
         return (self.w, self.h, self.x, self.y)
     
