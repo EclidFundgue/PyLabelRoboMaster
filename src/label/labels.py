@@ -66,9 +66,12 @@ class Labels(ui.components.CanvasComponent):
         self.snapshot_index = 0
         self.snapshots: List[dict] = []
 
-    def _getLabelsIO(self, orig_img_size: Tuple[int, int]) -> List[LabelIO]:
+    def _getLabelsIO(self,
+        labels: List[Label],
+        orig_img_size: Tuple[int, int]
+    ) -> List[LabelIO]:
         ret = []
-        for label in self.labels:
+        for label in labels:
             points = [p.getCenter() for p in label.points]
             points = [(
                 (x + self._x) / orig_img_size[0],
@@ -98,7 +101,7 @@ class Labels(ui.components.CanvasComponent):
 
     def _snapshot(self) -> None:
         snapshot = {
-            'labels': self._getLabelsIO((1, 1)),
+            'labels': self._getLabelsIO(self.labels, (1, 1)),
             'curr_class_id': self.curr_class_id
         }
 
@@ -196,7 +199,7 @@ class Labels(ui.components.CanvasComponent):
 
     def relabel(self, img: pygame.Surface) -> None:
         cv_img = imgproc.surface2mat(img)
-        labels_io = self._getLabelsIO(img.get_size())
+        labels_io = self._getLabelsIO(self.labels, img.get_size())
         labels_io = imgproc.relabel(cv_img, labels_io)
 
         self._deleteLabels(self.labels)
@@ -209,7 +212,7 @@ class Labels(ui.components.CanvasComponent):
             return
 
         cv_img = imgproc.surface2mat(img)
-        labels_io = self._getLabelsIO(img.get_size())
+        labels_io = self._getLabelsIO(self.selected_labels, img.get_size())
         labels_io = imgproc.correctLabels(cv_img, labels_io)
 
         self._deleteLabels(self.selected_labels)
@@ -252,7 +255,7 @@ class Labels(ui.components.CanvasComponent):
         self.redraw()
 
     def save(self, path: str, orig_img_size: Tuple[int, int]) -> None:
-        labels_io = self._getLabelsIO(orig_img_size)
+        labels_io = self._getLabelsIO(self.labels, orig_img_size)
         lbformat.saveLabel(path, labels_io)
 
     # ---------- canvas update ----------
