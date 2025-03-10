@@ -40,6 +40,7 @@ class ListBox(RectContainer):
         on_relative_change: Callable[[float], None] = None
     ):
         super().__init__(w, h, x, y)
+        self.interactive_when_active = True
         self.lines = lines if lines is not None else []
         self.on_relative_change = utils.getCallable(on_relative_change)
 
