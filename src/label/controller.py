@@ -151,6 +151,7 @@ class LabelController:
         label_path: str = None,
         relabel: bool = False
     ) -> None:
+        self.save()
         self._loadImage(image_path)
         self._loadLabels(label_path)
 
