@@ -219,8 +219,6 @@ class ArmorPage(StackedPage):
         filename: Union[str, None],
         is_deserted: bool
     ) -> None:
-        self.label_controller.save()
-
         if filename is None:
             self.label_controller.reload(None, None, False)
             self.label_controller.canvas.redraw()
