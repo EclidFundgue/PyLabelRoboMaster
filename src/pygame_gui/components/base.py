@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple, Hashable
+from typing import Callable, Hashable, List, Tuple
 
 import pygame
 
