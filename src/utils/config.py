@@ -4,8 +4,14 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Any, Tuple
 
-root = tk.Tk()
-root.withdraw()
+from .. import pygame_gui as ui
+
+try:
+    root = tk.Tk()
+    root.withdraw()
+    _has_display_device = True
+except tk.TclError:
+    _has_display_device = False
 
 class ConfigManager:
     def __init__(self, path: str):
@@ -41,8 +47,14 @@ class ConfigManager:
         return self.data[key]
 
 def openDir() -> Tuple[str, str, str]:
-    images_folder = filedialog.askdirectory(title='Images')
-    labels_folder = filedialog.askdirectory(title='Labels')
+    if _has_display_device:
+        images_folder = filedialog.askdirectory(title='Images')
+        labels_folder = filedialog.askdirectory(title='Labels')
+    else:
+        ui.logger.error(
+            'no display name and no $DISPLAY environment variable',
+            tk.TclError
+        )
     deserted_folder = os.path.join(images_folder, 'deserted')
     if not os.path.exists(deserted_folder):
         os.makedirs(deserted_folder)
