@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import Any, Tuple
 
+root = tk.Tk()
+root.withdraw()
 
 class ConfigManager:
     def __init__(self, path: str):
@@ -39,9 +41,6 @@ class ConfigManager:
         return self.data[key]
 
 def openDir() -> Tuple[str, str, str]:
-    root = tk.Tk()
-    root.withdraw()
-
     images_folder = filedialog.askdirectory(title='Images')
     labels_folder = filedialog.askdirectory(title='Labels')
     deserted_folder = os.path.join(images_folder, 'deserted')
