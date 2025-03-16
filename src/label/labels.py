@@ -146,7 +146,7 @@ class Labels(ui.components.CanvasComponent):
 
         # Add finished.
         if len(self.adding_label.points) >= self.num_keypoints:
-            self.adding_label.icon = self.icon_getter(self.adding_label.points[2], 0)
+            self.adding_label.icon = self.icon_getter(self.adding_label.points[2], self.adding_label.cls_id)
             self.addChild(self.adding_label.icon)
 
             self.labels.append(self.adding_label)
@@ -191,6 +191,8 @@ class Labels(ui.components.CanvasComponent):
         self.redraw()
 
     def setSelectedClass(self, cls_id: int) -> None:
+        self.curr_class_id = cls_id
+
         if len(self.selected_labels) == 0:
             return
 
