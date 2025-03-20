@@ -47,6 +47,7 @@ class LabelController:
         self.canvas: ui.components.Canvas = canvas
         self.labels_getter: _LabelsGetter = labels_getter
         self.on_selected: _OnSelected = ui.utils.getCallable(on_selected)
+        self.current_class_id = 0
 
         self.image: Image = None
         self.labels: Labels = None
@@ -58,7 +59,7 @@ class LabelController:
     # ---------- toolbar ----------
     def startAdd(self) -> None:
         if self.labels is not None:
-            self.labels.startAdd()
+            self.labels.startAdd(self.current_class_id)
 
     def cancelAdd(self) -> None:
         if self.labels is not None:
@@ -96,6 +97,7 @@ class LabelController:
     def setClass(self, cls_id: int) -> None:
         if self.labels is not None and cls_id != -1:
             self.labels.setSelectedClass(cls_id)
+            self.current_class_id = cls_id
 
     def selectAll(self) -> None:
         if self.labels is not None:
