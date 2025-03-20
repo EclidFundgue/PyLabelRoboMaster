@@ -291,6 +291,7 @@ class ArmorPage(StackedPage):
         self.redraw()
 
     def kill(self):
+        self.label_controller.save()
         selected_idx = self.toolbar_scroll_files.getSelectedIndex()
         if selected_idx == -1:
             selected_idx = None
