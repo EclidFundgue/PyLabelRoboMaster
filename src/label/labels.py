@@ -85,6 +85,8 @@ class Labels(ui.components.CanvasComponent):
         orig_img_size: Tuple[int, int]
     ) -> None:
         for label_io in labels_io:
+            label_io.kpts = imgproc.sortedPoints(label_io.kpts)
+
             kpts = []
             for x, y in label_io.kpts:
                 cx = int(x * orig_img_size[0] - self._x)
