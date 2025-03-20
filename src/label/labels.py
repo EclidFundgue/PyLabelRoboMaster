@@ -24,7 +24,7 @@ class Labels(ui.components.CanvasComponent):
     Methods:
 
     ---------- add & delete & change ----------
-    * startAdd() -> None
+    * startAdd(cls_id) -> None
     * cancelAdd() -> None
     * deleteSelectedLabels() -> None
     * setSelectedClass(cls_id) -> None
@@ -59,7 +59,6 @@ class Labels(ui.components.CanvasComponent):
         self.labels: List[Label] = []
         self.selected_labels: List[Label] = []
 
-        self.curr_class_id = 0
         self.key_ctrl_pressed = False # multi-selection
         self.curr_mouse_pos = (0, 0) # mouse position before scaled
 
@@ -103,8 +102,7 @@ class Labels(ui.components.CanvasComponent):
 
     def _snapshot(self) -> None:
         snapshot = {
-            'labels': self._getLabelsIO(self.labels, (1, 1)),
-            'curr_class_id': self.curr_class_id
+            'labels': self._getLabelsIO(self.labels, (1, 1))
         }
 
         if len(self.snapshots) > 0 and snapshot == self.snapshots[self.snapshot_index-1]:
@@ -127,7 +125,6 @@ class Labels(ui.components.CanvasComponent):
     def _loadSnapshot(self, snapshot: dict) -> None:
         self._deleteLabels(self.labels)
         self._addLabelsIO(snapshot['labels'], (1, 1))
-        self.curr_class_id = snapshot['curr_class_id']
 
     # ---------- add & delete & change ----------
     def _keypointOnClick(self, kpt: Keypoint) -> None:
@@ -162,12 +159,12 @@ class Labels(ui.components.CanvasComponent):
         self.adding_label.points.append(self.adding_point)
         self.addChild(self.adding_point)
 
-    def startAdd(self) -> None:
+    def startAdd(self, cls_id: int) -> None:
         if self.adding_label is not None:
             return
 
         self.adding_point = Keypoint(self.curr_mouse_pos, self._onAddPoint)
-        self.adding_label = Label(self.curr_class_id, [self.adding_point])
+        self.adding_label = Label(cls_id, [self.adding_point])
         self.addChild(self.adding_point)
 
     def _tryCancelAdd(self) -> bool:
@@ -191,8 +188,6 @@ class Labels(ui.components.CanvasComponent):
         self.redraw()
 
     def setSelectedClass(self, cls_id: int) -> None:
-        self.curr_class_id = cls_id
-
         if len(self.selected_labels) == 0:
             return
 

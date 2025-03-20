@@ -24,7 +24,7 @@ class TestLabels(ui.Main):
         labels = Labels(320, 320, 20, 20, 4, get_icon, on_select)
 
         canvas.setBackgroundColor((30, 30, 30))
-        canvas.addKeyDownEvent(pygame.K_a, labels.startAdd)
+        canvas.addKeyDownEvent(pygame.K_a, lambda : labels.startAdd(0))
         canvas.addKeyDownEvent(pygame.K_0, lambda : labels.setSelectedClass(0))
         canvas.addKeyDownEvent(pygame.K_1, lambda : labels.setSelectedClass(1))
 
