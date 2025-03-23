@@ -7,6 +7,7 @@ class Navigator(ui.components.RectContainer):
     '''
     Navigator(
         w, h, x, y,
+        images_folder,
         on_back,
         on_undo,
         on_redo,
@@ -14,10 +15,12 @@ class Navigator(ui.components.RectContainer):
     )
 
     Methods:
+    * setFolder(folder) -> None
     * resetState() -> None
     '''
     def __init__(self,
         w: int, h: int, x: int, y: int,
+        images_folder: str,
         on_back: Callable[[], None] = None,
         on_undo: Callable[[], None] = None,
         on_redo: Callable[[], None] = None,
@@ -28,6 +31,13 @@ class Navigator(ui.components.RectContainer):
         button_size = int(h * 0.9)
         button_y = (h - button_size) // 2
 
+        self.images_folder_label = ui.components.Label(
+            w=w-(3*button_size+80)-int(h*1.5),
+            h=h,
+            x=3*button_size+80,
+            y=0,
+            text=images_folder
+        )
         button_undo = ui.components.IconButton(
             w=button_size,
             h=button_size,
@@ -69,12 +79,16 @@ class Navigator(ui.components.RectContainer):
         self.alignVerticalCenter(button_undo)
         self.alignVerticalCenter(button_redo)
 
+        self.addChild(self.images_folder_label)
         self.addChild(button_back)
         self.addChild(button_undo)
         self.addChild(button_redo)
         self.addChild(button_open)
 
         self.button_back = button_back
+
+    def setFolder(self, folder: str) -> None:
+        self.images_folder_label.setText(folder)
 
     def resetState(self) -> None:
         '''This is called when page change.'''
