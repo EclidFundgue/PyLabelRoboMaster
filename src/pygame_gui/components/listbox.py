@@ -152,6 +152,9 @@ class ListBox(RectContainer):
         self._selectByIndex(idx)
 
     def _constrainRelativeByIndex(self, idx: int, smooth: bool) -> float:
+        if idx == -1:
+            return
+
         line_top = self.heights[idx]
         line_bottom = line_top + self.lines[idx].h
 
