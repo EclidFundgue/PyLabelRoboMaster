@@ -60,6 +60,7 @@ class ArmorPage(StackedPage):
             h=navigator_h,
             x=0,
             y=0,
+            images_folder=self.images_folder,
             on_back=lambda: self.setPage(page_incides['main_menu'],True),
             on_undo=self.label_controller.undo,
             on_redo=self.label_controller.redo,
@@ -270,6 +271,7 @@ class ArmorPage(StackedPage):
         self.labels_folder = _labels
         self.deserted_folder = _deserted
 
+        self.navigator.setFolder(self.images_folder)
         self._reloadSelectionBox()
         self.redraw()
 
@@ -287,6 +289,7 @@ class ArmorPage(StackedPage):
         self.labels_folder: str = labels_folder
         self.deserted_folder: str = os.path.join(images_folder, 'deserted')
 
+        self.navigator.setFolder(self.images_folder)
         self._reloadSelectionBox(image_index)
         self.redraw()
 
