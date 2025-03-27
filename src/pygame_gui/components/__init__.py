@@ -6,11 +6,12 @@ __all__ = [
     'IconButton',
     'Label',
     'ListBox',
+    'ProgressBar',
     'RectContainer',
     'Root',
     'RoundedRectContainer',
-    'Selectable',
     'ScrollBar',
+    'Selectable',
     'TextButton',
 ]
 
@@ -20,6 +21,7 @@ from .canvas import Canvas, CanvasComponent
 from .containers import RectContainer, RoundedRectContainer
 from .label import Label
 from .listbox import ListBox
+from .progressbar import ProgressBar
 from .root import Root
 from .scrollbar import ScrollBar
 from .selectable import Selectable
