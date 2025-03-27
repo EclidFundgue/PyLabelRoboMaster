@@ -63,19 +63,19 @@ class MainMenu(StackedPage):
             h=button_h,
             x=button_padx,
             y=button_pady,
-            text='Armor2024',
+            text='Armor',
             font=font,
-            on_press=self._setPageToArmor,
+            on_press=lambda : self.setPage(self.page_incidies['armor_page24'], redraw=True),
             cursor_change=True
         )
-        self.button_armor25 = ui.components.TextButton(
+        self.button_video = ui.components.TextButton(
             w=button_w,
             h=button_h,
             x=button_padx,
             y=button_pady+button_h+20,
-            text='Armor2025',
+            text='Video',
             font=font,
-            on_press=self._setPageToArmor25,
+            on_press=lambda : self.setPage(self.page_incidies['video_validate_page'], redraw=True),
             cursor_change=True
         )
 
@@ -93,19 +93,13 @@ class MainMenu(StackedPage):
         self.addChild(clock)
         self.addChild(self.settings_container)
         self.addChild(self.button_armor)
-        self.addChild(self.button_armor25)
+        self.addChild(self.button_video)
         self.settings_container.addChild(settings_label)
         self.settings_container.addChild(load_network_switch)
 
     def _onLoadNetworkSwitch(self, state: int) -> None:
         self.config_manager['load_network'] = bool(state)
 
-    def _setPageToArmor(self) -> None:
-        self.setPage(self.page_incidies['armor_page24'], redraw=True)
-
-    def _setPageToArmor25(self) -> None:
-        self.setPage(self.page_incidies['armor_page25'], redraw=True)
-
     def onHide(self):
         self.button_armor.resetState()
-        self.button_armor25.resetState()
+        self.button_video.resetState()

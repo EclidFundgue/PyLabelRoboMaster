@@ -61,7 +61,7 @@ class ArmorPage(StackedPage):
             x=0,
             y=0,
             images_folder=self.images_folder,
-            on_back=lambda: self.setPage(page_incides['main_menu'],True),
+            on_back=lambda: self.setPage(page_incides['main_menu'], True),
             on_undo=self.label_controller.undo,
             on_redo=self.label_controller.redo,
             on_open=self._navigator_onOpenDir
