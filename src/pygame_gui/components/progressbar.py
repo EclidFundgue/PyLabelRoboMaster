@@ -136,5 +136,6 @@ class ProgressBar(Base):
         pygame.draw.line(surface, self.color0, (x[1], y), (x[2], y), line_w)
 
     def kill(self) -> None:
+        self.on_change = None
         self.button = None
         super().kill()
