@@ -13,16 +13,14 @@ PyLabelRoboMaster 是一个 Robomaster 数据集标注软件，用于训练自�
 
 ### 1.1 环境
 
-需要 `python >= 3.7` 版本，第三方库：
+需要 `python == 3.9` 版本，第三方库：
 
-- pygame >= 2.5.0
 - numpy >= 1.2
 - opencv >= 4.9.0
 
 可以使用 pip 完成第三方库的安装
 
 ```bash
-pip install pygame
 pip install numpy
 pip install opencv-python
 ```
