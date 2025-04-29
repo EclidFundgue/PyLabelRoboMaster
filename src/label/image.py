@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import pygame
 
@@ -11,11 +11,10 @@ class Image(ui.components.CanvasComponent):
     * getOrigSize() -> Tuple[int, int]
     * setLight(gamma) -> None
     '''
-    def __init__(self, path: str):
-        self.orig_image = ui.utils.loadImage(path)
+    def __init__(self, image: Union[str, pygame.Surface]):
+        self.orig_image = ui.utils.loadImage(image)
         super().__init__(*self.orig_image.get_size(), 0, 0)
 
-        self.path = path
         self.image = self.orig_image
         self.cut_surface = self.orig_image
         self.blit_offset = (0, 0)

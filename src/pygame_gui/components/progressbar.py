@@ -4,7 +4,6 @@ import pygame
 
 from .. import color, timer, utils
 from .base import Base
-from .label import Label
 
 
 class _SlideButton(Base):
@@ -72,6 +71,10 @@ class ProgressBar(Base):
     '''
     ProgressBar(w, h, x, y, on_change)
     * on_change(value) -> None
+
+    Methods:
+    * get(value) -> float
+    * set(value) -> None
     '''
     def __init__(self,
         w: int, h: int, x: int, y: int,
@@ -95,8 +98,20 @@ class ProgressBar(Base):
         self.button = _SlideButton(btn_w, 0, (h-btn_w)//2)
         self.addChild(self.button)
 
+    def get(self) -> float:
+        return self.value
+
+    def set(self, value: float) -> None:
+        if value < 0.0:
+            value = 0.0
+        if value > 1.0:
+            value = 1.0
+        self.value = value
+        width = self.right_border - self.left_border
+        self.button.x = value * width + self.left_border
+
     def onLeftPress(self, x: int, y: int):
-        if not self.button.pressed:
+        if not self.active:
             return
 
         # map to button center

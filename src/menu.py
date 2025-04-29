@@ -75,7 +75,7 @@ class MainMenu(StackedPage):
             y=button_pady+button_h+20,
             text='Video',
             font=font,
-            on_press=lambda : self.setPage(self.page_incidies['video_validate_page'], redraw=True),
+            on_press=lambda : self.setPage(self.page_incidies['video_page'], redraw=True),
             cursor_change=True
         )
 

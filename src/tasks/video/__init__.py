@@ -1,5 +1,5 @@
 __all__ = [
-    'VideoValidatePage'
+    'VideoPage'
 ]
 
-from .page import VideoValidatePage
+from .page import VideoPage
