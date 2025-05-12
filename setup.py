@@ -6,9 +6,19 @@ from distutils.core import Extension, setup
 def get_ext(name: str, src_files: list[str]) -> Extension:
     return Extension(
         name=name,
-        include_dirs=["src_c/sdl2/include/", "src_c/"],
-        library_dirs=["src_c/sdl2"],
-        libraries=["SDL2"],
+        include_dirs=[
+            "src_c/",
+            "src_c/sdl2/include/",
+            "src_c/sdl2_image/include/",
+        ],
+        library_dirs=[
+            "src_c/sdl2",
+            "src_c/sdl2_image",
+        ],
+        libraries=[
+            "SDL2",
+            "SDL2_image"
+        ],
         sources=[os.path.join("src_c", f) for f in src_files]
     )
 
@@ -20,8 +30,17 @@ setup(
     name="efui-release",
     version="1.0",
     ext_modules=[
-        get_ext("screen", ["screen.c", "efutils.c"]),
-        get_ext("main", ["main.c", "screen.c", "efutils.c"])
+        get_ext("screen", ["screen.c", "surface.c", "efimport.c", "efutils.c"]),
+        get_ext("main", ["main.c", "screen.c", "surface.c", "efimport.c", "efutils.c"]),
+        get_ext("surface", ["surface.c", "efutils.c"]),
+        get_ext("widget", [
+            "widget.c",
+            "widgets/base.c",
+            "widgets/root.c",
+            "surface.c",
+            "efimport.c",
+            "efutils.c",
+        ]),
     ]
 )
 

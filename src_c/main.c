@@ -2,13 +2,13 @@
 
 #include <structmember.h>
 
+#include "efimport.h"
 #include "screen.h"
+#include "widget.h"
 #include "efutils.h"
+#include "SDL_image.h"
 
 static PyTypeObject EfMainType;
-
-// import types
-static PyObject *_imported_ScreenType = NULL;
 
 static void
 EfMainObject_dealloc(EfMainObject *self) {
@@ -34,8 +34,25 @@ EfMainObject_init(EfMainObject *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", kwlist, &size, &title))
         return -1;
 
-    self->screen = Ef_ScreenObject_FromPy(_imported_ScreenType, size, title);
+    self->screen = Ef_ScreenObject_FromPy(imported_ScreenType, size, title);
     if (!self->screen) {
+        return -1;
+    }
+
+    if (Ef_ScreenObject_CreateWindow(self->screen, -1, -1) < 0) {
+        return -1;
+    }
+
+    PyObject *surf = Ef_ScreenObject_GetSurface(self->screen);
+    if (surf == NULL || surf == Py_None) {
+        if (surf == Py_None) {
+            Py_DECREF(Py_None);
+        }
+        return -1;
+    }
+
+    self->root = PyObject_CallFunction(imported_RootWidgetType, "O", surf);
+    if (!self->root) {
         return -1;
     }
 
@@ -54,53 +71,56 @@ EfMainObject_repr(EfMainObject *v) {
     }
 }
 
-static PyObject *
-EfMainObject_getscreen(EfMainObject *self, void *closure) {
-    Py_INCREF(self->screen);
-    return self->screen;
-}
-
-static int
-EfMainObject_setscreen(EfMainObject *self, PyObject *value, void *closure) {
-    PyErr_SetString(PyExc_AttributeError, "readonly attribute");
-    return -1;
-}
-
-static PyGetSetDef EfMainObject_getsetters[] = {
-    {"screen", (getter)EfMainObject_getscreen, (setter)EfMainObject_setscreen,
-     "main screen", NULL},
+static PyMemberDef EfMainObject_members[] = {
+    {"screen", T_OBJECT, offsetof(EfMainObject, screen), READONLY,
+     "main screen"},
+    {"root", T_OBJECT, offsetof(EfMainObject, root), READONLY,
+     "root widget"},
     {NULL}
 };
 
+// static PyObject *
+// EfMainObject_getscreen(EfMainObject *self, void *closure) {
+//     Py_INCREF(self->screen);
+//     return self->screen;
+// }
+
+// static int
+// EfMainObject_setscreen(EfMainObject *self, PyObject *value, void *closure) {
+//     PyErr_SetString(PyExc_AttributeError, "readonly attribute");
+//     return -1;
+// }
+
+// static PyGetSetDef EfMainObject_getsetters[] = {
+//     {"screen", (getter)EfMainObject_getscreen, (setter)EfMainObject_setscreen,
+//      "main screen", NULL},
+//     {NULL}
+// };
+
 static PyObject *
 EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
-    if (Ef_ScreenObject_CreateWindow(self->screen, -1, -1) < 0) {
-        return NULL;
-    }
-
-    int running = 1;
-    uint8_t r = 160, g = 200, b = 255;
+    int quit = 0;
     SDL_Event e;
 
-    while (running) {
+    while (!quit) {
         // Handle events.
         while(SDL_PollEvent(&e) != 0) {
             switch (e.type) {
                 case SDL_QUIT:
-                    running = 0;
+                    quit = 1;
                     break;
                 case SDL_KEYDOWN:
-                    g = 0;
                     break;
                 case SDL_KEYUP:
-                    g = 230;
                     break;
             }
         }
-        Ef_ScreenObject_Fill(self->screen, r, g, b);
 
         Ef_ScreenObject_Update(self->screen);
-        SDL_Delay(10);
+
+        Py_BEGIN_ALLOW_THREADS
+        SDL_Delay(16);
+        Py_END_ALLOW_THREADS
     }
 
     Py_RETURN_NONE;
@@ -123,8 +143,8 @@ static PyTypeObject EfMainType = {
     .tp_init = (initproc)EfMainObject_init,
     .tp_dealloc = (destructor)EfMainObject_dealloc,
     .tp_repr = (reprfunc)EfMainObject_repr,
+    .tp_members = EfMainObject_members,
     .tp_methods = EfMainObject_methods,
-    .tp_getset = EfMainObject_getsetters,
 };
 
 static PyMethodDef main_methods[] = {
@@ -147,21 +167,22 @@ PyInit_main(void) {
 
     m = PyModule_Create(&main_module);
     if (m == NULL)
-        return NULL;
+        goto err_exit;
+
+    if (EF_IMPORT_Surface() < 0 ||
+        EF_IMPORT_Screen() < 0 ||
+        EF_IMPORT_RootWidget() < 0)
+        goto err_exit;
 
     Py_INCREF(&EfMainType);
-    if (PyModule_AddObject(m, "Main", (PyObject *)&EfMainType) < 0) {
-        Py_DECREF(&EfMainType);
-        Py_DECREF(m);
-        return NULL;
-    }
-
-    _imported_ScreenType = Ef_RelaviteImport(m, "screen", "Screen", 1);
-    if (!_imported_ScreenType) {
-        Py_DECREF(&EfMainType);
-        Py_DECREF(m);
-        return NULL;
-    }
+    if (PyModule_AddObject(m, "Main", (PyObject *)&EfMainType) < 0)
+        goto err_exit;
 
     return m;
+
+err_exit:
+    Py_XDECREF(m);
+    EF_IMPORT_DECREAF();
+    Py_XDECREF(&EfMainType);
+    return NULL;
 }

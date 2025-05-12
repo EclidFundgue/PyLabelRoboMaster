@@ -2,6 +2,8 @@
 
 #include <structmember.h>
 
+#include "efimport.h"
+#include "surface.h"
 #include "efutils.h"
 
 #define MAX_W 65535
@@ -156,6 +158,16 @@ int Ef_ScreenObject_CreateWindow(PyObject *screen, int x, int y) {
     if (!s->sdl_window) {
         return -1;
     }
+
+    s->sdl_renderer = SDL_CreateRenderer(s->sdl_window, -1, SDL_RENDERER_ACCELERATED);
+    if (!s->sdl_renderer) {
+        PyErr_Format(PyExc_RuntimeError,
+            "Renderer creating failed!\n"
+            "SDL Info: %s", SDL_GetError()
+        );
+        return -1;
+    }
+
     return 0;
 }
 
@@ -173,36 +185,9 @@ void Ef_ScreenObject_DestroyWindow(PyObject *screen) {
     }
 
     SDL_DestroyWindow(s->sdl_window);
+    SDL_DestroyRenderer(s->sdl_renderer);
     s->sdl_window = NULL;
-}
-
-/**
- * \brief Fill the screen with color.
- * 
- * \param screen Instance of EfScreenObject.
- * \param r red
- * \param g green
- * \param b blue
- * \return 0 on success, -1 on failure.
- */
-int Ef_ScreenObject_Fill(PyObject *screen, uint8_t r, uint8_t g, uint8_t b) {
-    EfScreenObject *s = (EfScreenObject *)screen;
-
-    if (s->sdl_window == NULL) {
-        PyErr_Warn(PyExc_RuntimeWarning, "Window has not been created!");
-        return 0;
-    }
-
-    SDL_Surface *surface = SDL_GetWindowSurface(s->sdl_window);
-    if (!surface) {
-        PyErr_Format(PyExc_RuntimeError,
-            "Error getting surface!\n"
-            "SDL Info: %s", SDL_GetError()
-        );
-        return -1;
-    }
-
-    return SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, r, g, b));
+    s->sdl_renderer = NULL;
 }
 
 /**
@@ -219,6 +204,31 @@ void Ef_ScreenObject_Update(PyObject *screen) {
     }
 
     SDL_UpdateWindowSurface(s->sdl_window);
+}
+
+/**
+ * \brief Get Surface Object from screen.
+ * 
+ * \param screen Instance of EfScreenObject.
+ * \return Surface Object on success, None on no window created, NULL on failure.
+ */
+PyObject *Ef_ScreenObject_GetSurface(PyObject *screen) {
+    EfScreenObject *s = (EfScreenObject *)screen;
+    if (s->sdl_window == NULL) {
+        PyErr_Warn(PyExc_RuntimeWarning, "Window has not been created!");
+        Py_RETURN_NONE;
+    }
+
+    SDL_Surface *surface = SDL_GetWindowSurface(s->sdl_window);
+    if (!surface) {
+        PyErr_Format(PyExc_RuntimeError,
+            "Error getting surface!\n"
+            "SDL Info: %s", SDL_GetError()
+        );
+        return NULL;
+    }
+
+    return Ef_SurfaceObject_FromSDLSurface(imported_SurfaceType, surface, 1);
 }
 
 static void
@@ -251,26 +261,21 @@ EfScreenObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
 static int
 EfScreenObject_init(EfScreenObject *self, PyObject *args, PyObject *kwds) {
-    int w = 0;
-    int h = 0;
-    const char *title = NULL;
-
-    static char *kwlist[] = {"size", "title", NULL};
     PyObject *size = NULL;
+    const char *title = NULL;
+    static char *kwlist[] = {"size", "title", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "Os", kwlist, &size, &title))
         return -1;
 
-    if (Ef_GetTwoIntsFromSequence(size, &w, &h) < 0) {
+    if (Ef_GetTwoIntsFromSequence(size, &self->w, &self->h) < 0) {
         PyErr_SetString(PyExc_TypeError, "Size must be two numbers.");
         return -1;
     }
-    if (_assertWindowSize(w, h) < 0) {
+    if (_assertWindowSize(self->w, self->h) < 0) {
         return -1;
     }
 
-    self->w = w;
-    self->h = h;
     self->title = strdup(title);
 
     return 0;
@@ -329,17 +334,8 @@ EfScreenObject_isCreated(EfScreenObject *self, PyObject *Py_UNUSED(ignore)) {
 }
 
 static PyObject *
-EfScreenObject_fill(EfScreenObject *self, PyObject *args, PyObject *kwds) {
-    uint8_t r, g, b;
-    static char *kwlist[] = {"color", NULL};
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "(bbb)", kwlist, &r, &g, &b))
-        return NULL;
-
-    if (Ef_ScreenObject_Fill((PyObject *)self, r, g, b) < 0) {
-        return NULL;
-    }
-    Py_RETURN_NONE;
+EfScreenObject_getSurface(EfScreenObject *self, PyObject *Py_UNUSED(ignore)) {
+    return Ef_ScreenObject_GetSurface((PyObject *)self);
 }
 
 static PyObject *
@@ -355,8 +351,8 @@ static PyMethodDef EfScreenObject_methods[] = {
      "Destroy the window."},
     {"isCreated", (PyCFunction)EfScreenObject_isCreated, METH_NOARGS,
      "Return is window created."},
-    {"fill", (PyCFunction)EfScreenObject_fill, METH_VARARGS | METH_KEYWORDS,
-     "Fill the screen with certain color."},
+    {"getSurface", (PyCFunction)EfScreenObject_getSurface, METH_NOARGS,
+     "Get surface of the screen."},
     {"update", (PyCFunction)EfScreenObject_update, METH_NOARGS,
      "Update screen."},
     {NULL}
@@ -378,7 +374,7 @@ static PyTypeObject EfScreenType = {
 };
 
 static PyObject *
-Ef_Py_createWindow(EfScreenObject *self, PyObject *args, PyObject *kwds) {
+Ef_Py_createWindow(PyObject *self, PyObject *args, PyObject *kwds) {
     int x = -1;
     int y = -1;
     PyObject *size = NULL;
@@ -408,7 +404,7 @@ Ef_Py_createWindow(EfScreenObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject *
-Ef_Py_getAllWindows(EfScreenObject *self, PyObject *Py_UNUSED(ignore)) {
+Ef_Py_getAllWindows(PyObject *self, PyObject *Py_UNUSED(ignore)) {
     if (_filterScreenObjects(_screen_objects_list) < 0) {
         return NULL;
     }
@@ -416,7 +412,7 @@ Ef_Py_getAllWindows(EfScreenObject *self, PyObject *Py_UNUSED(ignore)) {
 }
 
 static PyObject *
-Ef_Py_destroyAllWindows(EfScreenObject *self, PyObject *Py_UNUSED(ignore)) {
+Ef_Py_destroyAllWindows(PyObject *self, PyObject *Py_UNUSED(ignore)) {
     if (_filterScreenObjects(_screen_objects_list) < 0) {
         return NULL;
     }
@@ -454,27 +450,31 @@ static struct PyModuleDef screen_module = {
 
 PyMODINIT_FUNC
 PyInit_screen(void) {
-    PyObject *m;
+    PyObject *m = NULL;
     if (PyType_Ready(&EfScreenType) < 0)
         return NULL;
 
-    if (_screen_objects_list == NULL) {
-        _screen_objects_list = PyList_New(0);
-        if (!_screen_objects_list) {
-            return NULL;
-        }
-    }
-
     m = PyModule_Create(&screen_module);
-    if (m == NULL)
-        return NULL;
+    if (!m)
+        goto err_exit;
+
+    if (EF_IMPORT_Surface() < 0)
+        goto err_exit;
 
     Py_INCREF(&EfScreenType);
-    if (PyModule_AddObject(m, "Screen", (PyObject *)&EfScreenType) < 0) {
-        Py_DECREF(&EfScreenType);
-        Py_DECREF(m);
-        return NULL;
-    }
+    if (PyModule_AddObject(m, "Screen", (PyObject *)&EfScreenType) < 0)
+        goto err_exit;
+
+    _screen_objects_list = PyList_New(0);
+    if (!_screen_objects_list)
+        goto err_exit;
 
     return m;
+
+err_exit:
+    Py_XDECREF(m);
+    EF_IMPORT_DECREAF();
+    Py_XDECREF(&EfScreenType);
+    Py_XDECREF(_screen_objects_list);
+    return NULL;
 }

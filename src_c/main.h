@@ -9,6 +9,7 @@
 struct _EfMainObject {
     PyObject_HEAD
     PyObject *screen;
+    PyObject *root;
 };
 typedef struct _EfMainObject EfMainObject;
 

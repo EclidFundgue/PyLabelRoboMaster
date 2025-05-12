@@ -12,6 +12,7 @@ struct _EfScreenObject {
     int h;
     const char *title;
     SDL_Window *sdl_window;
+    SDL_Renderer *sdl_renderer;
 };
 typedef struct _EfScreenObject EfScreenObject;
 
@@ -20,7 +21,7 @@ PyObject *Ef_ScreenObject_FromC(PyObject *type, int w, int h, const char *title)
 
 int Ef_ScreenObject_CreateWindow(PyObject *screen, int x, int y);
 void Ef_ScreenObject_DestroyWindow(PyObject *screen);
-int Ef_ScreenObject_Fill(PyObject *screen, uint8_t r, uint8_t g, uint8_t b);
 void Ef_ScreenObject_Update(PyObject *screen);
+PyObject *Ef_ScreenObject_GetSurface(PyObject *screen);
 
 #endif // __SCREEN_H__
