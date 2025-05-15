@@ -69,7 +69,7 @@ class TestScreen(unittest.TestCase):
     def test_ScreenGetSurface(self):
         s = screen.Screen((10, 20), "my_title43")
 
-        with self.assertWarns(RuntimeWarning):
+        with self.assertRaises(RuntimeError):
             self.assertIsNone(s.getSurface())
 
         s.createWindow()

@@ -13,11 +13,11 @@ int Ef_ImportType(PyObject *module, PyObject **ret, const char *module_name, con
 #define EF_IMPORT_Screen() Ef_ImportType(m, &imported_ScreenType, "screen", "Screen")
 #define EF_IMPORT_RootWidget() Ef_ImportType(m, &imported_RootWidgetType, "widget", "Root")
 
-#define EF_IMPORT_DECREAF() \
-    do {\
-        Py_XDECREF(imported_SurfaceType);\
-        Py_XDECREF(imported_ScreenType);\
-        Py_XDECREF(imported_RootWidgetType);\
+#define EF_IMPORT_DECREAF()                     \
+    do {                                        \
+        Py_XDECREF(imported_SurfaceType);       \
+        Py_XDECREF(imported_ScreenType);        \
+        Py_XDECREF(imported_RootWidgetType);    \
     } while (0)
 
 #endif // __EFIMPORT_H__

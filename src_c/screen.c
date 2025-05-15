@@ -210,13 +210,13 @@ void Ef_ScreenObject_Update(PyObject *screen) {
  * \brief Get Surface Object from screen.
  * 
  * \param screen Instance of EfScreenObject.
- * \return Surface Object on success, None on no window created, NULL on failure.
+ * \return Surface Object on success, NULL on failure.
  */
 PyObject *Ef_ScreenObject_GetSurface(PyObject *screen) {
     EfScreenObject *s = (EfScreenObject *)screen;
     if (s->sdl_window == NULL) {
-        PyErr_Warn(PyExc_RuntimeWarning, "Window has not been created!");
-        Py_RETURN_NONE;
+        PyErr_SetString(PyExc_RuntimeError, "Window has not been created!");
+        return NULL;
     }
 
     SDL_Surface *surface = SDL_GetWindowSurface(s->sdl_window);

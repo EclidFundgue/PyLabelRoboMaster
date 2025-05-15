@@ -79,24 +79,6 @@ static PyMemberDef EfMainObject_members[] = {
     {NULL}
 };
 
-// static PyObject *
-// EfMainObject_getscreen(EfMainObject *self, void *closure) {
-//     Py_INCREF(self->screen);
-//     return self->screen;
-// }
-
-// static int
-// EfMainObject_setscreen(EfMainObject *self, PyObject *value, void *closure) {
-//     PyErr_SetString(PyExc_AttributeError, "readonly attribute");
-//     return -1;
-// }
-
-// static PyGetSetDef EfMainObject_getsetters[] = {
-//     {"screen", (getter)EfMainObject_getscreen, (setter)EfMainObject_setscreen,
-//      "main screen", NULL},
-//     {NULL}
-// };
-
 static PyObject *
 EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
     int quit = 0;

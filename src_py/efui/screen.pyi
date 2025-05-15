@@ -17,7 +17,7 @@ class Screen:
     def isCreated(self) -> bool:
         ...
 
-    def getSurface(self) -> Union[Surface, None]:
+    def getSurface(self) -> Surface:
         ...
 
     def update(self) -> None:

@@ -16,5 +16,6 @@ struct _EfSurfaceObject {
 typedef struct _EfSurfaceObject EfSurfaceObject;
 
 PyObject *Ef_SurfaceObject_FromSDLSurface(PyObject *type, SDL_Surface *surface, int is_from_window);
+PyObject *Ef_SurfaceObject_New(PyObject *type, Py_ssize_t w, Py_ssize_t h);
 
 #endif // __SURFACE_H__
