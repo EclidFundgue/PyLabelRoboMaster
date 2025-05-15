@@ -24,4 +24,6 @@ PyObject *Ef_SurfaceObject_New(PyObject *type, int w, int h, SDL_Surface *surf);
 PyObject *Ef_SurfaceObject_FromSurface(PyObject *type, SDL_Surface *surf);
 PyObject *Ef_SurfaceObject_FromWindow(PyObject *type, SDL_Window *win);
 
+PyObject *Ef_SurfaceObject_Subsurface(PyObject *owner, int x, int y, int w, int h);
+
 #endif // __SURFACE_H__

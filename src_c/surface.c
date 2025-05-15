@@ -67,6 +67,58 @@ PyObject *Ef_SurfaceObject_FromWindow(PyObject *type, SDL_Window *win) {
     return ret;
 }
 
+static SDL_Surface *_subsurfaceFrom(
+    SDL_Surface *src,
+    int x, int y, int w, int h
+) {
+    SDL_PixelFormat *f = src->format;
+    char *data = (char *)src->pixels + x * f->BytesPerPixel + y * src->pitch;
+    return SDL_CreateRGBSurfaceFrom(
+        data, w, h, f->BitsPerPixel, src->pitch,
+        f->Rmask, f->Gmask, f->Bmask, f->Amask
+    );
+}
+
+/**
+ * \brief Get a Subsurface from owner by certain rect.
+ * 
+ * \param x Rect X.
+ * \param y Rect Y.
+ * \param w Rect Width.
+ * \param h Rect Height.
+ * \return New reference to Subsurface on success, NULL on failure.
+ */
+PyObject *Ef_SurfaceObject_Subsurface(PyObject *owner, int x, int y, int w, int h) {
+    EfSurfaceObject *owner_obj = (EfSurfaceObject *)owner;
+    if (x < 0 || y < 0 || x + w > owner_obj->w || y + h > owner_obj->h) {
+        PyErr_SetString(PyExc_ValueError,
+            "Subsurface rect out of range."
+        );
+        return NULL;
+    }
+
+    SDL_Surface *sub = _subsurfaceFrom(owner_obj->sdl_surface, x, y, w, h);
+    if (!sub) {
+        PyErr_Format(PyExc_RuntimeError,
+            "Error creating subsurface.\n"
+            "SDL Info: %s", SDL_GetError()
+        );
+        return NULL;
+    }
+
+    EfSurfaceObject *ret = (EfSurfaceObject *)Ef_SurfaceObject_FromSurface((PyObject *)&EfSurfaceType, sub);
+    if (!ret) {
+        return NULL;
+    }
+
+    Py_INCREF(owner_obj);
+    ret->is_from_window = owner_obj->is_from_window;
+    ret->owner = owner;
+    ret->x_offset = x;
+    ret->y_offset = y;
+    return (PyObject *)ret;
+}
+
 static void
 EfSurfaceObject_dealloc(EfSurfaceObject *self) {
     // You can not free window surface.
@@ -226,10 +278,8 @@ static PyMethodDef EfSurfaceObject_methods[] = {
     {NULL}
 };
 
-static int _parseSubscript(
-    EfSurfaceObject* self, PyObject* item,
-    int *x, int *y, int *w, int *h
-) {
+static PyObject *
+EfSurfaceObject_subscript(EfSurfaceObject* self, PyObject* item) {
     Py_ssize_t _sy, _ey, _stepy;
     Py_ssize_t _sx, _ex, _stepx;
     int sy, ey, stepy;
@@ -239,12 +289,12 @@ static int _parseSubscript(
         !PySlice_Check(PyTuple_GET_ITEM(item, 0)) ||
         !PySlice_Check(PyTuple_GET_ITEM(item, 1))) {
         PyErr_SetString(PyExc_TypeError, "Surface indices must be two slices.");
-        return -1;
+        return NULL;
     }
 
     if (PySlice_Unpack(PyTuple_GET_ITEM(item, 0), &_sy, &_ey, &_stepy) < 0 ||
         PySlice_Unpack(PyTuple_GET_ITEM(item, 1), &_sx, &_ex, &_stepx) < 0) {
-        return -1;
+        return NULL;
     }
 
     sy = (int)_sy; ey = (int)_ey; stepy = (int)_stepy;
@@ -254,7 +304,7 @@ static int _parseSubscript(
             "Slice step must be 1, but received %d",
             (stepy != 1) ? stepy : stepx
         );
-        return -1;
+        return NULL;
     }
 
     if (ex < 0) {
@@ -266,60 +316,15 @@ static int _parseSubscript(
 
     if (sy < 0 || sx < 0 || ey < 0 || ex < 0 || ey > self->h || ex > self->w) {
         PyErr_SetString(PyExc_ValueError, "Subsurface outside surface area.");
-        return -1;
+        return NULL;
     }
 
     if (sy >= ey || sx >= ex) {
         PyErr_SetString(PyExc_ValueError, "Invalid slice range.");
-        return -1;
-    }
-
-    *x = sx;
-    *y = sy;
-    *w = ex - sx;
-    *h = ey - sy;
-    return 0;
-}
-
-static SDL_Surface *_subsurfaceFrom(
-    SDL_Surface *src,
-    int x, int y, int w, int h
-) {
-    SDL_PixelFormat *f = src->format;
-    char *data = (char *)src->pixels + x * f->BytesPerPixel + y * src->pitch;
-    return SDL_CreateRGBSurfaceFrom(
-        data, w, h, f->BitsPerPixel, src->pitch,
-        f->Rmask, f->Gmask, f->Bmask, f->Amask
-    );
-}
-
-static PyObject *
-EfSurfaceObject_subscript(EfSurfaceObject* self, PyObject* item) {
-    int x, y, w, h;
-    if (_parseSubscript(self, item, &x, &y, &w, &h) < 0) {
         return NULL;
     }
 
-    SDL_Surface *sub = _subsurfaceFrom(self->sdl_surface, x, y, w, h);
-    if (!sub) {
-        PyErr_Format(PyExc_RuntimeError,
-            "Error creating subsurface.\n"
-            "SDL Info: %s", SDL_GetError()
-        );
-        return NULL;
-    }
-
-    EfSurfaceObject *ret = (EfSurfaceObject *)Ef_SurfaceObject_FromSurface((PyObject *)&EfSurfaceType, sub);
-    if (!ret) {
-        return NULL;
-    }
-
-    Py_INCREF(self);
-    ret->is_from_window = self->is_from_window;
-    ret->owner = (PyObject *)self;
-    ret->x_offset = x;
-    ret->y_offset = y;
-    return (PyObject *)ret;
+    return Ef_SurfaceObject_Subsurface((PyObject *)self, sx, sy, ex - sx, ey - sy);
 }
 
 static PyMappingMethods EfSurfaceObject_mapping_methods = {
