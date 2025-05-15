@@ -34,7 +34,7 @@ EfMainObject_init(EfMainObject *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", kwlist, &size, &title))
         return -1;
 
-    self->screen = Ef_ScreenObject_FromPy(imported_ScreenType, size, title);
+    self->screen = Ef_ScreenObject_NewPyArgs(imported_ScreenType, size, title);
     if (!self->screen) {
         return -1;
     }

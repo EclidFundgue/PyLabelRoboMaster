@@ -8,46 +8,63 @@
 static PyTypeObject EfSurfaceType;
 
 /**
- * \brief Create SurfaceObject from SDL_Surface.
- * 
- * \param type SurfaceObject Type.
- * \param surface SDL_Surface.
- * \param is_from_window Is the SDL_Surface got from a SDL_Window.
- * 
- * \note SurfaceObject will take control of SDL_Surface and free it when dealloc.
- */
-PyObject *Ef_SurfaceObject_FromSDLSurface(
-    PyObject *type,
-    SDL_Surface *surface,
-    int is_from_window
-) {
-    EfSurfaceObject *ret = (EfSurfaceObject *)PyObject_CallFunction(
-        type, "((ii))", surface->w, surface->h // (ii) will be considered as two arguments.
-    );
-    if (!ret) {
-        return NULL;
-    }
-
-    ret->is_from_window = is_from_window;
-
-    if (ret->sdl_surface) {
-        SDL_FreeSurface(ret->sdl_surface);
-    }
-    ret->sdl_surface = surface;
-
-    return (PyObject *)ret;
-}
-
-/**
  * \brief Create a new SurfaceObject.
  * 
  * \param type SurfaceObject Type.
  * \param w Surface width.
  * \param h Surface height.
- * \return New reference to SurfaceObject.
+ * \param surf SDL_Surface, can be NULL.
+ * \return New reference to SurfaceObject, NULL on failure.
  */
-PyObject *Ef_SurfaceObject_New(PyObject *type, Py_ssize_t w, Py_ssize_t h) {
-    return PyObject_CallFunction(type, "((ii))", w, h);
+PyObject *
+Ef_SurfaceObject_New(PyObject *type, int w, int h, SDL_Surface *surf) {
+    PyTypeObject *tp = (PyTypeObject *)type;
+
+    EfSurfaceObject *ret = (EfSurfaceObject *)tp->tp_new(tp, NULL, NULL);
+    if (!ret) {
+        return NULL;
+    }
+
+    ret->w = w;
+    ret->h = h;
+    ret->sdl_surface = surf;
+    return (PyObject *)ret;
+}
+
+/**
+ * \brief Create SurfaceObject from SDL_Surface.
+ * 
+ * \param type SurfaceObject Type.
+ * \param surf SDL_Surface.
+ * 
+ * \note SurfaceObject will take control of SDL_Surface and free it when dealloc.
+ * \note `is_from_window` is default 0. Use `Ef_SurfaceObject_FromWindow` if you
+ *       want to create object from SDL_Window.
+ */
+PyObject *
+Ef_SurfaceObject_FromSurface(PyObject *type, SDL_Surface *surf) {
+    return Ef_SurfaceObject_New(type, surf->w, surf->h, surf);
+}
+
+/**
+ * \brief Create SurfaceObject from SDL_Surface.
+ * 
+ * \param type SurfaceObject Type.
+ * \param win SDL_Window.
+ */
+PyObject *Ef_SurfaceObject_FromWindow(PyObject *type, SDL_Window *win) {
+    SDL_Surface *surf = SDL_GetWindowSurface(win);
+    if (!surf) {
+        PyErr_Format(PyExc_RuntimeError,
+            "Error getting surface!\n"
+            "SDL Info: %s", SDL_GetError()
+        );
+        return NULL;
+    }
+
+    PyObject *ret = Ef_SurfaceObject_FromSurface(type, surf);
+    ((EfSurfaceObject *)ret)->is_from_window = 1;
+    return ret;
 }
 
 static void
@@ -56,7 +73,11 @@ EfSurfaceObject_dealloc(EfSurfaceObject *self) {
     if (self->sdl_surface != NULL && !self->is_from_window) {
         SDL_FreeSurface(self->sdl_surface);
     }
-    self->sdl_surface = NULL;
+
+    // subsurface
+    if (self->owner) {
+        Py_DECREF(self->owner);
+    }
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -69,6 +90,10 @@ EfSurfaceObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->h = 0;
         self->is_from_window = 0;
         self->sdl_surface = NULL;
+
+        self->owner = NULL;
+        self->x_offset = 0;
+        self->y_offset = 0;
     }
     return (PyObject *)self;
 }
@@ -155,15 +180,40 @@ EfSurfaceObject_blit(EfSurfaceObject *self, PyObject *args, PyObject *kwds) {
     }
 
     if (src->sdl_surface == NULL || self->sdl_surface == NULL) {
-        Py_RETURN_NONE;
+        PyErr_SetString(PyExc_RuntimeError, "Detected not initialized surface.");
+        return NULL;
     }
 
-    SDL_Rect dst_rect;
-    dst_rect.x = x;
-    dst_rect.y = y;
-    dst_rect.w = src->w;
-    dst_rect.h = src->h;
-    SDL_BlitSurface(src->sdl_surface, NULL, self->sdl_surface, &dst_rect);
+    // subsurface
+    EfSurfaceObject *owner = src;
+    int x_offset = 0;
+    int y_offset = 0;
+    while (owner->owner) {
+        x_offset += owner->x_offset;
+        y_offset += owner->y_offset;
+        owner = (EfSurfaceObject *)owner->owner;
+    }
+
+    if (owner == src) { // no subsurface
+        if (SDL_BlitSurface(src->sdl_surface, NULL, self->sdl_surface, NULL) < 0) {
+            PyErr_Format(PyExc_RuntimeError,
+                "Error bliting surface.\n"
+                "SDL Info: %s", SDL_GetError()
+            );
+            return NULL;
+        }
+    }
+    else {
+        SDL_Rect src_rect = {x_offset, y_offset, src->w, src->h};
+        SDL_Rect dst_rect = {x, y, src->w, src->h};
+        if (SDL_BlitSurface(owner->sdl_surface, &src_rect, self->sdl_surface, &dst_rect) < 0) {
+            PyErr_Format(PyExc_RuntimeError,
+                "Error bliting surface.\n"
+                "SDL Info: %s", SDL_GetError()
+            );
+            return NULL;
+        }
+    }
 
     Py_RETURN_NONE;
 }
@@ -236,9 +286,9 @@ static SDL_Surface *_subsurfaceFrom(
     int x, int y, int w, int h
 ) {
     SDL_PixelFormat *f = src->format;
-    char *data = ((char *)src->pixels) + x * f->BytesPerPixel + y * src->pitch;
+    char *data = (char *)src->pixels + x * f->BytesPerPixel + y * src->pitch;
     return SDL_CreateRGBSurfaceFrom(
-        data, (int)w, (int)h, f->BitsPerPixel, src->pitch,
+        data, w, h, f->BitsPerPixel, src->pitch,
         f->Rmask, f->Gmask, f->Bmask, f->Amask
     );
 }
@@ -259,18 +309,17 @@ EfSurfaceObject_subscript(EfSurfaceObject* self, PyObject* item) {
         return NULL;
     }
 
-    EfSurfaceObject *sub_object = \
-        (EfSurfaceObject *)Ef_SurfaceObject_New((PyObject *)&EfSurfaceType, w, h);
-    if (!sub_object) {
+    EfSurfaceObject *ret = (EfSurfaceObject *)Ef_SurfaceObject_FromSurface((PyObject *)&EfSurfaceType, sub);
+    if (!ret) {
         return NULL;
     }
 
-    if (sub_object->sdl_surface) {
-        SDL_FreeSurface(sub_object->sdl_surface);
-    }
-    sub_object->sdl_surface = sub;
-
-    return (PyObject *)sub_object;
+    Py_INCREF(self);
+    ret->is_from_window = self->is_from_window;
+    ret->owner = (PyObject *)self;
+    ret->x_offset = x;
+    ret->y_offset = y;
+    return (PyObject *)ret;
 }
 
 static PyMappingMethods EfSurfaceObject_mapping_methods = {
@@ -312,7 +361,7 @@ Ef_Py_loadImage(PyObject *self, PyObject *args, PyObject *kwds) {
         return NULL;
     }
 
-    return Ef_SurfaceObject_FromSDLSurface((PyObject *)&EfSurfaceType, image, 0);
+    return Ef_SurfaceObject_FromSurface((PyObject *)&EfSurfaceType, image);
 }
 
 static PyMethodDef surface_methods[] = {

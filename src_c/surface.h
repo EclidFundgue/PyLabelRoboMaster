@@ -12,10 +12,16 @@ struct _EfSurfaceObject {
     int h;
     int is_from_window;
     SDL_Surface *sdl_surface;
+
+    // subsurface
+    PyObject *owner;
+    int x_offset;
+    int y_offset;
 };
 typedef struct _EfSurfaceObject EfSurfaceObject;
 
-PyObject *Ef_SurfaceObject_FromSDLSurface(PyObject *type, SDL_Surface *surface, int is_from_window);
-PyObject *Ef_SurfaceObject_New(PyObject *type, Py_ssize_t w, Py_ssize_t h);
+PyObject *Ef_SurfaceObject_New(PyObject *type, int w, int h, SDL_Surface *surf);
+PyObject *Ef_SurfaceObject_FromSurface(PyObject *type, SDL_Surface *surf);
+PyObject *Ef_SurfaceObject_FromWindow(PyObject *type, SDL_Window *win);
 
 #endif // __SURFACE_H__

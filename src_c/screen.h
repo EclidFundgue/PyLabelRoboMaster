@@ -16,8 +16,8 @@ struct _EfScreenObject {
 };
 typedef struct _EfScreenObject EfScreenObject;
 
-PyObject *Ef_ScreenObject_FromPy(PyObject *type, PyObject *size, PyObject *title);
-PyObject *Ef_ScreenObject_FromC(PyObject *type, int w, int h, const char *title);
+PyObject *Ef_ScreenObject_NewPyArgs(PyObject *type, PyObject *size, PyObject *title);
+PyObject *Ef_ScreenObject_NewCArgs(PyObject *type, int w, int h, const char *title);
 
 int Ef_ScreenObject_CreateWindow(PyObject *screen, int x, int y);
 void Ef_ScreenObject_DestroyWindow(PyObject *screen);

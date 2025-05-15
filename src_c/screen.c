@@ -121,7 +121,7 @@ static SDL_Window *_createWindow(int x, int y, int w, int h, const char *title) 
  * \param title Unicode of title. Should not be NULL.
  * \return New reference. Pointer to EfScreenObject on success, or raise an exception and return NULL on failure.
  */
-PyObject *Ef_ScreenObject_FromPy(PyObject *type, PyObject *size, PyObject *title) {
+PyObject *Ef_ScreenObject_NewPyArgs(PyObject *type, PyObject *size, PyObject *title) {
     return PyObject_CallFunctionObjArgs(type, size, title, NULL);
 }
 
@@ -134,7 +134,7 @@ PyObject *Ef_ScreenObject_FromPy(PyObject *type, PyObject *size, PyObject *title
  * \param title Screen title.
  * \return New reference. Pointer to EfScreenObject on success, or raise an exception and return NULL on failure.
  */
-PyObject *Ef_ScreenObject_FromC(PyObject *type, int w, int h, const char *title) {
+PyObject *Ef_ScreenObject_NewCArgs(PyObject *type, int w, int h, const char *title) {
     return PyObject_CallFunction(type, "(ii)s", w, h, title);
 }
 
@@ -213,22 +213,13 @@ void Ef_ScreenObject_Update(PyObject *screen) {
  * \return Surface Object on success, NULL on failure.
  */
 PyObject *Ef_ScreenObject_GetSurface(PyObject *screen) {
-    EfScreenObject *s = (EfScreenObject *)screen;
-    if (s->sdl_window == NULL) {
+    SDL_Window *win = ((EfScreenObject *)screen)->sdl_window;
+    if (!win) {
         PyErr_SetString(PyExc_RuntimeError, "Window has not been created!");
         return NULL;
     }
 
-    SDL_Surface *surface = SDL_GetWindowSurface(s->sdl_window);
-    if (!surface) {
-        PyErr_Format(PyExc_RuntimeError,
-            "Error getting surface!\n"
-            "SDL Info: %s", SDL_GetError()
-        );
-        return NULL;
-    }
-
-    return Ef_SurfaceObject_FromSDLSurface(imported_SurfaceType, surface, 1);
+    return Ef_SurfaceObject_FromWindow(imported_SurfaceType, win);
 }
 
 static void
@@ -388,7 +379,7 @@ Ef_Py_createWindow(PyObject *self, PyObject *args, PyObject *kwds) {
                                      &size, &title, &pos))
         return NULL;
 
-    screen = Ef_ScreenObject_FromPy((PyObject *)&EfScreenType, size, title);
+    screen = Ef_ScreenObject_NewPyArgs((PyObject *)&EfScreenType, size, title);
     if (screen == NULL) {
         return NULL;
     }
