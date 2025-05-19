@@ -1,5 +1,5 @@
-#ifndef __WIDGET_ROOT_INTERNAL_H__
-#define __WIDGET_ROOT_INTERNAL_H__
+#ifndef __WIDGETS_ROOT_INTERNAL_H__
+#define __WIDGETS_ROOT_INTERNAL_H__
 
 #include "widgets/_base.h"
 
@@ -11,4 +11,4 @@ typedef struct _EfRootWidget EfRootWidget;
 
 extern PyTypeObject EfRootWidgetType;
 
-#endif // __WIDGET_ROOT_INTERNAL_H__
+#endif // __WIDGETS_ROOT_INTERNAL_H__

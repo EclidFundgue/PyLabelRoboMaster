@@ -1,19 +1,19 @@
-#include "widget.h"
+#include "widgets.h"
 
 #include <structmember.h>
 
 #include "efimport.h"
 #include "efutils.h"
 
-static struct PyModuleDef widget_module = {
+static struct PyModuleDef widgets_module = {
     PyModuleDef_HEAD_INIT,
-    .m_name = "widget",
+    .m_name = "widgets",
     .m_doc = "Control widgets.",
     .m_size = -1,
 };
 
 PyMODINIT_FUNC
-PyInit_widget(void) {
+PyInit_widgets(void) {
     PyObject *m = NULL;
 
     if (PyType_Ready(&EfBaseWidgetType) < 0)
@@ -21,7 +21,7 @@ PyInit_widget(void) {
     if (PyType_Ready(&EfRootWidgetType) < 0)
         return NULL;
 
-    m = PyModule_Create(&widget_module);
+    m = PyModule_Create(&widgets_module);
     if (m == NULL)
         goto err_exit;
 

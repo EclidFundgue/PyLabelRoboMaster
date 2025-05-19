@@ -1,11 +1,11 @@
 from typing import Tuple
 
-from . import screen, widget
+from . import screen, widgets
 
 class Main:
     def __init__(self, size: Tuple[int, int], title: str) -> None:
         self.screen: screen.Screen
-        self.root: widget.Root
+        self.root: widgets.Root
 
     def run(self) -> None:
         ...

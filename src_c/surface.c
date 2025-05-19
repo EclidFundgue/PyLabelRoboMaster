@@ -106,7 +106,7 @@ PyObject *Ef_SurfaceObject_Subsurface(PyObject *owner, int x, int y, int w, int 
         return NULL;
     }
 
-    EfSurfaceObject *ret = (EfSurfaceObject *)Ef_SurfaceObject_FromSurface((PyObject *)&EfSurfaceType, sub);
+    EfSurfaceObject *ret = (EfSurfaceObject *)Ef_SurfaceObject_FromSurface((PyObject *)Py_TYPE(owner), sub);
     if (!ret) {
         return NULL;
     }

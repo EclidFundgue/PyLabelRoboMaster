@@ -1,5 +1,5 @@
-#ifndef __WIDGET_BASE_INTERNAL_H__
-#define __WIDGET_BASE_INTERNAL_H__
+#ifndef __WIDGETS_BASE_INTERNAL_H__
+#define __WIDGETS_BASE_INTERNAL_H__
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
@@ -22,9 +22,12 @@ struct _EfBaseWidget {
     PyObject *_children;
     PyObject *_keyboard_events;
     PyObject *_keyboard_events_once;
+
+    int _need_redraw;
+    int _in_redraw_path;
 };
 typedef struct _EfBaseWidget EfBaseWidget;
 
 extern PyTypeObject EfBaseWidgetType;
 
-#endif // __WIDGET_BASE_INTERNAL_H__
+#endif // __WIDGETS_BASE_INTERNAL_H__

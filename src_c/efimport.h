@@ -11,7 +11,7 @@ int Ef_ImportType(PyObject *module, PyObject **ret, const char *module_name, con
 
 #define EF_IMPORT_Surface() Ef_ImportType(m, &imported_SurfaceType, "surface", "Surface")
 #define EF_IMPORT_Screen() Ef_ImportType(m, &imported_ScreenType, "screen", "Screen")
-#define EF_IMPORT_RootWidget() Ef_ImportType(m, &imported_RootWidgetType, "widget", "Root")
+#define EF_IMPORT_RootWidget() Ef_ImportType(m, &imported_RootWidgetType, "widgets", "Root")
 
 #define EF_IMPORT_DECREAF()                     \
     do {                                        \

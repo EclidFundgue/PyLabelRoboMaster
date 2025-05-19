@@ -4,7 +4,7 @@
 
 #include "efimport.h"
 #include "screen.h"
-#include "widget.h"
+#include "widgets.h"
 #include "efutils.h"
 #include "SDL_image.h"
 
@@ -98,6 +98,13 @@ EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
             }
         }
 
+        if (PyObject_CallMethodNoArgs(self->root, PyUnicode_FromString("redraw")) == NULL) {
+            return NULL;
+        }
+        // draw
+        if (PyObject_CallMethodNoArgs(self->root, PyUnicode_FromString("draw")) == NULL) {
+            return NULL;
+        }
         Ef_ScreenObject_Update(self->screen);
 
         Py_BEGIN_ALLOW_THREADS

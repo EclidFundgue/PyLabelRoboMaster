@@ -1,9 +1,9 @@
-#ifndef __WIDGET_H__
-#define __WIDGET_H__
+#ifndef __WIDGETS_H__
+#define __WIDGETS_H__
 
 #include "SDL.h"
 
 #include "widgets/_base.h"
 #include "widgets/_root.h"
 
-#endif // __WIDGET_H__
+#endif // __WIDGETS_H__

@@ -33,8 +33,8 @@ setup(
         get_ext("screen", ["screen.c", "surface.c", "efimport.c", "efutils.c"]),
         get_ext("main", ["main.c", "screen.c", "surface.c", "efimport.c", "efutils.c"]),
         get_ext("surface", ["surface.c", "efutils.c"]),
-        get_ext("widget", [
-            "widget.c",
+        get_ext("widgets", [
+            "widgets.c",
             "widgets/base.c",
             "widgets/root.c",
             "surface.c",
