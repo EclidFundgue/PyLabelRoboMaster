@@ -140,6 +140,22 @@ static int _removeDeadChildrenAndCheck(PyObject *list, EfBaseWidget *child) {
 }
 
 static PyObject *
+EfBaseWidget_onXY(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
+    int x, y;
+    static char *kwlist[] = {"x", "y", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii", kwlist, &x, &y))
+        return NULL;
+
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+EfBaseWidget_onNoArgs(EfBaseWidget *self, PyObject *Py_UNUSED(ignore)) {
+    Py_RETURN_NONE;
+}
+
+static PyObject *
 EfBaseWidget_addChild(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
     PyObject *child;
     EfBaseWidget *child_obj;
@@ -287,6 +303,35 @@ static PyMethodDef EfBaseWidget_methods[] = {
      "Remove the child from widget."},
     {"redraw", (PyCFunction)EfBaseWidget_redraw, METH_NOARGS,
      "Redraw the widget."},
+
+    {"onLeftClick", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On left click."},
+    {"onMidClick", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On mid click."},
+    {"onRightClick", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On right click."},
+
+    {"onLeftPress", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On left press."},
+    {"onMidPress", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On mid press."},
+    {"onRightPress", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On right press."},
+
+    {"onLeftDrag", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On left drag."},
+    {"onMidDrag", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On mid drag."},
+    {"onRightDrag", (PyCFunction)EfBaseWidget_onXY, METH_VARARGS | METH_KEYWORDS,
+     "On right drag."},
+
+    {"onLeftRelease", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
+     "On left release."},
+    {"onMidRelease", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
+     "On mid release."},
+    {"onRightRelease", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
+     "On right release."},
+
     {"draw", (PyCFunction)EfBaseWidget_draw, METH_VARARGS | METH_KEYWORDS,
      "Draw the widget."},
     {NULL}

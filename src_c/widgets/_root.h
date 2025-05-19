@@ -3,11 +3,10 @@
 
 #include "widgets/_base.h"
 
-struct _EfRootWidget {
+typedef struct EfRootWidget {
     EfBaseWidget base;
     PyObject *surface;
-};
-typedef struct _EfRootWidget EfRootWidget;
+} EfRootWidget;
 
 extern PyTypeObject EfRootWidgetType;
 

@@ -3,6 +3,7 @@
 
 #include "SDL.h"
 
+#include "widgets/_event.h"
 #include "widgets/_base.h"
 #include "widgets/_root.h"
 

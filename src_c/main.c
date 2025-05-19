@@ -79,17 +79,93 @@ static PyMemberDef EfMainObject_members[] = {
     {NULL}
 };
 
+static void _setMouseState(EfEventWidget *e) {
+    int last_x = e->mouse_x;
+    int last_y = e->mouse_y;
+
+    Uint32 state = SDL_GetMouseState(&e->mouse_x, &e->mouse_y);
+    e->mouse_dx = e->mouse_x - last_x;
+    e->mouse_dy = e->mouse_y - last_y;
+
+    if (state & SDL_BUTTON_LMASK) {
+        e->mouse_flags |= EF_MOUSE_LEFT_PRESS;
+    }
+
+    if (state & SDL_BUTTON_MMASK) {
+        e->mouse_flags |= EF_MOUSE_MID_PRESS;
+    }
+
+    if (state & SDL_BUTTON_RMASK) {
+        e->mouse_flags |= EF_MOUSE_RIGHT_PRESS;
+    }
+}
+
+static void _setMouseDownFlags(uint16_t *flags, uint8_t button) {
+    switch (button) {
+    case SDL_BUTTON_LEFT:
+        *flags |= EF_MOUSE_LEFT_DOWN;
+        break;
+    case SDL_BUTTON_MIDDLE:
+        *flags |= EF_MOUSE_MID_DOWN;
+        break;
+    case SDL_BUTTON_RIGHT:
+        *flags |= EF_MOUSE_RIGHT_DOWN;
+        break;
+
+    default:
+        PyErr_WarnFormat(PyExc_Warning, 1,
+            "Wrong mouse button id: %d", button
+        );
+        break;
+    }
+}
+
+static void _setMouseUpFlags(uint16_t *flags, uint8_t button) {
+    switch (button) {
+    case SDL_BUTTON_LEFT:
+        *flags |= EF_MOUSE_LEFT_UP;
+        break;
+    case SDL_BUTTON_MIDDLE:
+        *flags |= EF_MOUSE_MID_UP;
+        break;
+    case SDL_BUTTON_RIGHT:
+        *flags |= EF_MOUSE_RIGHT_UP;
+        break;
+
+    default:
+        PyErr_WarnFormat(PyExc_Warning, 1,
+            "Wrong mouse button id: %d", button
+        );
+        break;
+    }
+}
+
 static PyObject *
 EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
     int quit = 0;
-    SDL_Event e;
+    EfEventWidget *event = (EfEventWidget *)Ef_EventWidget_New(imported_EventWidgetType);
+    if (!event) {
+        return NULL;
+    }
 
     while (!quit) {
         // Handle events.
+        event->mouse_flags = 0; // clear flags
+
+        SDL_Event e;
         while(SDL_PollEvent(&e) != 0) {
             switch (e.type) {
                 case SDL_QUIT:
                     quit = 1;
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    _setMouseDownFlags(&event->mouse_flags, e.button.button);
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    _setMouseUpFlags(&event->mouse_flags, e.button.button);
+                    break;
+                case SDL_MOUSEMOTION:
+                    event->mouse_flags |= EF_MOUSE_MOTION;
                     break;
                 case SDL_KEYDOWN:
                     break;
@@ -98,12 +174,19 @@ EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
             }
         }
 
+        _setMouseState(event);
+
+        // update
+        if (PyObject_CallMethodOneArg(self->root, PyUnicode_FromString("update"), (PyObject *)event) == NULL) {
+            goto err_exit;
+        }
+
         if (PyObject_CallMethodNoArgs(self->root, PyUnicode_FromString("redraw")) == NULL) {
-            return NULL;
+            goto err_exit;
         }
         // draw
         if (PyObject_CallMethodNoArgs(self->root, PyUnicode_FromString("draw")) == NULL) {
-            return NULL;
+            goto err_exit;
         }
         Ef_ScreenObject_Update(self->screen);
 
@@ -112,7 +195,12 @@ EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
         Py_END_ALLOW_THREADS
     }
 
+    Py_DECREF(event);
     Py_RETURN_NONE;
+
+err_exit:
+    Py_DECREF(event);
+    return NULL;
 }
 
 static PyMethodDef EfMainObject_methods[] = {
@@ -160,6 +248,7 @@ PyInit_main(void) {
 
     if (EF_IMPORT_Surface() < 0 ||
         EF_IMPORT_Screen() < 0 ||
+        EF_IMPORT_EventWidget() < 0 ||
         EF_IMPORT_RootWidget() < 0)
         goto err_exit;
 

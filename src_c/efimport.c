@@ -4,6 +4,7 @@
 
 PyObject *imported_SurfaceType = NULL;
 PyObject *imported_ScreenType = NULL;
+PyObject *imported_EventWidgetType = NULL;
 PyObject *imported_RootWidgetType = NULL;
 
 /**

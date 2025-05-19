@@ -5,7 +5,7 @@
 #include <Python.h>
 #include <structmember.h>
 
-struct _EfBaseWidget {
+typedef struct EfBaseWidget {
     PyObject_HEAD
     int x;
     int y;
@@ -25,8 +25,7 @@ struct _EfBaseWidget {
 
     int _need_redraw;
     int _in_redraw_path;
-};
-typedef struct _EfBaseWidget EfBaseWidget;
+} EfBaseWidget;
 
 extern PyTypeObject EfBaseWidgetType;
 
