@@ -4,6 +4,53 @@
 #include "surface.h"
 
 /**
+ * \brief Remove dead children in list.
+ * 
+ * \param base Base object that needs remove dead children.
+ * \return 0 on success, -1 on failure.
+ * 
+ * \note This function will create a new list and DECREF the origin.
+ * \note It is safe to use this function during iteration, but you
+ *       must INCREF the origin _children list before iterating.
+ */
+int Ef_BaseWidgetType_RemoveDeadChildren(PyObject *base) {
+    EfBaseWidget *base_widget = (EfBaseWidget *)base;
+    PyObject *ls = base_widget->_children;
+
+    Py_ssize_t alive_cnt = 0;
+    PyObject **start = ((PyListObject *)ls)->ob_item;
+    PyObject **end = ((PyListObject *)ls)->ob_item + PyList_GET_SIZE(ls);
+
+    while (start != end) {
+        EfBaseWidget *ch = (EfBaseWidget *)*start++;
+        if (ch->alive) {
+            alive_cnt++;
+        }
+    }
+
+    PyObject *new = PyList_New(alive_cnt);
+    if (!new) {
+        return -1;
+    }
+
+    if (alive_cnt != 0) {
+        Py_ssize_t i = 0;
+        start = ((PyListObject *)ls)->ob_item;
+        while (start != end) {
+            EfBaseWidget *ch = (EfBaseWidget *)*start++;
+            if (ch->alive) {
+                Py_INCREF(ch);
+                PyList_SET_ITEM(new, i++, (PyObject *)ch);
+            }
+        }
+    }
+
+    Py_SETREF(base_widget->_children, new);
+
+    return 0;
+}
+
+/**
  * \brief Submit redraw all the way to root.
  * 
  * \param obj Widget to redraw.
@@ -113,32 +160,6 @@ static PyMemberDef EfBaseWidget_members[] = {
     {NULL}
 };
 
-/**
- * \brief Remove dead children and check if child already in list.
- * \return 0 on not in list, 1 on in list, -1 on failure.
- */
-static int _removeDeadChildrenAndCheck(PyObject *list, EfBaseWidget *child) {
-    Py_ssize_t i = 0;
-    int in_list = 0;
-
-    while (i < PyList_GET_SIZE(list)) {
-        EfBaseWidget *ch = (EfBaseWidget *)PyList_GET_ITEM(list, i);
-        if (ch->alive) {
-            if (ch == child) {
-                in_list = 1;
-            }
-            i++;
-            continue;
-        }
-
-        if (PyList_SetSlice(list, i, i+1, NULL) != 0) {
-            return -1;
-        }
-    }
-
-    return in_list;
-}
-
 static PyObject *
 EfBaseWidget_onXY(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
     int x, y;
@@ -153,6 +174,20 @@ EfBaseWidget_onXY(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
 static PyObject *
 EfBaseWidget_onNoArgs(EfBaseWidget *self, PyObject *Py_UNUSED(ignore)) {
     Py_RETURN_NONE;
+}
+
+/**
+ * \brief Check item in list.
+ * \return If item in list.
+ */
+static int _inList(PyObject *ls, PyObject *v) {
+    Py_ssize_t i;
+    for (i = 0; i < PyList_GET_SIZE(ls); i++) {
+        if (v == PyList_GET_ITEM(ls, i)) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static PyObject *
@@ -181,22 +216,16 @@ EfBaseWidget_addChild(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
         Py_RETURN_NONE;
     }
 
-    switch (_removeDeadChildrenAndCheck(self->_children, child_obj)) {
-    case 0:
-        PyList_Append(self->_children, child);
-        Py_INCREF(self);
-        child_obj->_parent = (PyObject *)self;
-        break;
-    case 1:
+    if (_inList(self->_children, child)) {
         PyErr_WarnFormat(PyExc_Warning, 1,
             "%s is already added.",
             PyUnicode_AsUTF8(PyObject_Str(child))
         );
-        break;
-    case -1:
-        return NULL;
-    default:
-        break;
+    }
+    else {
+        PyList_Append(self->_children, child);
+        Py_INCREF(self);
+        child_obj->_parent = (PyObject *)self;
     }
 
     Py_RETURN_NONE;
@@ -245,33 +274,54 @@ EfBaseWidget_removeChild(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
         Py_RETURN_NONE;
     }
 
-    switch (_removeDeadChildrenAndCheck(self->_children, child_obj)) {
-    case 0:
+    if (!_inList(self->_children, child)) {
         PyErr_WarnFormat(PyExc_Warning, 1,
             "%s is not in children list.",
             PyUnicode_AsUTF8(PyObject_Str(child))
         );
-        break;
-    case 1:
-        Py_XDECREF(child_obj->_parent);
-        child_obj->_parent = NULL;
+    }
+    else {
         if (_listRemove(self->_children, child) < 0) {
             return NULL;
         }
-        break;
-    case -1:
-        return NULL;
-    default:
-        break;
+        Py_XDECREF(child_obj->_parent);
+        child_obj->_parent = NULL;
     }
 
     Py_RETURN_NONE;
 }
 
 static PyObject *
+EfBaseWidget_isHovered(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
+    int x, y;
+    static char *kwlist[] = {"x", "y", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii", kwlist, &x, &y))
+        return NULL;
+
+    if (0 <= x && x <= self->w && 0 <= y && y <= self->h) {
+        Py_RETURN_TRUE;
+    }
+    Py_RETURN_FALSE;
+}
+
+static PyObject *
 EfBaseWidget_redraw(EfBaseWidget *self, PyObject *Py_UNUSED(ignore)) {
     self->_need_redraw = 1;
     _submitRedraw(self);
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+EfBaseWidget_update(EfBaseWidget *self, PyObject *args, PyObject *kwds) {
+    int x;
+    int y;
+    float wheel;
+    static char *kwlist[] = {"x", "y", "wheel", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "iii", kwlist, &x, &y, &wheel))
+        return NULL;
+
     Py_RETURN_NONE;
 }
 
@@ -301,6 +351,8 @@ static PyMethodDef EfBaseWidget_methods[] = {
      "Add a child to widget."},
     {"removeChild", (PyCFunction)EfBaseWidget_removeChild, METH_VARARGS | METH_KEYWORDS,
      "Remove the child from widget."},
+    {"isHovered", (PyCFunction)EfBaseWidget_isHovered, METH_VARARGS | METH_KEYWORDS,
+     "Is mouse hovered."},
     {"redraw", (PyCFunction)EfBaseWidget_redraw, METH_NOARGS,
      "Redraw the widget."},
 
@@ -331,6 +383,14 @@ static PyMethodDef EfBaseWidget_methods[] = {
      "On mid release."},
     {"onRightRelease", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
      "On right release."},
+
+    {"onMouseEnter", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
+     "On mouse enter."},
+    {"onMouseLeave", (PyCFunction)EfBaseWidget_onNoArgs, METH_NOARGS,
+     "On mouse enter."},
+
+    {"update", (PyCFunction)EfBaseWidget_update, METH_VARARGS | METH_KEYWORDS,
+     "Update the widget."},
 
     {"draw", (PyCFunction)EfBaseWidget_draw, METH_VARARGS | METH_KEYWORDS,
      "Draw the widget."},

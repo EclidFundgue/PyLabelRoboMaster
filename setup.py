@@ -19,7 +19,8 @@ def get_ext(name: str, src_files: list[str]) -> Extension:
             "SDL2",
             "SDL2_image"
         ],
-        sources=[os.path.join("src_c", f) for f in src_files]
+        sources = [os.path.join("src_c", f) for f in
+                   src_files + ["efimport.c", "efutils.c"]]
     )
 
 def move_files(src_dir, dst_dir):
@@ -30,16 +31,15 @@ setup(
     name="efui-release",
     version="1.0",
     ext_modules=[
-        get_ext("screen", ["screen.c", "surface.c", "efimport.c", "efutils.c"]),
-        get_ext("main", ["main.c", "screen.c", "surface.c", "efimport.c", "efutils.c"]),
-        get_ext("surface", ["surface.c", "efutils.c"]),
+        get_ext("screen", ["screen.c", "surface.c"]),
+        get_ext("main", ["main.c", "screen.c", "surface.c", "widgets/event.c"]),
+        get_ext("surface", ["surface.c"]),
         get_ext("widgets", [
             "widgets.c",
+            "widgets/event.c",
             "widgets/base.c",
             "widgets/root.c",
             "surface.c",
-            "efimport.c",
-            "efutils.c",
         ]),
     ]
 )

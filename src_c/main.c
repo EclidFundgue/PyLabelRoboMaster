@@ -151,6 +151,7 @@ EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
     while (!quit) {
         // Handle events.
         event->mouse_flags = 0; // clear flags
+        event->wheel = 0; // clear mouse wheel speed
 
         SDL_Event e;
         while(SDL_PollEvent(&e) != 0) {
@@ -166,6 +167,9 @@ EfMainObject_run(EfMainObject *self, PyObject *Py_UNUSED(ignore)) {
                     break;
                 case SDL_MOUSEMOTION:
                     event->mouse_flags |= EF_MOUSE_MOTION;
+                    break;
+                case SDL_MOUSEWHEEL:
+                    event->wheel = e.wheel.y;
                     break;
                 case SDL_KEYDOWN:
                     break;

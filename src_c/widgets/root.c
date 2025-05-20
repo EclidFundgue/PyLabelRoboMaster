@@ -5,8 +5,23 @@
 #include "widgets/_event.h"
 #include "widgets/_base.h"
 
-#define EfObject_CallXY(obj, name, x, y) PyObject_CallMethod((PyObject *)(obj), (name), "ii", (x), (y))
-#define EfObject_CallNoArgs(obj, name) PyObject_CallMethodNoArgs((PyObject *)(obj), PyUnicode_FromString(name))
+#define EfObject_CallXY(obj, name, x, y) \
+    PyObject_CallMethod((PyObject *)(obj), (name), "ii", (x), (y))
+
+#define EfObject_CallXY_Return(obj, name, x, y, ret)    \
+    do {                                                \
+        if (EfObject_CallXY(obj, name, x, y) == NULL)   \
+            return ret;                                 \
+    } while (0)
+
+#define EfObject_CallNoArgs(obj, name) \
+    PyObject_CallMethodNoArgs((PyObject *)(obj), PyUnicode_FromString(name))
+
+#define EfObject_CallNoArgs_Return(obj, name, ret)  \
+    do {                                            \
+        if (EfObject_CallNoArgs(obj, name) == NULL) \
+            return ret;                             \
+    } while (0)
 
 static void
 EfRootWidget_dealloc(EfRootWidget *self) {
@@ -68,96 +83,119 @@ static void _clipRect(
     *rh = Py_MAX(0, y2) - *ry;
 }
 
+/**
+ * \brief Recursive update children.
+ * 
+ * \param obj The object and its children that need update.
+ * \param contex_x X offset of the contex.
+ * \param contex_y Y offset of the contex.
+ * \param event Current event states.
+ * \param interact Is the object needs mouse and keyboard interaction.
+ * \return 0 on success, -1 on failure.
+ */
 static int _updateChildren(
     EfBaseWidget *obj,
     int contex_x,
     int contex_y,
-    EfEventWidget *event
+    EfEventWidget *event,
+    int interact
 ) {
     if (!obj->alive) {
         return 0;
     }
 
+    Ef_BaseWidgetType_RemoveDeadChildren((PyObject *)obj);
+
     int x = event->mouse_x - contex_x - obj->x;
     int y = event->mouse_y - contex_y - obj->y;
 
-    if (event->mouse_flags & EF_MOUSE_DOWN) {
-        if (event->mouse_flags & EF_MOUSE_LEFT_DOWN) {
-            if (EfObject_CallXY(obj, "onLeftClick", x, y) == NULL) {
-                return -1;
-            }
+    PyObject *active_obj = EfObject_CallXY(obj, "isHovered", x, y);
+    if (!active_obj) {
+        return -1;
+    }
+
+    if (PyObject_IsTrue(active_obj)) {
+        if (!obj->active) {
+            obj->active = 1;
+            EfObject_CallNoArgs_Return(obj, "onMouseEnter", -1);
         }
-        if (event->mouse_flags & EF_MOUSE_MID_DOWN) {
-            if (EfObject_CallXY(obj, "onMidClick", x, y) == NULL) {
-                return -1;
-            }
-        }
-        if (event->mouse_flags & EF_MOUSE_RIGHT_DOWN) {
-            if (EfObject_CallXY(obj, "onRightClick", x, y) == NULL) {
-                return -1;
-            }
+    }
+    else {
+        if (obj->active) {
+            obj->active = 0;
+            EfObject_CallNoArgs_Return(obj, "onMouseLeave", -1);
         }
     }
 
-    if (event->mouse_flags & EF_MOUSE_PRESS) {
-        if (event->mouse_flags & EF_MOUSE_LEFT_PRESS) {
-            if (EfObject_CallXY(obj, "onLeftPress", x, y) == NULL) {
-                return -1;
-            }
+    // Object may be killed after `onMouseEnter` or `onMouseLeave`.
+    if (!obj->alive) {
+        return 0;
+    }
+
+    interact = (obj->active || !obj->interactive_when_active) && interact;
+    if (interact) {
+        if (event->mouse_flags & EF_MOUSE_DOWN) {
+            if (event->mouse_flags & EF_MOUSE_LEFT_DOWN)
+                EfObject_CallXY_Return(obj, "onLeftClick", x, y, -1);
+            if (event->mouse_flags & EF_MOUSE_MID_DOWN)
+                EfObject_CallXY_Return(obj, "onMidClick", x, y, -1);
+            if (event->mouse_flags & EF_MOUSE_RIGHT_DOWN)
+                EfObject_CallXY_Return(obj, "onRightClick", x, y, -1);
         }
-        if (event->mouse_flags & EF_MOUSE_MID_PRESS) {
-            if (EfObject_CallXY(obj, "onMidPress", x, y) == NULL) {
-                return -1;
-            }
+
+        if (event->mouse_flags & EF_MOUSE_PRESS) {
+            if (event->mouse_flags & EF_MOUSE_LEFT_PRESS)
+                EfObject_CallXY_Return(obj, "onLeftPress", x, y, -1);
+            if (event->mouse_flags & EF_MOUSE_MID_PRESS)
+                EfObject_CallXY_Return(obj, "onMidPress", x, y, -1);
+            if (event->mouse_flags & EF_MOUSE_RIGHT_PRESS)
+                EfObject_CallXY_Return(obj, "onRightPress", x, y, -1);
         }
-        if (event->mouse_flags & EF_MOUSE_RIGHT_PRESS) {
-            if (EfObject_CallXY(obj, "onRightPress", x, y) == NULL) {
-                return -1;
-            }
+
+        if ((event->mouse_flags & EF_MOUSE_PRESS) &&
+            (event->mouse_flags & EF_MOUSE_MOTION)) {
+
+            if (event->mouse_flags & EF_MOUSE_LEFT_PRESS)
+                EfObject_CallXY_Return(obj, "onLeftDrag",
+                    event->mouse_dx, event->mouse_dy, -1);
+
+            if (event->mouse_flags & EF_MOUSE_MID_PRESS)
+                EfObject_CallXY_Return(obj, "onMidDrag",
+                    event->mouse_dx, event->mouse_dy, -1);
+
+            if (event->mouse_flags & EF_MOUSE_RIGHT_PRESS)
+                EfObject_CallXY_Return(obj, "onRightDrag",
+                    event->mouse_dx, event->mouse_dy, -1);
+        }
+
+        if (event->mouse_flags & EF_MOUSE_UP) {
+            if (event->mouse_flags & EF_MOUSE_LEFT_UP)
+                EfObject_CallNoArgs_Return(obj, "onLeftRelease", -1);
+            if (event->mouse_flags & EF_MOUSE_MID_UP)
+                EfObject_CallNoArgs_Return(obj, "onMidRelease", -1);
+            if (event->mouse_flags & EF_MOUSE_RIGHT_UP)
+                EfObject_CallNoArgs_Return(obj, "onRightRelease", -1);
+        }
+
+        // Object may be killed when interact.
+        if (!obj->alive) {
+            return 0;
         }
     }
 
-    if ((event->mouse_flags & EF_MOUSE_PRESS) &&
-        (event->mouse_flags & EF_MOUSE_MOTION)) {
-        if (event->mouse_flags & EF_MOUSE_LEFT_PRESS) {
-            if (EfObject_CallXY(obj, "onLeftDrag", event->mouse_dx, event->mouse_dy) == NULL) {
-                return -1;
-            }
-        }
-        if (event->mouse_flags & EF_MOUSE_MID_PRESS) {
-            if (EfObject_CallXY(obj, "onMidDrag", event->mouse_dx, event->mouse_dy) == NULL) {
-                return -1;
-            }
-        }
-        if (event->mouse_flags & EF_MOUSE_RIGHT_PRESS) {
-            if (EfObject_CallXY(obj, "onRightDrag", event->mouse_dx, event->mouse_dy) == NULL) {
-                return -1;
-            }
-        }
+    if (PyObject_CallMethod((PyObject *)obj, "update", "iii", x, y, event->wheel) == NULL) {
+        return -1;
     }
 
-    if (event->mouse_flags & EF_MOUSE_UP) {
-        if (event->mouse_flags & EF_MOUSE_LEFT_UP) {
-            if (EfObject_CallNoArgs(obj, "onLeftRelease") == NULL) {
-                return -1;
-            }
-        }
-        if (event->mouse_flags & EF_MOUSE_MID_UP) {
-            if (EfObject_CallNoArgs(obj, "onMidRelease") == NULL) {
-                return -1;
-            }
-        }
-        if (event->mouse_flags & EF_MOUSE_RIGHT_UP) {
-            if (EfObject_CallNoArgs(obj, "onRightRelease") == NULL) {
-                return -1;
-            }
-        }
+    // Object may be killed when update.
+    if (!obj->alive) {
+        return 0;
     }
 
     Py_ssize_t i;
     for (i = 0; i < PyList_GET_SIZE(obj->_children); i++) {
         EfBaseWidget *ch = (EfBaseWidget *)PyList_GET_ITEM(obj->_children, i);
-        _updateChildren(ch, contex_x + obj->x, contex_y + obj->y, event);
+        _updateChildren(ch, contex_x + obj->x, contex_y + obj->y, event, interact);
     }
     return 0;
 }
@@ -170,8 +208,12 @@ EfRootWidget_update(EfRootWidget *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist, &event))
         return NULL;
 
-    if (_updateChildren((EfBaseWidget *)self, 0, 0, event) < 0) {
-        return NULL;
+    Py_ssize_t i;
+    for (i = 0; i < PyList_GET_SIZE(self->base._children); i++) {
+        EfBaseWidget *ch = (EfBaseWidget *)PyList_GET_ITEM(self->base._children, i);
+        if (_updateChildren(ch, 0, 0, event, 1) < 0) {
+            return NULL;
+        }
     }
 
     Py_RETURN_NONE;

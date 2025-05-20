@@ -29,4 +29,6 @@ typedef struct EfBaseWidget {
 
 extern PyTypeObject EfBaseWidgetType;
 
+int Ef_BaseWidgetType_RemoveDeadChildren(PyObject *base);
+
 #endif // __WIDGETS_BASE_INTERNAL_H__
