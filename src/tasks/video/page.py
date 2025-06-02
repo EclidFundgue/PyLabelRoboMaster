@@ -199,6 +199,8 @@ class VideoPage(StackedPage):
             self.image_light = light
             if self.current_frame:
                 self.current_frame.setLight(light_to_gamma(light))
+            if self.current_labeled_frame:
+                self.current_labeled_frame.setLight(light_to_gamma(light))
         light_bar = LightBar(
             w=400,
             h=btn_size,
