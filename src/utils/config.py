@@ -64,7 +64,10 @@ def openDir() -> Tuple[str, str, str]:
 
 def openVideo() -> str:
     if _has_display_device:
-        return filedialog.askopenfile(title='Video').name
+        file = filedialog.askopenfile(title='Video')
+        if file is None:
+            return None
+        return file.name
     else:
         ui.logger.error(
             'no display name and no $DISPLAY environment variable',
