@@ -18,6 +18,13 @@ from .icon import getIcon
 class ArmorPage(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incides: dict):
         super().__init__(w, h, x, y)
+        self.page_incides = page_incides
+        self.initialized = False
+
+    def onShow(self):
+        if self.initialized:
+            return
+        self.initialized = True
 
         self.icon_class_id = -1
 
@@ -30,6 +37,8 @@ class ArmorPage(StackedPage):
         # ----- initialize basic constants -----
         color_theme = ui.color.LightColorTheme()
 
+        w = self.w
+        h = self.h
         navigator_h = 50
         canvas_w = w - 320
         toolbar_h = h - navigator_h
@@ -61,7 +70,7 @@ class ArmorPage(StackedPage):
             x=0,
             y=0,
             images_folder=self.images_folder,
-            on_back=lambda: self.setPage(page_incides['main_menu'], True),
+            on_back=lambda: self.setPage(self.page_incides['main_menu'], True),
             on_undo=self.label_controller.undo,
             on_redo=self.label_controller.redo,
             on_open=self._navigator_onOpenDir
@@ -196,6 +205,9 @@ class ArmorPage(StackedPage):
         self.addKeyDownEvent(pygame.K_r, lambda : on_color_set(1))
 
     def onResize(self, w: int, h: int, x: int, y: int):
+        if not self.initialized:
+            return
+
         navigator_h = 50
         canvas_w = w - 320
 
@@ -294,11 +306,12 @@ class ArmorPage(StackedPage):
         self.redraw()
 
     def kill(self):
-        self.label_controller.save()
-        selected_idx = self.toolbar_scroll_files.getSelectedIndex()
-        if selected_idx == -1:
-            selected_idx = None
-        self.config_manager['last_images_folder'] = self.images_folder
-        self.config_manager['last_labels_folder'] = self.labels_folder
-        self.config_manager['last_image_index'] = selected_idx
+        if self.initialized:
+            self.label_controller.save()
+            selected_idx = self.toolbar_scroll_files.getSelectedIndex()
+            if selected_idx == -1:
+                selected_idx = None
+            self.config_manager['last_images_folder'] = self.images_folder
+            self.config_manager['last_labels_folder'] = self.labels_folder
+            self.config_manager['last_image_index'] = selected_idx
         super().kill()
