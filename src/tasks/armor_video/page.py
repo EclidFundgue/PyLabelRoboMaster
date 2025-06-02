@@ -23,7 +23,7 @@ def light_to_gamma(light: float) -> float:
         return -light * 0.9 + 1.0
     return 1.0
 
-class VideoPage(StackedPage):
+class ArmorVideoPage(StackedPage):
     def __init__(self, w: int, h: int, x: int, y: int, page_incides: dict):
         super().__init__(w, h, x, y)
         self.page_incides = page_incides

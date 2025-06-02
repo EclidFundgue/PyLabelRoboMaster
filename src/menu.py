@@ -65,17 +65,17 @@ class MainMenu(StackedPage):
             y=button_pady,
             text='Armor',
             font=font,
-            on_press=lambda : self.setPage(self.page_incidies['armor_page24'], redraw=True),
+            on_press=lambda : self.setPage(self.page_incidies['armor_page'], redraw=True),
             cursor_change=True
         )
         self.button_video = ui.components.TextButton(
             w=button_w,
             h=button_h,
-            x=button_padx,
-            y=button_pady+button_h+20,
+            x=button_padx+button_w+20,
+            y=button_pady,
             text='Video',
             font=font,
-            on_press=lambda : self.setPage(self.page_incidies['video_page'], redraw=True),
+            on_press=lambda : self.setPage(self.page_incidies['armor_video_page'], redraw=True),
             cursor_change=True
         )
 
