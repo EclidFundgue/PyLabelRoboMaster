@@ -123,6 +123,12 @@ class Root(Base):
                 self.mouse.wheel = event.y
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse.is_down = True
+                if event.button == 1:
+                    self.mouse.buttons_now[0] = True
+                elif event.button == 2:
+                    self.mouse.buttons_now[1] = True
+                elif event.button == 3:
+                    self.mouse.buttons_now[2] = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.mouse.is_up = True
             elif event.type == pygame.MOUSEMOTION:
