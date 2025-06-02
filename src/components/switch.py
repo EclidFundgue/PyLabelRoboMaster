@@ -16,6 +16,7 @@ class Switch(ui.components.Base):
         on_turn,
         cursor_change
     )
+    on_turn(state) -> None
 
     Methods:
     * turn() -> None

@@ -13,6 +13,7 @@ try:
 except tk.TclError:
     _has_display_device = False
 
+@ui.utils.singleton
 class ConfigManager:
     def __init__(self, path: str):
         self.path = path
@@ -32,7 +33,8 @@ class ConfigManager:
             'load_network': False,
             'last_images_folder': None,
             'last_labels_folder': None,
-            'last_image_index': None
+            'last_image_index': None,
+            'last_video_path': None
         }
 
         with open(path, 'w') as f:
@@ -59,3 +61,15 @@ def openDir() -> Tuple[str, str, str]:
     if not os.path.exists(deserted_folder):
         os.makedirs(deserted_folder)
     return images_folder, labels_folder, deserted_folder
+
+def openVideo() -> str:
+    if _has_display_device:
+        file = filedialog.askopenfile(title='Video')
+        if file is None:
+            return None
+        return file.name
+    else:
+        ui.logger.error(
+            'no display name and no $DISPLAY environment variable',
+            tk.TclError
+        )

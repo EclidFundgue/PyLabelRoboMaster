@@ -1,5 +1,5 @@
 __all__ = [
-    'ArmorPage24'
+    'ArmorPage'
 ]
 
-from .page import ArmorPage as ArmorPage24
+from .page import ArmorPage

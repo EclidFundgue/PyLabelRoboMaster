@@ -20,8 +20,8 @@ class MouseEventHandler:
         self.vx: int = 0
         self.vy: int = 0
         self.wheel: int = 0
-        self.buttons_last: Tuple[bool, bool, bool] = (0, 0, 0)
-        self.buttons_now: Tuple[bool, bool, bool] = (0, 0, 0)
+        self.buttons_last: List[bool, bool, bool] = (0, 0, 0)
+        self.buttons_now: List[bool, bool, bool] = (0, 0, 0)
         self.is_down: bool = False
         self.is_up: bool = False
         self.motion: bool = False
@@ -32,7 +32,7 @@ class MouseEventHandler:
         self.x = x
         self.y = y
         self.buttons_last = self.buttons_now
-        self.buttons_now = pygame.mouse.get_pressed()
+        self.buttons_now = list(pygame.mouse.get_pressed())
 
         self.wheel = 0
         self.is_down = False
