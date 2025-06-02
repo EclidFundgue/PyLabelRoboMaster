@@ -23,6 +23,7 @@ class ArmorPage(StackedPage):
 
     def onShow(self):
         if self.initialized:
+            self._reloadSelectionBox()
             return
         self.initialized = True
 
@@ -259,7 +260,9 @@ class ArmorPage(StackedPage):
             deserted_folder=self.deserted_folder,
             on_selected=self._toolbar_onFileSelection
         )
-        toolbar_scroll_files.select(selected_idx)
+
+        if selected_idx is not None:
+            toolbar_scroll_files.select(selected_idx)
 
         self.toolbar_scroll_files.kill()
         self.toolbar_scroll_files = toolbar_scroll_files
